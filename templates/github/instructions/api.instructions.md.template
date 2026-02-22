@@ -1,0 +1,37 @@
+---
+applyTo: "**/routes/**,**/api/**,**/controllers/**"
+---
+# API Conventions
+
+## Route Structure
+
+- Use RESTful naming: `GET /users`, `POST /users`, `GET /users/:id`
+- Use kebab-case for URL paths: `/user-profiles`, not `/userProfiles`
+- Use camelCase for JSON request/response properties
+
+## Input Validation
+
+- Validate all request inputs at the route/controller level
+- Return 400 for invalid input with a descriptive error message
+- Use a validation library (Zod, express-validator, etc.) — not manual checks
+
+## Error Handling
+
+- Use consistent error response format across all endpoints:
+  ```json
+  { "error": { "code": "ERROR_CODE", "message": "Human-readable message" } }
+  ```
+- Use appropriate HTTP status codes (400, 401, 403, 404, 409, 422, 500)
+- Never expose internal error details (stack traces, DB errors) in responses
+
+## Pagination
+
+- List endpoints must support pagination
+- Use cursor-based pagination for large datasets
+- Always include total count and next/previous cursors in the response
+
+## Authentication & Authorization
+
+- Protected routes must use auth middleware
+- Check both authentication (who are you?) and authorization (can you do this?)
+- Use middleware composition: `router.get('/admin', auth, requireRole('admin'), handler)`

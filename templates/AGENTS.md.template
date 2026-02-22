@@ -1,0 +1,143 @@
+# Project: [PROJECT NAME]
+
+<!-- AGENTS.md AUTHORING GUIDE
+This is the cross-tool instruction file — read by GitHub Copilot, Claude Code, Cursor, and Gemini CLI.
+Keep it LEAN. It's loaded every session — only include universally applicable instructions.
+For domain-specific knowledge, use .github/instructions/ (auto-loaded by glob).
+For detailed architecture docs, use docs/ or agent_docs/ (agent reads when relevant).
+Budget: ~150 usable instruction slots. The tool's system prompt uses some of those. Don't waste them.
+Test: "Would removing this line cause the agent to make mistakes?" If not, cut it.
+-->
+
+## One-liner
+[Brief description of what this project does]
+
+## Stack
+[Framework, language, key libraries]
+
+## RPI Workflow
+
+This project follows the Research-Plan-Implement (RPI) pattern.
+All significant changes go through four phases:
+1. /research — Understand the codebase as-is
+2. /plan — Create a phased implementation spec
+3. /implement — Execute one phase at a time with review gates
+4. /validate — Verify implementation against the plan
+
+### Context Management
+
+- Each RPI phase should be its own conversation. Don't run research + plan + implement in one session.
+- Start a new Chat window between unrelated tasks. Write a handoff doc when context is heavy but the task continues.
+- Use `#codebase` for broad searches; use `#file:path` for targeted reads.
+- Research and planning happen on the default branch. Implementation happens in feature branches.
+- If research comes back wrong, throw it out and restart with more specific steering.
+
+### Rules for All Phases
+
+- Read all mentioned files COMPLETELY before doing anything else.
+- Never suggest improvements during research — only document what exists.
+- Every code reference must include file:line.
+- Never write documents with placeholder values.
+
+### Rules for Implementation
+
+- Follow the atomic loop: implement → self-review → fix → verify → report.
+- Run ALL automated verification after each phase.
+- STOP after each phase and wait for human confirmation.
+- Never auto-proceed to the next phase.
+- If the plan doesn't match reality, STOP and explain the mismatch.
+
+### Testing Philosophy
+
+- Prefer automated verification over manual testing.
+- Manual testing is ONLY for: sudo, hardware, new installs, truly visual-only validation.
+- If you can verify it with a command or tool, do so automatically.
+- Don't use the agent for linting/formatting — use automated tools and hooks instead.
+
+## Key Commands
+
+```bash
+# [Adjust these for your project]
+pnpm run test           # Run all tests
+pnpm run typecheck      # Check types
+pnpm run lint           # Check linting
+pnpm run dev            # Local dev server
+pnpm run build          # Production build
+```
+
+### CRITICAL: Run verification commands before committing
+Always run typecheck and lint before attempting `git commit`.
+Chain with `;`: `pnpm run typecheck 2>&1; pnpm run lint 2>&1`
+
+## Git Workflow
+
+**`develop` is the default branch. `main` is production only.**
+
+1. All development happens on `develop`
+2. Never commit directly to `main`
+3. Release to production via PR: `develop` → `main`
+4. Always run checks before committing (pre-commit hooks enforce this)
+5. Always `git pull --rebase` before pushing
+
+### Commit Messages
+
+Use conventional commits:
+```
+feat(scope): description (#issue)
+fix(scope): description (#issue)
+test(scope): description
+refactor(scope): description
+chore: description
+docs: description
+```
+
+## Deployment
+[Describe your deployment pipeline — which branch deploys where]
+
+## Agent Operational Rules
+
+### Git Operations
+- Run typecheck/lint BEFORE committing (pre-commit hooks run the same checks)
+- `git pull --rebase` before every push
+- Remove worktrees BEFORE merging PRs with `--delete-branch`
+- `git worktree remove --force` (always use --force)
+- Use `;` not `&&` for multiple cleanup operations
+
+### GitHub CLI
+- Don't guess `gh --json` field names — query available fields first
+- Check CI per-PR with `--json`, not chained human-readable output
+- `review: fail` means "needs approval", NOT a CI failure
+
+## Push Accountability
+
+Every push to the development branch requires CI verification. After pushing:
+1. Verify CI status: `gh run list --branch develop --limit 1`
+2. If CI passes — log and move on
+3. If CI fails — investigate with `gh run view <id> --log-failed`, fix, and re-push
+4. Never push to production from a background fix
+
+## TDD Protocol
+
+All code changes follow Red-Green-Refactor:
+1. **Red** — Write a failing test FIRST
+2. **Green** — Minimum code to pass
+3. **Refactor** — Clean up with green tests
+
+No exceptions. Bug fixes need a regression test. Refactors need existing coverage. No "tests later."
+
+## Agent Autonomy
+
+Before asking the user to do anything manually:
+1. Exhaust CLI tools (`gh`, `git`, project CLIs)
+2. Exhaust terminal commands (curl, build scripts)
+3. Exhaust file operations (read/edit/write for config changes)
+4. Only then ask for human help — with a clear explanation of what you tried
+
+Autonomy applies to development work. Production-affecting actions always need explicit human authorization.
+
+## Research Documents
+Store in: docs/research/YYYY-MM-DD-description.md
+
+## Implementation Plans
+Store in: docs/plans/YYYY-MM-DD-description.md
+Phase files: docs/plans/YYYY-MM-DD-description-phases/phase-N.md
