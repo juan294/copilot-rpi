@@ -19,7 +19,7 @@ Use a real Redis test instance (not mocks) for accuracy.
 
 ### Green — Implement `src/auth/rate-limiter.ts`
 
-```
+```text
 @ createRateLimiter(key, limit, windowSec) -> RateLimiter
 ctx: Redis
 pre: Redis connection healthy
@@ -35,6 +35,7 @@ risk: clock skew across replicas
 ```
 
 Implementation notes:
+
 - Use `MULTI/EXEC` for atomic INCR + EXPIRE (`src/auth/rate-limiter.ts`)
 - Key format: `ratelimit:{prefix}:{Math.floor(Date.now() / (windowSec * 1000))}`
 - Export a factory function, not a class — matches existing patterns in `src/auth/session.ts:5`

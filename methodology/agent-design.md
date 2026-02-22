@@ -7,6 +7,7 @@ Every research-phase agent follows one absolute constraint:
 > **Describe what EXISTS. Never suggest what SHOULD BE.**
 
 This means:
+
 - No improvement suggestions
 - No problem identification
 - No root cause analysis (unless explicitly asked)
@@ -27,6 +28,7 @@ This means:
 > The login endpoint lacks rate limiting, which is a security vulnerability that should be addressed. The bcrypt cost factor of 12 is adequate but could be increased to 14 for better security. The test coverage is poor — the logout flow has no tests and needs them urgently.
 
 **Why the bad version is harmful:**
+
 - "Security vulnerability" is a judgment, not an observation. The human may already know and have reasons.
 - "Could be increased to 14" is a recommendation the human didn't ask for.
 - "Poor" and "urgently" are opinions that bias the human before they've formed their own assessment.
@@ -81,6 +83,7 @@ All research roles mapped to Copilot execution patterns:
 | Parallel Researcher | `copilot -p` background | Research | Independent parallel investigation |
 
 **Key patterns:**
+
 - **In-session research** uses `#codebase` and `#file:` references — fast, stays in your context.
 - **Background research** uses `copilot -p "prompt" > output.md` — runs in a separate terminal, writes results to a file you can reference later. Keeps your main session's context clean.
 - **Parallel research** runs multiple `copilot -p` processes simultaneously for independent questions. Each writes to a separate output file.
@@ -122,6 +125,7 @@ All research roles mapped to Copilot execution patterns:
 **Copilot:** Use web search capabilities in Copilot Chat or `copilot -p` with web search enabled.
 
 **Search strategies by query type:**
+
 - **API/Library docs:** Official docs first, then changelogs and release notes.
 - **Best practices:** Recent articles from recognized experts, cross-reference multiple sources.
 - **Technical solutions:** Specific error messages in quotes, Stack Overflow, GitHub issues.
@@ -221,6 +225,7 @@ wait
 ### `@copilot` Cloud Agent
 
 Assign a GitHub Issue to `@copilot` for async implementation. The cloud agent:
+
 - Reads the issue description and referenced files
 - Creates a branch and implements the changes
 - Opens a PR for review
@@ -297,6 +302,7 @@ See [push-accountability.md](push-accountability.md) for the post-push verificat
 ### Self-Correction Over Escalation
 
 When an agent encounters an error:
+
 1. **Diagnose** — read the error, understand the root cause
 2. **Fix** — attempt the fix using available tools
 3. **Verify** — run the relevant checks to confirm the fix works

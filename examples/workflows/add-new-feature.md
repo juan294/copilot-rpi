@@ -14,7 +14,7 @@ You have a Node.js/Express API that's been running for a few weeks. Users are hi
 
 Before planning anything, understand what exists today. Open a Copilot Chat window:
 
-```
+```text
 You: /research how does our API handle requests currently? I want to understand
      the middleware chain, error handling, and any existing rate limiting or
      throttling before I add rate limiting to the login endpoint.
@@ -22,7 +22,7 @@ You: /research how does our API handle requests currently? I want to understand
 
 The agent searches systematically using #codebase to explore:
 
-```
+```text
 Copilot: Researching your codebase...
 
 [searching: finding middleware, routes, auth files]
@@ -44,13 +44,13 @@ Full details with file:line references in the research document.
 
 **Your job: read the research document.** Open `docs/research/2026-02-22-request-handling.md` and verify it accurately describes your codebase. If something's wrong or missing, say so — the agent will re-research.
 
-```
+```text
 You: Looks accurate. One thing — we also have a Redis instance running for
      session storage. That's relevant since rate limiters can use Redis as
      a backing store.
 ```
 
-```
+```text
 Copilot: Good catch. I'll note that for the planning phase — Redis at
 redis://localhost:6379 configured in src/config/redis.ts.
 ```
@@ -61,14 +61,14 @@ redis://localhost:6379 configured in src/config/redis.ts.
 
 Start a **new Chat window**. Clean context for planning:
 
-```
+```text
 You: /plan add rate limiting to the login endpoint. Research is at
      docs/research/2026-02-22-request-handling.md — we have Redis available.
 ```
 
 The agent reads the research, explores additional context, and asks focused questions:
 
-```
+```text
 Copilot: I've read the research. The middleware chain and Redis setup are clear.
 A few decisions:
 
@@ -79,7 +79,7 @@ A few decisions:
    rate limiting other endpoints later?
 ```
 
-```
+```text
 You: Per-IP for now. 5 attempts per 15-minute window. Standard 429 with
      retry-after. Set up the infrastructure so we can easily add other
      endpoints later.
@@ -87,7 +87,7 @@ You: Per-IP for now. 5 attempts per 15-minute window. Standard 429 with
 
 The agent writes the plan:
 
-```
+```text
 Copilot: Plan saved to docs/plans/2026-02-22-rate-limiting.md
 
 2 phases:
@@ -99,17 +99,18 @@ Success criteria per phase documented. Ready to review?
 ```
 
 **Read the plan carefully.** This is where you check:
+
 - Does the middleware factory design make sense for reuse?
 - Is the Redis key structure reasonable?
 - Are the tests covering the right scenarios (under limit, at limit, over limit, cooldown expiry)?
 
-```
+```text
 You: Phase 1 looks good. In Phase 2, also add a test for when Redis is
      unavailable — the endpoint should still work, just without rate limiting.
      Don't block users because Redis is down.
 ```
 
-```
+```text
 Copilot: Updated. Added a fail-open test case to Phase 2 — when Redis is
 unreachable, requests pass through without rate limiting.
 ```
@@ -120,11 +121,11 @@ unreachable, requests pass through without rate limiting.
 
 New Chat window again. Clean context:
 
-```
+```text
 You: /implement docs/plans/2026-02-22-rate-limiting.md
 ```
 
-```
+```text
 Copilot: Reading the plan... Starting Phase 1: Rate limiting infrastructure
 
 [creates src/middleware/rateLimiter.ts — factory function]
@@ -144,11 +145,11 @@ Phase 1 complete:
 Ready for Phase 2?
 ```
 
-```
+```text
 You: Good. Continue.
 ```
 
-```
+```text
 Copilot: Starting Phase 2: Apply to login endpoint + integration tests
 
 [adds rate limiter to login route in src/routes/auth.ts]
@@ -169,11 +170,11 @@ All phases complete.
 
 ## Step 4: Validate
 
-```
+```text
 You: /validate docs/plans/2026-02-22-rate-limiting.md
 ```
 
-```
+```text
 Copilot: Running validation...
 
 - Phase 1: All success criteria met
@@ -195,11 +196,11 @@ Verdict: All plan objectives achieved.
 
 ## Step 5: PR and push
 
-```
+```text
 You: /describe-pr
 ```
 
-```
+```text
 Copilot: PR description generated. Creating PR...
 
 > https://github.com/yourname/my-api/pull/12

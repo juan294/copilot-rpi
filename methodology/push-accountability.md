@@ -12,7 +12,7 @@ After ANY push to the development branch, the agent must verify that CI passes. 
 
 ### Sequence
 
-```
+```text
 1. Agent pushes to develop
    └─> Immediately spawns a background verification process
 

@@ -16,37 +16,37 @@ These rules must be internalized before starting any work. They prevent the most
 
 ## GitHub CLI Rules
 
-6. **Don't guess `gh` CLI `--json` field names** — fields differ per subcommand. Run `gh <cmd> --json 2>&1 | head -5` first if unsure. `conclusion` exists on `gh run` but NOT `gh pr checks`.
+1. **Don't guess `gh` CLI `--json` field names** — fields differ per subcommand. Run `gh <cmd> --json 2>&1 | head -5` first if unsure. `conclusion` exists on `gh run` but NOT `gh pr checks`.
 
-7. **Check CI per-PR with `--json`, not chained human-readable output** — jumbled output is unreadable. `review: fail` means "needs approval", NOT a CI failure — always filter it out.
+2. **Check CI per-PR with `--json`, not chained human-readable output** — jumbled output is unreadable. `review: fail` means "needs approval", NOT a CI failure — always filter it out.
 
 ## Node.js / TypeScript Rules
 
-8. **Always pass `{ encoding: 'utf-8' }` to `execSync`/`spawnSync`** — they return Buffers by default. `.trim()` and other string methods fail on Buffer.
+1. **Always pass `{ encoding: 'utf-8' }` to `execSync`/`spawnSync`** — they return Buffers by default. `.trim()` and other string methods fail on Buffer.
 
-9. **Don't run ESM CLI tools with `node <file>`** — shebang + ESM = SyntaxError. Use `chmod +x && ./<file>` or `npx .` instead.
+2. **Don't run ESM CLI tools with `node <file>`** — shebang + ESM = SyntaxError. Use `chmod +x && ./<file>` or `npx .` instead.
 
 ## CI & Workflow Rules
 
-10. **Never push and forget** — after every push to the development branch, verify CI passes. If CI fails, investigate, fix, and re-push. The push isn't done until CI is green.
+1. **Never push and forget** — after every push to the development branch, verify CI passes. If CI fails, investigate, fix, and re-push. The push isn't done until CI is green.
 
-11. **Always write tests before implementation (TDD)** — Red-Green-Refactor, every time. Bug fixes need a regression test first. No "tests later." Tests written after implementation tend to be tautological.
+2. **Always write tests before implementation (TDD)** — Red-Green-Refactor, every time. Bug fixes need a regression test first. No "tests later." Tests written after implementation tend to be tautological.
 
-12. **Exhaust all tools before suggesting manual steps** — before telling the user "go to the dashboard and...", check if you can use CLI tools, shell commands, MCP servers, or terminal commands to do it yourself. Only escalate when genuinely impossible.
+3. **Exhaust all tools before suggesting manual steps** — before telling the user "go to the dashboard and...", check if you can use CLI tools, shell commands, MCP servers, or terminal commands to do it yourself. Only escalate when genuinely impossible.
 
 ## Copilot-Specific Rules
 
-13. **Always include YAML frontmatter in `.prompt.md` files** — prompt files without frontmatter won't appear in the `/` command menu. At minimum include `mode: agent` (or `mode: ask` for read-only prompts). The `description` field is required for discoverability.
+1. **Always include YAML frontmatter in `.prompt.md` files** — prompt files without frontmatter won't appear in the `/` command menu. At minimum include `mode: agent` (or `mode: ask` for read-only prompts). The `description` field is required for discoverability.
 
-14. **Use `${input:variableName}` for prompt parameters, not `$ARGUMENTS`** — Copilot prompt files use `${input:varName}` syntax for user input. The `$ARGUMENTS` pattern is Claude Code-specific and won't work.
+2. **Use `${input:variableName}` for prompt parameters, not `$ARGUMENTS`** — Copilot prompt files use `${input:varName}` syntax for user input. The `$ARGUMENTS` pattern is Claude Code-specific and won't work.
 
-15. **Path-specific instruction files need `applyTo` in frontmatter** — `.github/instructions/*.instructions.md` files are ignored if they lack the `applyTo` glob pattern in their YAML frontmatter. No `applyTo` = never loaded.
+3. **Path-specific instruction files need `applyTo` in frontmatter** — `.github/instructions/*.instructions.md` files are ignored if they lack the `applyTo` glob pattern in their YAML frontmatter. No `applyTo` = never loaded.
 
-16. **Authenticate the Copilot CLI before using it in cron/launchd** — `copilot -p` in headless mode requires pre-authenticated credentials. Run `copilot auth` interactively first, then verify from a non-interactive shell.
+4. **Authenticate the Copilot CLI before using it in cron/launchd** — `copilot -p` in headless mode requires pre-authenticated credentials. Run `copilot auth` interactively first, then verify from a non-interactive shell.
 
-17. **Proactive compaction before auto-compaction** — Copilot auto-compacts at ~95% context usage, but quality degrades well before that. Write a handoff document and start a new Chat window at ~60% usage for best results.
+5. **Proactive compaction before auto-compaction** — Copilot auto-compacts at ~95% context usage, but quality degrades well before that. Write a handoff document and start a new Chat window at ~60% usage for best results.
 
-18. **Chat mode files must be in `.github/chatmodes/`** — placing them anywhere else (e.g., `.github/prompts/` or project root) means they won't appear as selectable chat modes in VS Code.
+6. **Chat mode files must be in `.github/chatmodes/`** — placing them anywhere else (e.g., `.github/prompts/` or project root) means they won't appear as selectable chat modes in VS Code.
 
 ---
 

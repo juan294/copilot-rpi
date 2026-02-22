@@ -15,7 +15,7 @@
 
 Errors amplify as they move downstream through the pipeline:
 
-```
+```text
 A bad line of RESEARCH  →  thousands of bad lines of code
 A bad line of a PLAN    →  hundreds of bad lines of code
 A bad line of CODE      →  a bad line of code

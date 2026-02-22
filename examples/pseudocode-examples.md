@@ -6,7 +6,7 @@ These supplement the single `createOrder` example in `methodology/pseudocode-not
 
 ## Simple CRUD — No Branching
 
-```
+```text
 @ getUser(userId) -> User
 ctx: DB(read)
 pre: userId is valid UUID
@@ -18,7 +18,7 @@ fail: not found -> throw NotFoundError
 
 ## Middleware with Early Returns
 
-```
+```text
 @ authMiddleware(req, res, next) -> void
 ctx: JWT verifier, req.headers
 pre: Authorization header present
@@ -34,7 +34,7 @@ fail: malformed token -> 401 INVALID_TOKEN
 
 ## Multi-Step with Dependencies Between Steps
 
-```
+```text
 @ processPayment(orderId, paymentMethod) -> PaymentResult
 ctx: DB(tx), stripeSvc, eventBus
 pre: order exists; order.status == 'pending'
@@ -53,7 +53,7 @@ risk: partial commit if event bus fails after DB commit; use outbox pattern
 
 ## Background Job / Scheduled Task
 
-```
+```text
 @ runSecurityAudit() -> AuditReport
 ctx: npm audit, file system, git
 pre: repo is clean (no uncommitted changes)
@@ -69,7 +69,7 @@ fail: audit command fails -> report partial results with error note
 
 ## Function with Nested Branching
 
-```
+```text
 @ resolvePermission(userId, resource, action) -> boolean
 ctx: DB(read), permissionCache
 pre: userId valid; resource and action are known enums
@@ -86,7 +86,7 @@ fail: DB down -> deny (fail-closed for permissions)
 
 ## Migration / Data Transform
 
-```
+```text
 @ migrateUserEmails() -> MigrationResult
 ctx: DB(tx), batchSize=500
 pre: migration not already applied (check migrations table)

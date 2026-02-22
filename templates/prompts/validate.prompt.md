@@ -5,6 +5,7 @@ description: "Verify implementation against the plan and run all success criteri
 Validate the implementation against the plan.
 
 Process:
+
 1. Locate the plan (provided path or search recent git history).
 2. Gather evidence: git log, git diff, run test suites via #tool:terminal.
 3. For each phase:

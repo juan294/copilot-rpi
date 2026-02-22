@@ -3,6 +3,7 @@
 ## What This Is
 
 This is the blueprint repository for projects that use GitHub Copilot. It contains:
+
 - The RPI (Research-Plan-Implement) methodology adapted for GitHub Copilot
 - A catalog of known agent errors with proven solutions
 - Operational rules that prevent recurring mistakes
@@ -13,6 +14,7 @@ This is the blueprint repository for projects that use GitHub Copilot. It contai
 When starting a new project, the agent is told: "Go check my copilot-rpi repository and set up the environment to follow all the best practices."
 
 The agent should:
+
 1. Read `patterns/quick-reference.md` — internalize all operational rules
 2. Read `patterns/agent-errors.md` — know every known error pattern
 3. Read `methodology/README.md` — understand the RPI approach (follow reading order for depth)
@@ -24,7 +26,7 @@ The agent should:
 
 ## Repo Structure
 
-```
+```text
 copilot-rpi/
 ├── .github/
 │   ├── copilot-instructions.md       # Copilot auto-loaded project instructions
@@ -91,10 +93,12 @@ copilot-rpi/
 ## Contributing to This Repo
 
 When new error patterns are discovered during work on ANY project:
+
 1. Add them to `patterns/agent-errors.md` following the existing format
 2. Add a one-liner to `patterns/quick-reference.md`
 3. Keep entries generic — no project-specific references
 
 When new best practices or methodology refinements are confirmed:
+
 1. Add them to the appropriate file under `methodology/`
 2. Or create a new file under `patterns/` if it's a distinct topic

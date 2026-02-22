@@ -53,6 +53,7 @@ Use this when setting up a new project to follow copilot-rpi best practices.
 ## Prompt Files
 
 Copy and adapt from `templates/prompts/`:
+
 - [ ] `/research` — Codebase research with documentarian constraint
 - [ ] `/plan` — Interactive plan creation with phases
 - [ ] `/implement` — Phase-by-phase execution with review gates
@@ -87,11 +88,13 @@ Each file must have `applyTo` in YAML frontmatter — without it, the file is si
 
 - [ ] Install a hook framework (e.g., Husky for Node.js, pre-commit for Python)
 - [ ] Configure pre-commit to run typecheck + lint:
+
   ```bash
   # Example: Husky
   npx husky init
   echo "pnpm run typecheck && pnpm run lint" > .husky/pre-commit
   ```
+
 - [ ] Test that the hook rejects a commit with a deliberate type error
 - [ ] Add a note to AGENTS.md reminding agents to run checks before committing
 
@@ -151,33 +154,39 @@ Each file must have `applyTo` in YAML frontmatter — without it, the file is si
 The defaults above assume a web application. Adapt these sections based on your project type:
 
 ### Web Application (default)
+
 The standard setup applies as-is.
 
 ### Library / npm Package
+
 - **Git workflow:** May use `main` only (no `develop`) if releases are tagged from `main`
 - **CI additions:** Add `npm pack` or `pnpm pack` verification, publish dry-run
 - **AGENTS.md:** Document the public API surface
 
 ### CLI Tool
+
 - **CI additions:** Test the CLI binary end-to-end
 - **AGENTS.md:** Document all commands and flags. ESM CLI files use shebang — never run with `node`
 
 ### Monorepo
+
 - **CI additions:** Use `turbo`/`nx` affected detection
 - **AGENTS.md:** Document the workspace structure, how packages depend on each other
 - **Pre-commit:** Run typecheck across ALL workspace packages
 
 ### Python Project
+
 - **Pre-commit hooks:** Use the `pre-commit` framework (not Husky)
 - **Key commands:** Replace `pnpm run *` with equivalents: `pytest`, `mypy .`, `ruff check .`
 
 ### Static Site / Documentation
+
 - **Git workflow:** May deploy directly from `main`
 - **CI:** Build verification + link checking
 
 ## Thoughts Directory Structure
 
-```
+```text
 docs/
 ├── research/                  # Research documents
 │   └── YYYY-MM-DD-topic.md

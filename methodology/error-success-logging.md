@@ -7,6 +7,7 @@ Most people only log failures. Logging successes helps identify what works and m
 **When to log:** After a notably smooth task completion, first-try success, or elegant solution.
 
 **Process:**
+
 1. Review what went well in the conversation.
 2. Ask 4-6 specific questions about WHY it worked (not generic "what went well").
 3. Trace the exact triggering prompt that led to success.
@@ -19,6 +20,7 @@ The goal is to improve USER skill at agentic coding, not catalog model failures.
 ### Error Categories
 
 **Prompt Errors:**
+
 - Ambiguous instruction — could be interpreted multiple ways
 - Missing constraints — didn't specify what NOT to do
 - Too verbose — buried key requirements in walls of text
@@ -28,12 +30,14 @@ The goal is to improve USER skill at agentic coding, not catalog model failures.
 - Wrong abstraction level — too high-level or too detailed
 
 **Context Errors:**
+
 - Context rot — conversation too long, should have started fresh
 - Stale context — old information polluting new responses
 - Context overflow — too much info degraded performance
 - Missing context — assumed the model remembered something it didn't
 
 **Harness Errors:**
+
 - Subagent context loss — critical info didn't reach subagents
 - Wrong agent type — used wrong specialized agent for task
 - No guardrails — didn't constrain agent behavior
@@ -58,7 +62,7 @@ The goal is to improve USER skill at agentic coding, not catalog model failures.
 
 Store logs as markdown files in your project's docs directory:
 
-```
+```text
 docs/
 ├── logs/
 │   ├── errors/
@@ -69,6 +73,7 @@ docs/
 ```
 
 **Why markdown in git, not a database:**
+
 - Logs are read by both humans and agents. Markdown is native to both.
 - Git provides full history, blame, and search.
 - Agents can read logs during research phases to avoid repeating known mistakes.
@@ -101,6 +106,7 @@ Maintain a `docs/logs/README.md` with one-line lessons extracted from each log e
 ### Graduating Logs to Rules
 
 When a pattern appears 3 or more times in your logs:
+
 1. Extract it as a rule in AGENTS.md or `patterns/quick-reference.md`
 2. Add a detailed entry to `patterns/agent-errors.md` if it's a Copilot error
 3. The log entries remain as historical evidence, but the rule becomes the primary reference

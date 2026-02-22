@@ -14,7 +14,7 @@ Your API has grown. Authentication logic is spread across three places: an auth 
 
 Refactoring is where research matters most. You need a complete map of what exists before moving anything. Open a Copilot Chat window:
 
-```
+```text
 You: /research map all authentication and authorization logic in the codebase.
      I want to know every file that handles auth, what each one does, how they
      connect, and where the boundaries are unclear.
@@ -22,7 +22,7 @@ You: /research map all authentication and authorization logic in the codebase.
 
 The agent explores thoroughly using #codebase:
 
-```
+```text
 Copilot: Researching authentication across your codebase...
 
 [searching: finding all files with auth-related code]
@@ -61,7 +61,7 @@ Full file:line references in the research document.
 
 **Read the research carefully.** This is where you discover things you didn't know — like the inconsistent 401/403 responses and the refresh token bug. These need to be addressed in the refactor plan.
 
-```
+```text
 You: This is really useful. I didn't know about the refresh token bug.
      The research is accurate — proceed to planning.
 ```
@@ -72,7 +72,7 @@ You: This is really useful. I didn't know about the refresh token bug.
 
 New Chat window. Clean context:
 
-```
+```text
 You: /plan refactor all auth logic into a dedicated AuthService.
      Research at docs/research/2026-02-22-auth-landscape.md.
      Also fix the refresh token bug and the inconsistent 401/403 responses
@@ -81,7 +81,7 @@ You: /plan refactor all auth logic into a dedicated AuthService.
 
 The agent reads the research and designs the refactor:
 
-```
+```text
 Copilot: I've read the research. Here's what I'm proposing:
 
 Design decision: AuthService as a class or as pure functions?
@@ -91,11 +91,11 @@ Design decision: AuthService as a class or as pure functions?
 Which do you prefer?
 ```
 
-```
+```text
 You: Class. We can instantiate it once and inject it where needed.
 ```
 
-```
+```text
 Copilot: Plan saved to docs/plans/2026-02-22-auth-refactor.md
 
 3 phases:
@@ -112,19 +112,20 @@ Nothing breaks between phases.
 ```
 
 **This is the critical review.** Check:
+
 - Does the phasing make sense? (New code first, migration second, cleanup third)
 - Will anything break between phases? (It shouldn't — old code stays until Phase 3)
 - Are the role check replacements covering all 3 duplicated locations?
 - Does the refresh token fix match what you'd expect?
 
-```
+```text
 You: Solid plan. One addition to Phase 2: when you migrate the role checks,
      add a requireRole middleware factory instead of checking inside each
      handler. router.get('/users', auth, requireRole('admin'), handler)
      — that pattern.
 ```
 
-```
+```text
 Copilot: Updated. Phase 2 now includes a requireRole() middleware factory
 that wraps AuthService.checkRole(). Cleaner route definitions.
 ```
@@ -135,11 +136,11 @@ that wraps AuthService.checkRole(). Cleaner route definitions.
 
 New Chat window:
 
-```
+```text
 You: /implement docs/plans/2026-02-22-auth-refactor.md
 ```
 
-```
+```text
 Copilot: Reading the plan... Starting Phase 1: Create AuthService (TDD)
 
 Writing tests first...
@@ -167,11 +168,11 @@ Ready for Phase 2?
 
 At this point you can verify: the new AuthService exists alongside the old code. Nothing is broken. You can even import it manually and test it.
 
-```
+```text
 You: Tests look thorough. Continue.
 ```
 
-```
+```text
 Copilot: Starting Phase 2: Migrate middleware and routes to AuthService
 
 [rewrites src/middleware/auth.ts to use AuthService.verifyToken()]
@@ -191,11 +192,11 @@ Phase 2 complete:
 Ready for Phase 3?
 ```
 
-```
+```text
 You: The 401/403 split is exactly right. Continue.
 ```
 
-```
+```text
 Copilot: Starting Phase 3: Fix refresh token bug + cleanup
 
 [fixes refreshToken: now checks expiry before refreshing]
@@ -219,11 +220,11 @@ All phases complete.
 
 ## Step 4: Validate
 
-```
+```text
 You: /validate docs/plans/2026-02-22-auth-refactor.md
 ```
 
-```
+```text
 Copilot: Running validation...
 
 - Phase 1: AuthService exists with full test coverage
@@ -245,11 +246,11 @@ Verdict: All plan objectives achieved.
 
 ## Step 5: PR
 
-```
+```text
 You: /describe-pr
 ```
 
-```
+```text
 Copilot: PR created > https://github.com/yourname/my-api/pull/15
 ```
 

@@ -2,7 +2,7 @@
 
 ## The Hierarchy
 
-```
+```text
 Automated (ALWAYS preferred)
 ├── Test suites (unit, integration, e2e)
 ├── Build commands
@@ -57,6 +57,7 @@ Test-Driven Development is mandatory for all code changes. No exceptions — not
 ### In the RPI Workflow
 
 TDD integrates into the Implement phase:
+
 1. Plan specifies what each phase should accomplish
 2. For each phase, write failing tests that capture the acceptance criteria
 3. Implement until all tests pass

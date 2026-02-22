@@ -29,6 +29,7 @@ Followed by:
 ## Reproducibility Notes
 
 This pattern works well for any "add a new feature that mirrors an existing one." The key ingredients:
+
 1. Research the existing pattern thoroughly (file:line references)
 2. Reference that pattern explicitly in the plan
 3. Constrain the first phase to the core functionality only
