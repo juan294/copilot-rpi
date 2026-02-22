@@ -26,6 +26,10 @@ The agent should:
 
 ```
 copilot-rpi/
+├── .github/
+│   ├── copilot-instructions.md       # Copilot auto-loaded project instructions
+│   └── prompts/                      # Prompt files for maintaining THIS repo
+│       └── process-errors.prompt.md  # /process-errors — error screenshot pipeline
 ├── AGENTS.md                         # This file (repo self-description)
 ├── GUIDE.md                          # Human-readable quick-start guide
 ├── README.md                         # Public documentation
