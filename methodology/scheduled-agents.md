@@ -4,7 +4,7 @@ Scheduled agents run outside of interactive sessions on a recurring schedule. Th
 
 ## Architecture
 
-```
+```text
 ┌─────────────────────┐
 │  OS Scheduler        │  cron (Linux) / launchd (macOS)
 │  (fires on schedule) │  Catches up after sleep/shutdown

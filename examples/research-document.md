@@ -22,6 +22,7 @@ The authentication API exposes three endpoints:
 ### Token Generation
 
 Tokens are created in `src/auth/tokens.ts:15-42`:
+
 - Access token: 15-minute expiry, contains `userId` and `role` claims
 - Refresh token: 7-day expiry, stored in Redis at `src/auth/tokens.ts:38`
 - Both use `RS256` signing with keys loaded from environment variables at `src/config/auth.ts:4-8`
@@ -29,6 +30,7 @@ Tokens are created in `src/auth/tokens.ts:15-42`:
 ### Middleware Chain
 
 Request authentication follows this path (`src/middleware/auth.ts:10-45`):
+
 1. Extract `Authorization` header (`src/middleware/auth.ts:12`)
 2. Verify JWT signature (`src/middleware/auth.ts:18`)
 3. Check token expiry (`src/middleware/auth.ts:22`)
@@ -38,6 +40,7 @@ Request authentication follows this path (`src/middleware/auth.ts:10-45`):
 ### Session Storage
 
 Redis is used for refresh token storage (`src/auth/session.ts:5-28`):
+
 - Key pattern: `session:{userId}:{tokenId}` (`src/auth/session.ts:8`)
 - TTL: 7 days, matching refresh token expiry (`src/auth/session.ts:12`)
 - On logout, the session key is deleted (`src/auth/logout.ts:8`)

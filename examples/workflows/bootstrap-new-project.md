@@ -26,13 +26,13 @@ You now have an empty repo with VS Code open. Open a Copilot Chat window.
 
 ## Step 2: Run /bootstrap
 
-```
+```text
 You: /bootstrap
 ```
 
 The agent reads the entire copilot-rpi blueprint (methodology, error patterns, operational rules, templates) and then asks you about your project:
 
-```
+```text
 Copilot: I've read the copilot-rpi blueprint. A few questions before I set things up:
 
 1. What type of project is this? (web app, library, CLI tool, monorepo, Python, static site)
@@ -40,13 +40,13 @@ Copilot: I've read the copilot-rpi blueprint. A few questions before I set thing
 3. Any conventions I should know? (naming, folder structure preferences, test framework)
 ```
 
-```
+```text
 You: It's a web app. Node.js, Express, TypeScript. Jest for testing. Standard src/ folder structure.
 ```
 
 The agent then creates everything:
 
-```
+```text
 Copilot: Setting up your project. Here's what I'm creating:
 
 - AGENTS.md — project configuration with all operational rules
@@ -65,13 +65,13 @@ Copilot: Setting up your project. Here's what I'm creating:
 Should I proceed?
 ```
 
-```
+```text
 You: Yes, go ahead.
 ```
 
 The agent creates all files, installs dependencies, runs the initial typecheck and tests to verify everything works, then makes the initial commit.
 
-```
+```text
 Copilot: Done. Your project is set up:
 
 - All checks pass (typecheck, lint, tests)
@@ -88,14 +88,14 @@ or /plan to design your first feature.
 
 Now you want to add your first real feature. Since this is a fresh project, research is light — there's not much code to explore yet. You can go straight to planning:
 
-```
+```text
 You: /plan create a REST API for managing a todo list with CRUD endpoints,
      PostgreSQL storage, and input validation
 ```
 
 The agent enters planning mode:
 
-```
+```text
 Copilot: I'll design this feature. Let me explore what /bootstrap set up...
 
 [reads AGENTS.md, src/ structure, existing config]
@@ -107,13 +107,13 @@ Before I write the plan, a few questions:
 3. Should I set up database migrations?
 ```
 
-```
+```text
 You: Prisma. No auth for now, we'll add it later. Yes on migrations.
 ```
 
 The agent writes the plan:
 
-```
+```text
 Copilot: Plan saved to docs/plans/2026-02-22-todo-api.md
 
 3 phases:
@@ -126,12 +126,12 @@ Each phase has specific success criteria. Ready to review?
 
 **This is where you stop and read the plan.** Open `docs/plans/2026-02-22-todo-api.md`, review the pseudocode for each phase, check the file changes, verify the success criteria make sense. This is your highest-leverage review — catching a wrong assumption here saves hours.
 
-```
+```text
 You: Looks good. Phase 2 — use express-validator instead of zod, I prefer it
      for Express projects. Otherwise approved.
 ```
 
-```
+```text
 Copilot: Updated the plan. express-validator replaces zod in Phase 2.
 ```
 
@@ -139,13 +139,13 @@ Copilot: Updated the plan. express-validator replaces zod in Phase 2.
 
 ## Step 4: Implement phase by phase
 
-```
+```text
 You: /implement docs/plans/2026-02-22-todo-api.md
 ```
 
 The agent reads the plan and starts with Phase 1 only:
 
-```
+```text
 Copilot: Starting Phase 1: Database schema + Prisma setup
 
 [installs prisma, creates schema, runs migration, writes seed script]
@@ -163,11 +163,11 @@ Ready for Phase 2?
 
 You verify — maybe run the seed script yourself, check the migration looks right.
 
-```
+```text
 You: Good, continue.
 ```
 
-```
+```text
 Copilot: Starting Phase 2: CRUD endpoints with input validation
 
 [creates routes, controllers, validation middleware]
@@ -181,11 +181,11 @@ Phase 2 complete. All checks pass:
 Ready for Phase 3?
 ```
 
-```
+```text
 You: Continue.
 ```
 
-```
+```text
 Copilot: Starting Phase 3: Error handling + integration tests
 
 [creates error middleware, adds integration tests with supertest]
@@ -204,11 +204,11 @@ All phases complete.
 
 ## Step 5: Validate
 
-```
+```text
 You: /validate docs/plans/2026-02-22-todo-api.md
 ```
 
-```
+```text
 Copilot: Running validation against the plan...
 
 - Phase 1: All success criteria met
@@ -226,11 +226,11 @@ Verdict: All plan objectives achieved. Ready for PR.
 
 ## Step 6: Create the PR
 
-```
+```text
 You: /describe-pr
 ```
 
-```
+```text
 Copilot: PR description generated. Creating PR...
 
 > https://github.com/yourname/my-api/pull/1

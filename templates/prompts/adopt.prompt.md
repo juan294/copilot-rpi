@@ -31,14 +31,17 @@ Investigate THIS project systematically:
 ## Phase 3: Present the Audit Report
 
 ### What's Already In Place
+
 List everything that aligns with copilot-rpi practices.
 
 ### What's Missing (by priority)
+
 **HIGH:** Missing AGENTS.md, no prompt files, no docs/ structure
 **MEDIUM:** No pre-commit hooks, incomplete CI, no path-specific instructions
 **LOW:** No chat modes, no scheduled agents, no error logging
 
 ### What Needs Adaptation (Not Replacement)
+
 Things that exist but differ from the blueprint.
 
 ## Phase 4: Get Approval and Execute

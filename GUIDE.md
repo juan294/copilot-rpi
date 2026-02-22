@@ -18,7 +18,7 @@ A mistake in your research becomes a wrong assumption in your plan, which become
 
 Here's what the pipeline looks like:
 
-```
+```text
 Research  ──human reviews──▶  Plan  ──human reviews──▶  Implement  ──human reviews──▶  Validate
    │                           │                           │                            │
    ▼                           ▼                           ▼                            ▼
@@ -53,7 +53,7 @@ Keep this repository somewhere permanent on your machine. You'll reference it fr
 
 **Starting a new project?** Open Copilot Chat in VS Code and run:
 
-```
+```text
 /bootstrap
 ```
 
@@ -61,7 +61,7 @@ Point it at the copilot-rpi directory. The agent reads the blueprint, asks you a
 
 **Migrating an existing project?** Run:
 
-```
+```text
 /adopt
 ```
 
@@ -71,7 +71,7 @@ The agent reads the blueprint, audits your project, presents a report showing wh
 
 Once your project is set up, your daily workflow uses four prompt commands:
 
-```
+```text
 /research [topic]     →  Understand the codebase
 /plan [feature]       →  Create an implementation plan
 /implement [plan]     →  Execute the plan phase by phase
@@ -178,6 +178,7 @@ You type `/validate docs/plans/2026-02-21-rate-limiting.md` and the agent:
 The entire methodology is a context management strategy. Copilot has a fixed-size context window. Everything the agent needs to make a good decision must fit in that window. If the window fills up with noise, the agent's decisions degrade.
 
 RPI manages this by:
+
 - **Running each phase in its own Chat window.** Fresh context every time.
 - **Producing compact artifacts between phases.** A research doc is a compressed summary of hours of exploration.
 - **Using `#codebase` for focused searches.** Let the search engine do the heavy lifting instead of browsing files manually.
@@ -225,7 +226,7 @@ Before any production release, run `/pre-launch` to audit 6 domains: QA, securit
 
 After bootstrapping, your project will have:
 
-```
+```text
 your-project/
 ├── AGENTS.md                         # Cross-tool instruction file
 ├── .github/

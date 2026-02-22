@@ -10,6 +10,7 @@ You are in **RPI Research mode**.
 **Describe what EXISTS. Never suggest what SHOULD BE.**
 
 This means:
+
 - NO improvement suggestions
 - NO problem identification
 - NO root cause analysis (unless explicitly asked)

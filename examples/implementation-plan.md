@@ -15,6 +15,7 @@ The login endpoint (`POST /api/auth/login`) has no rate limiting. Research confi
 Use Redis-based sliding window rate limiting (the app already has a Redis dependency for session storage). Apply per-IP and per-email limits to prevent both brute force and credential stuffing.
 
 **Limits:**
+
 - Per-IP: 20 attempts per 15-minute window
 - Per-email: 5 attempts per 15-minute window
 - On limit exceeded: return `429 Too Many Requests` with `Retry-After` header
@@ -22,9 +23,10 @@ Use Redis-based sliding window rate limiting (the app already has a Redis depend
 ## Phases
 
 ### Phase 1 — Rate Limiter Core + Tests
+
 **File:** `docs/plans/2025-12-16-rate-limiting-phases/phase-1.md`
 
-```
+```text
 @ createRateLimiter(key, limit, windowSec) -> RateLimiter
 ctx: Redis
 pre: Redis connection healthy
@@ -40,6 +42,7 @@ risk: clock skew across replicas
 ```
 
 **Success criteria:**
+
 - Automated:
   - [ ] Unit tests pass: `pnpm test tests/auth/rate-limiter.test.ts`
   - [ ] TypeScript compiles: `pnpm run typecheck`
@@ -47,9 +50,10 @@ risk: clock skew across replicas
 - Manual: None
 
 ### Phase 2 — Middleware Integration + Tests
+
 **File:** `docs/plans/2025-12-16-rate-limiting-phases/phase-2.md`
 
-```
+```text
 @ rateLimitMiddleware(req, res, next) -> void
 ctx: RateLimiter, req.ip, req.body.email
 pre: rate limiter initialized
@@ -66,6 +70,7 @@ fail: malformed body -> skip email limit (IP-only)
 ```
 
 **Success criteria:**
+
 - Automated:
   - [ ] Integration tests pass: `pnpm test tests/integration/rate-limit.test.ts`
   - [ ] All existing auth tests still pass: `pnpm test tests/auth/`
@@ -73,9 +78,10 @@ fail: malformed body -> skip email limit (IP-only)
 - Manual: None
 
 ### Phase 3 — Route Wiring + E2E Verification
+
 **File:** `docs/plans/2025-12-16-rate-limiting-phases/phase-3.md`
 
-```
+```text
 @ wireRateLimit() -> void
 ctx: Express router, rateLimitMiddleware
 pre: middleware tested in isolation
@@ -89,6 +95,7 @@ risk: middleware ordering (rate limit must run before body parsing if body-depen
 ```
 
 **Success criteria:**
+
 - Automated:
   - [ ] Full test suite passes: `pnpm test`
   - [ ] Build succeeds: `pnpm run build`

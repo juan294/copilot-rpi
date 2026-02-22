@@ -5,6 +5,7 @@ description: "Create a phased implementation plan with pseudocode and success cr
 Create an implementation plan for: ${input:feature}
 
 Process:
+
 1. Read ALL mentioned files completely.
 2. Use #codebase to find relevant code, patterns, and docs.
 3. Read everything identified.

@@ -4,7 +4,7 @@ Guardrails are automated enforcement layers that catch mistakes before they reac
 
 ## The Enforcement Stack
 
-```
+```text
 Level 1: Editor-time (VS Code settings + extensions)
 ├── Formatter runs on save (Prettier, Black, rustfmt)
 ├── Linter runs on save (ESLint, Ruff, clippy)
@@ -134,6 +134,7 @@ Beyond automated checks, guardrails include process rules that prevent common mi
 Guardrails are what make agent autonomy safe. When pre-commit hooks catch errors, CI verifies builds, and branch protection prevents unauthorized merges, agents can operate with high autonomy on the development branch without risk of damage.
 
 The relationship is:
+
 - **More guardrails** → more agent autonomy is safe
 - **Fewer guardrails** → more human oversight is needed
 

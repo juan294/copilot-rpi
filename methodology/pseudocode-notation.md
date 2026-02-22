@@ -11,7 +11,7 @@ Plans use a compact pseudocode to describe changes. This keeps plans concise and
 
 ## Template
 
-```
+```text
 @ functionName(inputs) -> outputs
 ctx: external IO/dependencies
 pre: must-hold assumptions
@@ -26,7 +26,7 @@ risk: hazards
 
 ## Example
 
-```
+```text
 @ createOrder(userId, items) -> orderId
 ctx: DB(tx), inventorySvc, eventBus
 pre: items non-empty; user exists

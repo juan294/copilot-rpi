@@ -1,7 +1,7 @@
 # copilot-rpi — GitHub Copilot Reference & Project Intelligence
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Status: Active](https://img.shields.io/badge/Status-Active-brightgreen.svg)]()
+[![Status: Active](https://img.shields.io/badge/Status-Active-brightgreen.svg)](https://github.com/juan294/copilot-rpi)
 [![GitHub Copilot](https://img.shields.io/badge/Built%20for-GitHub%20Copilot-blue.svg)](https://docs.github.com/en/copilot)
 
 A blueprint repository for setting up and running projects with [GitHub Copilot](https://docs.github.com/en/copilot). Contains the RPI (Research-Plan-Implement) methodology, a catalog of known agent errors, and operational rules learned from hundreds of real sessions.

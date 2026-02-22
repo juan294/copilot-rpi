@@ -21,7 +21,7 @@ Create detailed, phased implementation plans through interactive dialogue with t
 
 Use this compact format for describing changes:
 
-```
+```text
 @ functionName(inputs) -> outputs
 ctx: external IO/dependencies
 pre: must-hold assumptions

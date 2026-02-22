@@ -44,6 +44,7 @@ The core technique that makes RPI work at scale.
 **Three forms of compaction:**
 
 ### 1. Ad-hoc compaction
+
 When your context starts filling up mid-session, pause and write progress to a markdown file:
 
 > "Write everything we did so far to progress.md — note the end goal, the approach, steps completed, and the current issue we're working on."
@@ -51,10 +52,13 @@ When your context starts filling up mid-session, pause and write progress to a m
 Then start a fresh Chat window pointing at that file.
 
 ### 2. Background process compaction
+
 Background `copilot -p` processes do file searching, code reading, and analysis in THEIR context and return only the structured summary as a file. This is NOT about "role-playing" — separate processes are a **context control mechanism**.
 
 ### 3. Phase compaction (the RPI workflow itself)
+
 Each phase produces a compact artifact:
+
 - Research -> research document (compact summary of codebase state)
 - Plan -> implementation spec (compact description of what to change)
 - Implement -> committed code + updated plan checkboxes
@@ -63,6 +67,7 @@ Each phase produces a compact artifact:
 Each phase starts with a fresh context window that reads only the compact artifact from the previous phase, not the raw exploration that produced it.
 
 **The ideal compacted output includes:**
+
 - What we're trying to accomplish (goal)
 - What we've learned so far (findings with file:line refs)
 - What approach we're taking (decisions made)
@@ -173,6 +178,7 @@ AGENTS.md is your highest-leverage context engineering tool — it's the only fi
 | Common gotchas and non-obvious behaviors | Self-evident practices like "write clean code" |
 
 **Authoring principles:**
+
 - Manually craft every line. Don't auto-generate — bad instructions compound through research, plans, and code.
 - For each line, ask: "Would removing this cause the agent to make mistakes?" If not, cut it.
 - Don't use the agent for linting — it's expensive and slow vs. deterministic tools. Use automated formatters + hooks instead.
@@ -190,6 +196,7 @@ Context doesn't have to be managed only through RPI phases. Copilot provides ses
 - **File references** — Use `#file:path/to/file.ts` to add specific files to context without pasting their contents.
 
 **When to start fresh vs continue:**
+
 - Switching to an unrelated task → New Chat window
 - Same task but context is heavy → Write handoff doc, start fresh
 - Tried an approach that failed → Start fresh with a better initial prompt

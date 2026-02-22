@@ -5,6 +5,7 @@ description: "Generate a PR description from the current branch's diff and histo
 Generate a PR description for the current branch.
 
 Process:
+
 1. Identify the PR (current branch or ask user).
 2. Get the full diff, commit history, and metadata via #tool:terminal.
 3. Analyze changes thoroughly — user-facing vs internal, breaking changes.

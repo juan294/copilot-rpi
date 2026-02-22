@@ -2,7 +2,7 @@
 
 ## Architecture Overview
 
-```
+```text
 User
  │
  ├── /research  ─────► Research Session
@@ -147,6 +147,7 @@ When resuming from a handoff, the agent should classify the situation before act
 6. **Add permalinks** to code references when on a pushed branch.
 
 **Critical rules:**
+
 - All research documents describe what *is*, never what *should be*.
 - Every claim must include a `file:line` reference.
 - Codebase findings are primary source of truth; historical docs are supplementary context.
@@ -185,6 +186,7 @@ last_updated_by: [name]
 ### Phase Completion Criteria
 
 Research is **done** when:
+
 - [ ] Every component mentioned in the original question has been located and described
 - [ ] All code references include `file:line` — no vague claims ("somewhere in the auth module")
 - [ ] Data flow is traced end-to-end for the relevant paths (entry point → processing → output)
@@ -193,6 +195,7 @@ Research is **done** when:
 - [ ] The document is self-contained: a reader who didn't attend the session can understand it
 
 Research is **NOT done** if:
+
 - Findings contain opinions, suggestions, or quality judgments
 - Any section says "likely" or "probably" without a supporting code reference
 - The open questions list is empty (there are always open questions)
@@ -236,6 +239,7 @@ Research is **NOT done** if:
    - No unresolved questions in the final plan.
 
 **Key principles:**
+
 - Be skeptical: question vague requirements, identify edge cases early.
 - Be interactive: don't write the whole plan in one shot. Get buy-in at each step.
 - Be thorough: include file:line references, measurable success criteria.
@@ -244,6 +248,7 @@ Research is **NOT done** if:
 ### Phase Completion Criteria
 
 A plan is **done** when:
+
 - [ ] Every phase has specific files to create/modify (no "update relevant files")
 - [ ] Every phase has automated success criteria with exact commands to run
 - [ ] Pseudocode notation is used for non-trivial logic changes
@@ -253,6 +258,7 @@ A plan is **done** when:
 - [ ] Phase files exist for every phase (separate files, not inline)
 
 A plan is **NOT done** if:
+
 - Any success criterion is subjective ("code should be clean")
 - A phase modifies more than 5-7 files (split it)
 - Dependencies between phases are not documented
@@ -276,7 +282,8 @@ A plan is **NOT done** if:
    - **STOP. Wait for human confirmation before next phase.**
 
 **The atomic loop:**
-```
+
+```text
 Implement (atomic change)
     → Self-review (re-read changes)
     → Fix if needed
@@ -286,9 +293,11 @@ Implement (atomic change)
 ```
 
 **If stuck:**
+
 - Search the codebase for similar patterns that might guide the solution.
 - If plan doesn't match reality, STOP and present the mismatch clearly:
-  ```
+
+  ```text
   Issue in Phase [N]:
   Expected: [what the plan says]
   Found: [actual situation]
@@ -299,6 +308,7 @@ Implement (atomic change)
 ### Phase Completion Criteria
 
 An implementation phase is **done** when:
+
 - [ ] All files listed in the phase plan are created/modified
 - [ ] Every automated success criterion passes (typecheck, lint, tests)
 - [ ] Changes have been self-reviewed
@@ -307,6 +317,7 @@ An implementation phase is **done** when:
 - [ ] Human has confirmed and approved before next phase
 
 An implementation phase is **NOT done** if:
+
 - Any automated check fails (even if the failure "looks unrelated")
 - The phase modified files not listed in the plan (scope creep)
 
@@ -354,6 +365,7 @@ An implementation phase is **NOT done** if:
 ### Phase Completion Criteria
 
 Validation is **done** when:
+
 - [ ] Every plan phase has been checked against the actual code
 - [ ] All automated verification commands have been run and results recorded
 - [ ] Deviations from the plan are documented with explanations
@@ -361,6 +373,7 @@ Validation is **done** when:
 - [ ] Manual testing items (if any) are listed with justification for why automation is impossible
 
 Validation is **NOT done** if:
+
 - Any automated check was skipped
 - Deviations were found but not explained
 - The report omits phases or success criteria from the original plan
@@ -373,7 +386,7 @@ When things go wrong during any phase, follow these decision trees instead of gu
 
 ### Research Comes Back Wrong or Incomplete
 
-```
+```text
 Research quality issue detected
 ├── Findings contain opinions/suggestions?
 │   └── Strip them. Re-run research with stricter documentarian constraint.
@@ -389,7 +402,7 @@ Research quality issue detected
 
 ### Plan Doesn't Match Reality During Implementation
 
-```
+```text
 Mismatch discovered mid-implementation
 ├── Minor: file moved/renamed since plan was written?
 │   └── Fix the reference. Note the correction in the plan file. Continue.
@@ -408,7 +421,7 @@ Mismatch discovered mid-implementation
 
 ### CI Fails After Push (Background Process)
 
-```
+```text
 CI failure detected
 ├── Attempt 1: Read the failure log
 │   ├── Lint/format error → fix and re-push
@@ -430,7 +443,7 @@ CI failure detected
 
 ### Scheduled Agent Crashes
 
-```
+```text
 Scheduled agent failure
 ├── Copilot CLI crashed (non-zero exit)?
 │   └── Check the log file. Common causes:
@@ -452,7 +465,7 @@ Scheduled agent failure
 
 ### Validation Reveals Major Issues
 
-```
+```text
 Validation finds problems
 ├── Missing functionality (plan says implemented, code doesn't have it)?
 │   └── Go back to implementation for the affected phase.

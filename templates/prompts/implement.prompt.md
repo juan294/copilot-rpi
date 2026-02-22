@@ -5,6 +5,7 @@ description: "Execute an implementation plan phase by phase with verification ga
 Implement the plan at: ${input:planPath}
 
 Process:
+
 1. Read the plan completely. Check for existing checkmarks.
 2. Use #codebase to gather relevant context.
 3. For the CURRENT phase only:
@@ -17,5 +18,6 @@ Process:
 5. Do NOT proceed to the next phase without confirmation.
 
 If plan doesn't match reality:
+
 - STOP and present: Expected vs Found vs Why it matters.
 - Ask how to proceed.

@@ -13,6 +13,7 @@ Documented from real recurring issues across projects. Each entry includes the s
 **Root cause:** The agent skipped running verification checks before committing. Pre-commit hooks enforce the same checks (typecheck, lint, tests) — discovering failures at commit time means unnecessary rework.
 
 **Correct approach — always do this:**
+
 ```bash
 # 1. Run the checks FIRST (same ones the pre-commit hook runs):
 pnpm run typecheck 2>&1; pnpm run lint 2>&1
@@ -24,6 +25,7 @@ git add <files> && git commit -m "fix(scope): description"
 ```
 
 **Never do this:**
+
 ```bash
 # Don't go straight to commit without checking first:
 git add . && git commit -m "fix: something"  # ← hook fails, wasted time
@@ -40,6 +42,7 @@ git add . && git commit -m "fix: something"  # ← hook fails, wasted time
 **Root cause:** `gh` CLI `--json` field names differ between subcommands. The agent assumes fields from one command (e.g., `gh run view`) work on another (e.g., `gh pr checks`). They don't.
 
 **Correct approach — always do this:**
+
 ```bash
 # If unsure of available fields, query them first:
 gh pr checks <PR> --json 2>&1 | head -5
@@ -55,6 +58,7 @@ gh run list --branch <branch> --limit 1 --json conclusion,status,name
 ```
 
 **Never do this:**
+
 ```bash
 # Don't guess field names across subcommands:
 gh pr checks 377 --json name,state,conclusion  # ← "conclusion" doesn't exist here
@@ -69,6 +73,7 @@ gh pr checks 377 --json name,state,conclusion  # ← "conclusion" doesn't exist 
 **Root cause:** The built file has a shebang (`#!/usr/bin/env node`) and uses ESM (`"type": "module"` in package.json). Node's ESM loader doesn't strip shebangs the same way as CJS.
 
 **Correct approach — always do this:**
+
 ```bash
 # Option 1: Execute via the shebang (needs +x permission):
 chmod +x dist/index.js && ./dist/index.js --version
@@ -81,6 +86,7 @@ grep -A2 '"bin"' package.json
 ```
 
 **Never do this:**
+
 ```bash
 # Don't run ESM CLI files with node directly:
 node dist/index.js --version  # ← SyntaxError on shebang
@@ -95,6 +101,7 @@ node dist/index.js --version  # ← SyntaxError on shebang
 **Root cause:** Git cannot delete a branch that is currently checked out in any worktree. The agent finished work in the worktree, pushed, created the PR, but forgot to remove the worktree before merging with `--delete-branch`.
 
 **Correct approach — always do this:**
+
 ```bash
 # 1. Remove the worktree FIRST (after pushing all changes):
 git worktree remove --force /path/to/worktree
@@ -112,12 +119,14 @@ gh pr merge <PR> --merge --delete-branch
 **Root cause:** Node.js `execSync()` returns a **Buffer** by default, not a string. String methods don't exist on Buffer.
 
 **Correct approach — always do this:**
+
 ```typescript
 // ALWAYS pass encoding to get a string back:
 const output = execSync('some command', { encoding: 'utf-8' }).trim();
 ```
 
 **Never do this:**
+
 ```typescript
 const output = execSync('some command').trim();  // ← TypeError
 ```
@@ -131,6 +140,7 @@ const output = execSync('some command').trim();  // ← TypeError
 **Root cause:** The remote branch has commits the local branch doesn't. The agent pushed without pulling first.
 
 **Correct approach — always do this:**
+
 ```bash
 # ALWAYS pull before pushing:
 git pull --rebase origin <branch> && git push origin <branch>
@@ -145,6 +155,7 @@ git pull --rebase origin <branch> && git push origin <branch>
 **Root cause:** Cramming multiple PR checks into one command produces jumbled output, and `gh pr checks` exits non-zero for `review: fail` which just means "needs approval", not CI failure.
 
 **Correct approach — always do this:**
+
 ```bash
 # Check one PR at a time with structured output:
 gh pr checks <PR> --json name,state,bucket
@@ -165,6 +176,7 @@ gh run list --branch <branch> --limit 1 --json conclusion,status,name
 **Root cause:** Worktrees always have untracked files (build artifacts, node_modules). The default `git worktree remove` refuses to delete them.
 
 **Correct approach — always do this:**
+
 ```bash
 # ALWAYS use --force and ; (not &&):
 git worktree remove --force .worktrees/foo; git worktree remove --force .worktrees/bar; git branch -D branch1 branch2
@@ -179,6 +191,7 @@ git worktree remove --force .worktrees/foo; git worktree remove --force .worktre
 **Root cause:** The agent treats `git push` as the end of the workflow. There's no accountability loop.
 
 **Correct approach — always do this:**
+
 ```bash
 # After every push, verify CI:
 gh run list --branch develop --limit 1 --json conclusion,status,databaseId
@@ -195,7 +208,8 @@ gh run list --branch develop --limit 1 --json conclusion,status,databaseId
 **Root cause:** The agent defaults to implementation-first development without an explicit TDD mandate.
 
 **Correct approach — always do this:**
-```
+
+```text
 1. Write a failing test that describes the expected behavior (Red)
 2. Write the minimum implementation to make it pass (Green)
 3. Refactor while keeping tests green
@@ -212,7 +226,8 @@ For bug fixes: write a test that reproduces the bug FIRST.
 **Root cause:** The agent defaults to instructional mode rather than action mode.
 
 **Correct approach — always do this:**
-```
+
+```text
 Before suggesting any manual step:
 1. Can I use a CLI tool? (gh, git, curl, project CLIs)
 2. Can I use #tool:terminal?
@@ -230,6 +245,7 @@ Only suggest manual intervention when genuinely required.
 **Root cause:** Worktree branches are almost never "fully merged" (squash merges, deleted remotes, abandoned work). Lowercase `-d` safety check fails.
 
 **Correct approach — always do this:**
+
 ```bash
 # ALWAYS use -D (uppercase, force) for worktree branches:
 git worktree remove --force /path/to/worktree; git branch -D <branch-name>
@@ -244,6 +260,7 @@ git worktree remove --force /path/to/worktree; git branch -D <branch-name>
 **Root cause:** `.github/prompts/*.prompt.md` files require valid YAML frontmatter at the top of the file. Without `mode:` and `description:` fields, Copilot ignores the file.
 
 **Correct approach — always do this:**
+
 ```markdown
 ---
 mode: agent
@@ -263,6 +280,7 @@ description: "Brief description shown in the / menu"
 **Root cause:** `$ARGUMENTS` is a Claude Code convention. Copilot prompt files use `${input:variableName}` syntax for parameterized input.
 
 **Correct approach — always do this:**
+
 ```markdown
 ---
 mode: agent
@@ -272,6 +290,7 @@ Research the codebase to answer: ${input:question}
 ```
 
 **Never do this:**
+
 ```markdown
 ---
 mode: agent
@@ -289,6 +308,7 @@ Research the codebase to answer: $ARGUMENTS
 **Root cause:** Instruction files require an `applyTo` glob pattern in YAML frontmatter. Without it, Copilot doesn't know when to load the file.
 
 **Correct approach — always do this:**
+
 ```markdown
 ---
 applyTo: "**/*.test.{ts,tsx}"
@@ -305,7 +325,8 @@ applyTo: "**/*.test.{ts,tsx}"
 **Root cause:** Chat mode files must be in `.github/chatmodes/`. Placing them in `.github/prompts/`, `.github/instructions/`, or project root has no effect.
 
 **Correct approach — always do this:**
-```
+
+```text
 .github/chatmodes/rpi-research.chatmode.md  ← correct
 .github/prompts/rpi-research.chatmode.md    ← wrong directory, ignored
 ```
@@ -319,6 +340,7 @@ applyTo: "**/*.test.{ts,tsx}"
 **Root cause:** The Copilot CLI auth token has a limited lifetime. Interactive sessions refresh it automatically, but headless `copilot -p` calls from cron/launchd don't trigger re-authentication.
 
 **Correct approach — always do this:**
+
 ```bash
 # In agent scripts, check auth status before running:
 if ! copilot auth status > /dev/null 2>&1; then
