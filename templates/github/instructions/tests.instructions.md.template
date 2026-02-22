@@ -1,0 +1,36 @@
+---
+applyTo: "**/*.test.{ts,tsx,js,jsx}"
+---
+# Test File Conventions
+
+## TDD Protocol
+
+All code changes follow Red-Green-Refactor:
+1. **Red** — Write a failing test FIRST, before touching implementation code
+2. **Green** — Write the minimum code to make the test pass
+3. **Refactor** — Clean up while keeping tests green
+
+## Test Structure
+
+- Use `describe` blocks grouped by function or method under test
+- Always include: happy path, error cases, edge cases
+- Bug fixes MUST start with a regression test that reproduces the bug
+
+## Mocking
+
+- Mock external dependencies (network, database, file system)
+- Never mock the module under test
+- Use factory functions for test data, not raw object literals
+- Prefer dependency injection over module mocking where possible
+
+## Naming
+
+- Test descriptions should read as specifications: `it('returns 404 when user not found')`
+- Avoid vague names: `it('works correctly')` is not acceptable
+- Group related tests in nested `describe` blocks
+
+## Assertions
+
+- One logical assertion per test (multiple `expect` calls are fine if testing one behavior)
+- Use the most specific matcher available (`.toEqual` over `.toBeTruthy`)
+- Always assert error types/messages, not just that an error was thrown

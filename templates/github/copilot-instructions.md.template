@@ -1,0 +1,39 @@
+# Copilot-Specific Instructions
+
+<!-- This file supplements AGENTS.md with Copilot-specific guidance.
+     Most instructions belong in AGENTS.md (cross-tool) or path-specific instructions.
+     Only put things here that are unique to GitHub Copilot behavior. -->
+
+## Chat Modes
+
+This project includes specialized chat modes in `.github/chatmodes/`:
+- **RPI Research** — Documentarian-constrained research mode (read-only)
+- **RPI Planner** — Interactive planning mode with pseudocode output
+- **RPI Auditor** — Read-only validation with structured reports
+
+Use the appropriate chat mode when starting an RPI phase for better behavioral constraints.
+
+## Prompt Files
+
+RPI workflow prompts are in `.github/prompts/`:
+- `/research` — Codebase exploration
+- `/plan` — Implementation planning
+- `/implement` — Phase-by-phase execution
+- `/validate` — Post-implementation verification
+- `/describe-pr` — PR description generation
+- `/pre-launch` — Production audit
+
+## Context References
+
+When working in Copilot Chat:
+- Use `#codebase` for broad repository searches
+- Use `#file:path/to/file.ts` to add specific files to context
+- Use `#tool:terminal` to run shell commands in agent mode
+- Use `#selection` to reference currently selected code
+
+## Auto-Compaction
+
+Copilot auto-compacts context at ~95% usage. For better results:
+- Proactively write a handoff document at ~60% usage
+- Start a new Chat window pointing at the handoff doc
+- This produces significantly better output than relying on auto-compaction

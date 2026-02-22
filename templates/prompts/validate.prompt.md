@@ -1,0 +1,19 @@
+---
+mode: agent
+description: "Verify implementation against the plan and run all success criteria"
+---
+Validate the implementation against the plan.
+
+Process:
+1. Locate the plan (provided path or search recent git history).
+2. Gather evidence: git log, git diff, run test suites via #tool:terminal.
+3. For each phase:
+   - Verify marked-complete items are actually done.
+   - Run every automated verification command.
+   - Think about edge cases.
+4. Generate a validation report with:
+   - Implementation status per phase
+   - Automated verification results
+   - Code review findings (matches, deviations, issues)
+   - Manual testing required (only if automation impossible — explain WHY)
+   - Recommendations
