@@ -238,7 +238,7 @@ Configure `.vscode/settings.json` to control Copilot behavior:
 
 Different tasks benefit from different models. Configure in VS Code settings or select per-session:
 
-- **Complex reasoning** (architecture, debugging, planning) → most capable model (Claude Sonnet 4, GPT-4.1)
+- **Complex reasoning** (architecture, debugging, planning) → most capable model available (e.g., GPT-4.1, o3)
 - **Routine tasks** (formatting, simple edits, file operations) → faster model
 - **Bulk operations** (migrating many files, batch formatting) → fastest model
 

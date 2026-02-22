@@ -2,7 +2,7 @@
 
 ## What Happened
 
-Asked Claude to "add validation to the API" without specifying which endpoints or what validation rules. Claude added input validation to all 14 endpoints, including internal-only ones that already had upstream validation, resulting in duplicate checks and 3 broken integration tests.
+Asked Copilot to "add validation to the API" without specifying which endpoints or what validation rules. Copilot added input validation to all 14 endpoints, including internal-only ones that already had upstream validation, resulting in duplicate checks and 3 broken integration tests.
 
 ## Primary Cause
 
