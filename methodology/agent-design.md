@@ -148,7 +148,7 @@ applyTo: "**/*.test.{ts,tsx}"
 - Use factory functions for test data, not raw objects
 ```
 
-**This is superior to Claude Code's skills system** because rules fire automatically based on what files are open — no manual invocation needed. TDD rules activate when test files are in context. API conventions activate when route files are open.
+The key advantage is that rules fire automatically based on what files are open — no manual invocation needed. TDD rules activate when test files are in context. API conventions activate when route files are open.
 
 ### Chat Modes (`.github/chatmodes/`)
 
@@ -202,7 +202,7 @@ Keep it minimal — most instructions belong in AGENTS.md (cross-tool) or path-s
 
 ## Parallel Work Patterns
 
-Without Agent Teams (which are Claude Code-specific), Copilot achieves parallelism through multiple independent processes and the `@copilot` cloud agent.
+Copilot achieves parallelism through multiple independent processes and the `@copilot` cloud agent.
 
 ### Background `copilot -p` Processes
 

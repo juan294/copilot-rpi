@@ -1,0 +1,25 @@
+# Claude Code local settings
+.claude/
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Node (if used for linting tools)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Environment
+.env
+.env.local

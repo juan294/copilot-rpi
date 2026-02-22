@@ -112,6 +112,14 @@ When you discover a new recurring error or best practice:
 2. Add a one-liner to `patterns/quick-reference.md`
 3. Keep entries generic — no project-specific references
 
+## Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on submitting changes, adding error patterns, and writing style.
+
+This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md).
+
+For security issues, see [SECURITY.md](SECURITY.md). For a history of changes, see [CHANGELOG.md](CHANGELOG.md).
+
 ## Credits
 
 - [HumanLayer](https://humanlayer.dev/) — ACE-FCA framework and opencode-rpi implementation
