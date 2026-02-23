@@ -12,7 +12,7 @@
 
 [One or two sentences describing what the project does and why it matters.]
 
-![Chapa Badge](https://chapa.thecreativetoken.com/u/juan294/badge.svg)
+![Chapa Badge](https://chapa.thecreativetoken.com/u/[OWNER]/badge.svg)
 
 ---
 
