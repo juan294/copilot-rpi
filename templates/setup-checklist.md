@@ -32,6 +32,7 @@ Use this when setting up a new project to follow copilot-rpi best practices.
   - `docs/research/` — Research documents
   - `docs/plans/` — Implementation plans
   - `docs/decisions/` — Architecture decision records
+  - `docs/agents/` — Agent reports and project memory
 - [ ] Configure `.vscode/settings.json` (adapt from `templates/vscode-settings.json.template`):
   - Enable agent mode: `"chat.agent.enabled": true`
   - Enable thinking: `"github.copilot.chat.agent.thinkingTool": true`

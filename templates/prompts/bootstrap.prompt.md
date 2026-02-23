@@ -38,8 +38,45 @@ Execute the setup checklist:
 9. Set up the README with the standard header.
 10. Walk through remaining checklist items (pre-commit hooks, CI, git setup).
 
+## Phase 4: Save to Memory
+
+Create `docs/agents/project-memory.md` with the following structure, filled in from everything you learned during setup:
+
+```markdown
+# Project Memory
+
+Operational knowledge that persists across sessions. Agents read this at session start and append lessons as they work.
+
+## Project Identity
+
+- **Name:** [project name]
+- **Type:** [web app / library / CLI / monorepo / etc.]
+- **Stack:** [language, framework, key libraries]
+- **Default branch:** [develop / main]
+- **Production branch:** [main]
+
+## Setup Decisions
+
+[Decisions made during bootstrap — why certain template sections were kept, removed, or adapted]
+
+## Internalized Rules
+
+[Key rules from patterns/quick-reference.md that are especially relevant to this project]
+
+## CI/CD & Environment
+
+[CI provider, required checks, environment variables, deployment targets]
+
+## Operational Lessons
+
+[Append new lessons here as they are discovered — one line per lesson]
+```
+
+Fill every section from what you learned in Phases 1–3. Don't leave placeholders.
+
 ## Rules
 
 - **Ask before assuming.** Every project is different.
 - **Adapt, don't copy.** Templates are starting points.
 - **Keep AGENTS.md lean.** Only include instructions that would cause mistakes if missing.
+- **Always save to memory.** Phase 4 is not optional. Every bootstrap must end with a memory save.

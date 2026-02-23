@@ -51,9 +51,50 @@ Things that exist but differ from the blueprint.
 3. Create a migration checklist.
 4. Execute item by item, confirming after each major change.
 
+## Phase 5: Save to Memory
+
+Create `docs/agents/project-memory.md` with the following structure, filled in from everything you learned during the audit and adoption:
+
+```markdown
+# Project Memory
+
+Operational knowledge that persists across sessions. Agents read this at session start and append lessons as they work.
+
+## Project Identity
+
+- **Name:** [project name]
+- **Type:** [web app / library / CLI / monorepo / etc.]
+- **Stack:** [language, framework, key libraries]
+- **Default branch:** [develop / main]
+- **Production branch:** [main]
+
+## Audit Findings
+
+[Key findings from the Phase 2 audit — what was already in place, what was missing, what was adapted]
+
+## Key Decisions
+
+[Decisions made during adoption — what was adopted, what was skipped, and why]
+
+## Project Conventions
+
+[Existing conventions that were preserved — naming, structure, workflow patterns already in use]
+
+## CI/CD & Environment
+
+[CI provider, required checks, environment variables, deployment targets]
+
+## Operational Lessons
+
+[Append new lessons here as they are discovered — one line per lesson]
+```
+
+Fill every section from what you learned in Phases 1–4. Don't leave placeholders.
+
 ## Rules
 
 - **Audit first, change nothing.** No files modified until user approves.
 - **Respect what exists.** Don't overwrite working configurations.
 - **Merge, don't replace.** Add missing pieces to existing files.
 - **One thing at a time.** Logical, reviewable changes.
+- **Always save to memory.** Phase 5 is not optional. Every adoption must end with a memory save.

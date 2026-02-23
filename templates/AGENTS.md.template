@@ -135,6 +135,15 @@ Before asking the user to do anything manually:
 
 Autonomy applies to development work. Production-affecting actions always need explicit human authorization.
 
+## Memory Management
+
+Project memory lives at `docs/agents/project-memory.md`. This file persists operational knowledge across sessions.
+
+- **Read it** at the start of every session — it contains project identity, setup decisions, and hard-won lessons.
+- **Write to it** whenever you discover something non-obvious: CI quirks, environment gotchas, workarounds, tool behaviors, failed approaches worth avoiding.
+- Don't wait to be asked — proactively append new lessons to the `## Operational Lessons` section.
+- Keep entries concise: one line per lesson, with `file:line` references where relevant.
+
 ## Research Documents
 Store in: docs/research/YYYY-MM-DD-description.md
 
