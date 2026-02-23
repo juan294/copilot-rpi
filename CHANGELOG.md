@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-02-23
+
 ### Added
 
 - Memory management section in AGENTS.md template for cross-session persistence
