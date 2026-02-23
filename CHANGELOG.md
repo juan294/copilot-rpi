@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Added
 
+- `/update` prompt template for incremental blueprint sync
+- Scheduled update agent shell script (`templates/scripts/copilot-rpi-update-agent.sh`)
 - Community files: CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md, CHANGELOG.md
 - GitHub issue and PR templates
 - CI workflow for markdown linting

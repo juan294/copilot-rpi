@@ -129,7 +129,13 @@ Each file must have `applyTo` in YAML frontmatter — without it, the file is si
 - [ ] Create `scripts/agents/` directory for agent shell scripts
 - [ ] Create `docs/agents/` directory for agent reports and shared context
 - [ ] Create `logs/` directory for agent output capture
-- [ ] Write at least one agent script (e.g., test-health, security-audit)
+- [ ] **Set up the `/update` agent first** — keeps your project in sync with copilot-rpi improvements:
+  1. Copy `templates/scripts/copilot-rpi-update-agent.sh` to `scripts/agents/copilot-rpi-update.sh`
+  2. Set `COPILOT_RPI_PATH` to your copilot-rpi clone location
+  3. Make executable: `chmod +x scripts/agents/copilot-rpi-update.sh`
+  4. Create required directories: `mkdir -p docs/agents logs`
+  5. Schedule with launchd or cron (examples are in the script comments)
+- [ ] Write additional agent scripts (e.g., test-health, security-audit)
 - [ ] Ensure Copilot CLI is authenticated (`copilot auth`)
 - [ ] Schedule with launchd (macOS) or cron (Linux)
 - [ ] Verify the agent runs successfully and produces a report

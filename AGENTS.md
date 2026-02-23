@@ -72,12 +72,15 @@ copilot-rpi/
     ├── prompts/                      # Prompt file templates (.github/prompts/)
     │   ├── bootstrap.prompt.md       # /bootstrap — new project setup
     │   ├── adopt.prompt.md           # /adopt — existing project migration
+    │   ├── update.prompt.md          # /update — blueprint sync
     │   ├── research.prompt.md        # /research — codebase research
     │   ├── plan.prompt.md            # /plan — implementation planning
     │   ├── implement.prompt.md       # /implement — phased execution
     │   ├── validate.prompt.md        # /validate — verification
     │   ├── describe-pr.prompt.md     # /describe-pr — PR description
     │   └── pre-launch.prompt.md      # /pre-launch — production audit
+    ├── scripts/                      # Agent shell script templates
+    │   └── copilot-rpi-update-agent.sh  # Nightly blueprint sync agent
     └── github/                       # Copilot-specific templates
         ├── copilot-instructions.md.template
         ├── instructions/             # Path-specific rule templates
