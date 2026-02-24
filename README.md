@@ -1,5 +1,6 @@
 # copilot-rpi — GitHub Copilot Reference & Project Intelligence
 
+[![CI](https://github.com/juan294/copilot-rpi/actions/workflows/markdown-lint.yml/badge.svg)](https://github.com/juan294/copilot-rpi/actions/workflows/markdown-lint.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Status: Active](https://img.shields.io/badge/Status-Active-brightgreen.svg)](https://github.com/juan294/copilot-rpi)
 [![GitHub Copilot](https://img.shields.io/badge/Built%20for-GitHub%20Copilot-blue.svg)](https://docs.github.com/en/copilot)
