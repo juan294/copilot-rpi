@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-02-24
+
+### Fixed
+
+- `/update` now adds new blueprint sections instead of skipping them — projects stay current with new knowledge
+- Nightly agent shell script uses `CLAUDE_BIN` env var instead of bare command, fixing `launchd`/`cron` PATH failures
+
 ## [1.1.0] - 2026-02-23
 
 ### Added
