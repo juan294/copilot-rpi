@@ -61,7 +61,7 @@ On incremental syncs (lastSyncCommit exists), prioritize reading files that appe
 4. For each blueprint-managed section:
    - If the project's version differs from the template → update to match.
    - If the project has added project-specific content *within* a blueprint section (e.g., extra rules), preserve it — only update the parts that came from the template.
-   - If a section doesn't exist in the project → skip it (don't add sections, that's `/adopt`'s job).
+   - If a section doesn't exist in the project → add it from the template. Place it after the last existing blueprint-managed section, preserving the order from the template. New blueprint sections are new knowledge — `/update` is responsible for delivering them.
 5. **Do NOT touch** project-specific sections: Project name, One-liner, Stack, Key Commands, Git Workflow, Deployment, Commit Messages, Research Documents, Implementation Plans, or any custom section.
 6. The `### CRITICAL: Run verification commands before committing` section under Key Commands is blueprint-originated — update it if it exists.
 
@@ -120,7 +120,7 @@ On incremental syncs (lastSyncCommit exists), prioritize reading files that appe
 2. Present a summary:
    - copilot-rpi version synced to (tag + commit hash)
    - Prompts updated/added (list them)
-   - AGENTS.md sections updated (list them)
+   - AGENTS.md sections updated/added (list them)
    - Instructions/chat modes updated (list them)
    - VS Code settings changes (list them)
    - Notable new content: new error patterns, new rules, methodology changes

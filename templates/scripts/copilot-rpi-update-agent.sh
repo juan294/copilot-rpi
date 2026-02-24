@@ -61,6 +61,7 @@ set -euo pipefail
 # ── Configuration ──
 # Change these for your project:
 COPILOT_RPI_PATH="<path-to-your-copilot-rpi-clone>"
+CLAUDE_BIN="${CLAUDE_BIN:-$HOME/.local/bin/claude}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -78,6 +79,13 @@ fi
 
 if [ ! -f "$UPDATE_INSTRUCTIONS" ]; then
   echo "[$(date)] ERROR: Update prompt not found at $UPDATE_INSTRUCTIONS"
+  exit 1
+fi
+
+if [ ! -x "$CLAUDE_BIN" ]; then
+  echo "[$(date)] ERROR: claude binary not found at $CLAUDE_BIN"
+  echo "[$(date)] Set CLAUDE_BIN in this script or export it as an env var."
+  echo "[$(date)] Common locations: \$HOME/.local/bin/claude, /usr/local/bin/claude"
   exit 1
 fi
 
@@ -112,7 +120,7 @@ echo "[$(date)] Project: $PROJECT_ROOT"
 echo "[$(date)] Blueprint: $COPILOT_RPI_PATH"
 
 while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-  if copilot -p "$PROMPT" \
+  if "$CLAUDE_BIN" -p "$PROMPT" \
     > "$REPORT_FILE" 2>&1; then
     echo "[$(date)] $AGENT_NAME complete. Report: $REPORT_FILE"
     exit 0
