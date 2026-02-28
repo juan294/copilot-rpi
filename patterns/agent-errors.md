@@ -353,3 +353,54 @@ copilot auth
 ```
 
 **Prevention:** Add an auth check to every scheduled agent script. Log the failure clearly so you know to re-authenticate rather than debugging phantom errors.
+
+---
+
+## Error #18: Agent CLI crashes with "Unexpected" when plist runs script directly
+
+**Symptom:** Agent plist with correct environment variables and auth still fails. The CLI returns a crash or unexpected error even for simple commands. The error is instant (< 1 second). Exit code may be 0 despite the error.
+
+**Root cause:** When launchd directly executes a script located inside a project directory that has configuration folders (`.github/`, `.vscode/`, etc.), the CLI may misidentify the project context from the initial process arguments. This causes an internal crash before any real work begins. The same script works fine when located outside the project tree (e.g., `/tmp`), or when the plist uses `/bin/bash -c "exec /bin/bash <script>"` instead of running the script directly.
+
+**Diagnostic clue:** The failure is **location-dependent**, not content-dependent. The same script at `/tmp/my-agent.sh` works, but at `/project/scripts/agents/my-agent.sh` fails. The error is a CLI bug in how it resolves project context under launchd's process model.
+
+**Correct approach from the start:**
+
+Use `/bin/bash -c "exec /bin/bash <script>"` in ProgramArguments instead of the script path directly:
+
+```xml
+<!-- WRONG — direct script execution, causes crash: -->
+<key>ProgramArguments</key>
+<array>
+  <string>/path/to/project/scripts/agents/my-agent.sh</string>
+</array>
+
+<!-- ALSO WRONG — /bin/bash without -c exec, same crash: -->
+<key>ProgramArguments</key>
+<array>
+  <string>/bin/bash</string>
+  <string>/path/to/project/scripts/agents/my-agent.sh</string>
+</array>
+
+<!-- CORRECT — bash -c with exec wrapper: -->
+<key>ProgramArguments</key>
+<array>
+  <string>/bin/bash</string>
+  <string>-c</string>
+  <string>exec /bin/bash /path/to/project/scripts/agents/my-agent.sh</string>
+</array>
+```
+
+The `exec` replaces the initial shell process, so the agent script still runs as PID 1 of the launchd job (clean process tree, correct signal handling). The `-c` wrapper changes the initial process context so the CLI doesn't misidentify the project root from the launchd process arguments.
+
+**Never do this:**
+```xml
+<!-- Don't run scripts directly — even with /bin/bash prefix: -->
+<array>
+  <string>/bin/bash</string>
+  <string>/project/scripts/agents/my-agent.sh</string>
+</array>
+<!-- CLI may crash if the script is inside a project directory -->
+```
+
+**Key detail:** This error has minimal debug output — the CLI crashes before reaching initialization. The exit code may be 0 despite the error, which means auth preflight checks can silently pass, masking the problem. A working launchd agent plist should always use the `-c exec` ProgramArguments wrapper pattern, include `HardResourceLimits`/`SoftResourceLimits` for file descriptors, and set `EnvironmentVariables` for HOME, TERM, and PATH.

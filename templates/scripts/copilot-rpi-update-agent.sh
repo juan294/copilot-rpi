@@ -20,6 +20,7 @@
 # ── macOS launchd ──
 #
 #   Create ~/Library/LaunchAgents/com.<project>.agent.copilot-rpi-update.plist:
+#   (Replace YOUR_USERNAME with your macOS username)
 #
 #   <?xml version="1.0" encoding="UTF-8"?>
 #   <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
@@ -30,7 +31,9 @@
 #     <string>com.<project>.agent.copilot-rpi-update</string>
 #     <key>ProgramArguments</key>
 #     <array>
-#       <string>/absolute/path/to/project/scripts/agents/copilot-rpi-update.sh</string>
+#       <string>/bin/bash</string>
+#       <string>-c</string>
+#       <string>exec /bin/bash /absolute/path/to/project/scripts/agents/copilot-rpi-update.sh</string>
 #     </array>
 #     <key>StartCalendarInterval</key>
 #     <dict>
@@ -38,6 +41,25 @@
 #       <integer>3</integer>
 #       <key>Minute</key>
 #       <integer>0</integer>
+#     </dict>
+#     <key>HardResourceLimits</key>
+#     <dict>
+#       <key>NumberOfFiles</key>
+#       <integer>122880</integer>
+#     </dict>
+#     <key>SoftResourceLimits</key>
+#     <dict>
+#       <key>NumberOfFiles</key>
+#       <integer>122880</integer>
+#     </dict>
+#     <key>EnvironmentVariables</key>
+#     <dict>
+#       <key>HOME</key>
+#       <string>/Users/YOUR_USERNAME</string>
+#       <key>TERM</key>
+#       <string>xterm-256color</string>
+#       <key>PATH</key>
+#       <string>/usr/local/bin:/opt/homebrew/bin:/Users/YOUR_USERNAME/.local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
 #     </dict>
 #     <key>StandardOutPath</key>
 #     <string>/absolute/path/to/project/logs/copilot-rpi-update.log</string>
@@ -47,6 +69,7 @@
 #   </plist>
 #
 #   Install: launchctl load ~/Library/LaunchAgents/com.<project>.agent.copilot-rpi-update.plist
+#   Test:    launchctl start com.<project>.agent.copilot-rpi-update
 #   Remove:  launchctl unload ~/Library/LaunchAgents/com.<project>.agent.copilot-rpi-update.plist
 #
 # ── Linux cron ──

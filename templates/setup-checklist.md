@@ -138,7 +138,9 @@ Each file must have `applyTo` in YAML frontmatter — without it, the file is si
   5. Schedule with launchd or cron (examples are in the script comments)
 - [ ] Write additional agent scripts (e.g., test-health, security-audit)
 - [ ] Ensure Copilot CLI is authenticated (`copilot auth`)
+- [ ] For macOS launchd: ensure plist has resource limits, env vars, and `/bin/bash -c exec` wrapper in ProgramArguments (see [scheduled-agents.md](../methodology/scheduled-agents.md) for plist template and gotchas)
 - [ ] Schedule with launchd (macOS) or cron (Linux)
+- [ ] Test with `launchctl start` (macOS) — don't test from a terminal, it masks launchd issues
 - [ ] Verify the agent runs successfully and produces a report
 
 ## Workflow Habits

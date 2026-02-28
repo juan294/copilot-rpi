@@ -86,7 +86,9 @@ echo "[$(date)] $AGENT_NAME complete. Report: $REPORT_FILE"
   <string>com.project.agent.my-agent</string>
   <key>ProgramArguments</key>
   <array>
-    <string>/absolute/path/to/project/scripts/agents/my-agent.sh</string>
+    <string>/bin/bash</string>
+    <string>-c</string>
+    <string>exec /bin/bash /absolute/path/to/project/scripts/agents/my-agent.sh</string>
   </array>
   <key>StartCalendarInterval</key>
   <dict>
@@ -94,6 +96,25 @@ echo "[$(date)] $AGENT_NAME complete. Report: $REPORT_FILE"
     <integer>6</integer>
     <key>Minute</key>
     <integer>0</integer>
+  </dict>
+  <key>HardResourceLimits</key>
+  <dict>
+    <key>NumberOfFiles</key>
+    <integer>122880</integer>
+  </dict>
+  <key>SoftResourceLimits</key>
+  <dict>
+    <key>NumberOfFiles</key>
+    <integer>122880</integer>
+  </dict>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>HOME</key>
+    <string>/Users/YOUR_USERNAME</string>
+    <key>TERM</key>
+    <string>xterm-256color</string>
+    <key>PATH</key>
+    <string>/usr/local/bin:/opt/homebrew/bin:/Users/YOUR_USERNAME/.local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
   </dict>
   <key>StandardOutPath</key>
   <string>/absolute/path/to/project/logs/my-agent.log</string>
@@ -108,9 +129,26 @@ echo "[$(date)] $AGENT_NAME complete. Report: $REPORT_FILE"
 cp com.project.agent.my-agent.plist ~/Library/LaunchAgents/
 launchctl load ~/Library/LaunchAgents/com.project.agent.my-agent.plist
 
+# Test (don't rely on terminal execution — it masks launchd issues):
+launchctl start com.project.agent.my-agent
+
 # Uninstall:
 launchctl unload ~/Library/LaunchAgents/com.project.agent.my-agent.plist
 ```
+
+#### macOS launchd Gotchas
+
+launchd provides a minimal execution environment that breaks CLI tools in several ways. All fixes must be applied together — any single missing fix causes silent failure. See [Error #18](../patterns/agent-errors.md#error-18-agent-cli-crashes-with-unexpected-when-plist-runs-script-directly) for full details.
+
+**1. File descriptor limit (hard cap 256).** launchd sets a hard limit of 256 open files. Many CLI tools need far more for Node.js runtimes and network connections. `ulimit -n` in the script cannot raise above the hard limit — the fix must be in the plist via `HardResourceLimits` and `SoftResourceLimits` (shown in the plist template above).
+
+**2. Missing environment variables.** launchd doesn't source shell profiles (`~/.zshrc`, `~/.bash_profile`). PATH is minimal (`/usr/bin:/bin:/usr/sbin:/sbin`), HOME may be unset, TERM is absent. The fix is `EnvironmentVariables` in the plist (shown above), supplemented by fallback exports in the script.
+
+**3. No interactive authentication.** CLI tools' default auth flows may open a browser or require a TTY. Under launchd there's no TTY and no browser. Fix: pre-authenticate from an interactive terminal before scheduling. The script should verify auth works before attempting the main task.
+
+**4. ProgramArguments must use `/bin/bash -c exec`.** When launchd directly executes a script located inside a project directory (via shebang), the CLI may crash with unexpected errors. The fix is to use `/bin/bash -c "exec /bin/bash /path/to/script.sh"` in ProgramArguments (shown in the plist template above). This changes the process context so the CLI doesn't misidentify the project root from the initial process arguments.
+
+**Testing:** Always test with `launchctl start <label>`, never by running the script from a terminal. Terminal execution has full env vars, high fd limits, and interactive auth — it masks all four problems.
 
 ### Linux (cron)
 
@@ -308,14 +346,8 @@ The shared context file (`docs/agents/shared-context.md`) is a cross-agent intel
 ## Prerequisites
 
 - Copilot CLI installed and authenticated (`copilot --version`)
+- Non-interactive auth configured: run `copilot auth` from an interactive terminal (required for launchd/cron — interactive auth flows won't work without a browser/TTY)
+- macOS launchd: plist must include `HardResourceLimits`/`SoftResourceLimits` with `NumberOfFiles: 122880`, `EnvironmentVariables` with HOME, TERM, PATH, and `ProgramArguments` must use `/bin/bash -c "exec /bin/bash <script>"` format (see plist template above and [Error #18](../patterns/agent-errors.md#error-18-agent-cli-crashes-with-unexpected-when-plist-runs-script-directly))
 - Project dependencies installed (agents may run test/build commands)
 - `docs/agents/` directory exists in the project
 - `logs/` directory exists for output capture
-
-### CLI Authentication for Cron
-
-When running `copilot -p` from cron or launchd, the CLI must be pre-authenticated. Unlike interactive sessions where the IDE handles auth, headless mode requires:
-
-1. **Run `copilot auth` once interactively** to cache credentials
-2. **Verify cron has access to the credential store** — test by running your agent script manually from a non-interactive shell: `bash -l scripts/agents/my-agent.sh`
-3. **Set `PATH` explicitly in cron** — cron doesn't inherit your shell profile. Add the full path to the `copilot` binary or source your profile in the agent script.
