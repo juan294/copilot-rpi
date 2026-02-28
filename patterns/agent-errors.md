@@ -394,6 +394,7 @@ Use `/bin/bash -c "exec /bin/bash <script>"` in ProgramArguments instead of the 
 The `exec` replaces the initial shell process, so the agent script still runs as PID 1 of the launchd job (clean process tree, correct signal handling). The `-c` wrapper changes the initial process context so the CLI doesn't misidentify the project root from the launchd process arguments.
 
 **Never do this:**
+
 ```xml
 <!-- Don't run scripts directly — even with /bin/bash prefix: -->
 <array>
