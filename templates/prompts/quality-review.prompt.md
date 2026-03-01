@@ -15,6 +15,7 @@ Review the diff for each of the following. Check each concern thoroughly before 
 ### Concern 1: Code Reuse
 
 For each change:
+
 1. Use #codebase to search for existing utilities and helpers that could replace newly written code. Check utility directories, shared modules, and files adjacent to the changed ones.
 2. Flag any new function that duplicates existing functionality. Suggest the existing function to use instead.
 3. Flag any inline logic that could use an existing utility — hand-rolled string manipulation, manual path handling, custom environment checks, ad-hoc type guards.
@@ -22,6 +23,7 @@ For each change:
 ### Concern 2: Code Quality
 
 Review the same changes for:
+
 1. **Redundant state** — state that duplicates existing state, cached values that could be derived
 2. **Parameter sprawl** — adding new parameters instead of generalizing or restructuring
 3. **Copy-paste with slight variation** — near-duplicate code blocks that should be unified
@@ -31,6 +33,7 @@ Review the same changes for:
 ### Concern 3: Efficiency
 
 Review the same changes for:
+
 1. **Unnecessary work** — redundant computations, repeated file reads, duplicate API calls, N+1 patterns
 2. **Missed concurrency** — independent operations run sequentially that could run in parallel
 3. **Hot-path bloat** — new blocking work on startup or per-request/per-render paths
