@@ -91,6 +91,14 @@ Operational knowledge that persists across sessions. Agents read this at session
 
 Fill every section from what you learned in Phases 1–4. Don't leave placeholders.
 
+## Recommended Next Step
+
+After adoption is complete, suggest the user run `/pre-launch` in a new session to baseline their codebase quality. `/pre-launch` audits 6 domains (architecture, QA, security, performance, UX, infrastructure) and produces a report with blockers, warnings, and recommendations.
+
+For code quality findings (dead code, duplicates, inefficiencies), `/quality-review` handles fixes interactively. Security, infrastructure, and accessibility findings require manual implementation or a targeted `/implement` cycle.
+
+This is optional but recommended — it gives adopters a clear picture of their codebase health under the new methodology.
+
 ## Rules
 
 - **Audit first, change nothing.** No files modified until user approves.

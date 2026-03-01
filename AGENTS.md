@@ -77,6 +77,7 @@ copilot-rpi/
     │   ├── plan.prompt.md            # /plan — implementation planning
     │   ├── implement.prompt.md       # /implement — phased execution
     │   ├── validate.prompt.md        # /validate — verification
+    │   ├── quality-review.prompt.md  # /quality-review — code reuse, quality, efficiency review
     │   ├── describe-pr.prompt.md     # /describe-pr — PR description
     │   └── pre-launch.prompt.md      # /pre-launch — production audit
     ├── scripts/                      # Agent shell script templates

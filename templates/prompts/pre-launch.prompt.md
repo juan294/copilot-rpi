@@ -45,8 +45,18 @@ Write the report to `docs/agents/pre-launch-report.md`:
 ### 6. UX/Accessibility — GREEN/YELLOW/RED
 ```
 
+## After the Audit
+
+If the verdict is CONDITIONAL or NOT READY with code quality findings (dead code, duplicates,
+inefficiencies, reuse opportunities), recommend running `/quality-review` as the first fix action.
+`/quality-review` checks for code reuse, quality, and efficiency issues and applies fixes
+interactively — it handles the bulk of architecture and performance findings.
+
+For findings that `/quality-review` can't address (security, infrastructure, accessibility), those
+require manual implementation or a targeted `/implement` cycle.
+
 ## Rules
 
 - **Read-only.** Do not modify files — audit and report only.
-- **Do NOT auto-fix.** Present the full audit. The user decides what to fix.
+- **Do NOT auto-fix during the audit.** Present the full audit to the user. The user decides what to fix and what to accept as risk. After review, `/quality-review` may be used as a first fix step (see "After the Audit" above).
 - **Verdict thresholds:** Any blocker = NOT READY. Warnings only = CONDITIONAL. Clean = READY.

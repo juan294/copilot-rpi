@@ -43,7 +43,7 @@ The full Research-Plan-Implement pattern adapted for GitHub Copilot, based on Hu
 - **Philosophy** — Core tenets, error amplification principle, mental alignment
 - **Context Engineering** — Compaction, context quality, Copilot configuration surfaces (7 config files)
 - **Four Phases** — Research, Plan, Implement, Validate with detailed processes
-- **Agent Design** — Documentarian rule, research catalog, parallel work patterns, autonomy principles
+- **Agent Design** — Documentarian rule, research catalog, quality review pattern, batch-eligible parallelism, autonomy principles
 - **Pseudocode Notation** — Compact notation for writing implementation plans
 - **Testing** — Automated-first verification hierarchy, TDD protocol
 - **Push Accountability** — Post-push CI ownership, background polling, fix-and-repush cycle
@@ -74,7 +74,7 @@ Ready-to-use starting points for new projects:
 - **VS Code settings template** — `.vscode/settings.json` for Copilot configuration
 - **MCP config template** — `.vscode/mcp.json` for external tool access
 - **Setup checklist** — Step-by-step guide including prompt files, instructions, chatmodes, CI, and hooks
-- **Prompt files** — `/bootstrap`, `/adopt`, `/research`, `/plan`, `/implement`, `/validate`, `/describe-pr`, `/pre-launch`
+- **Prompt files** — `/bootstrap`, `/adopt`, `/research`, `/plan`, `/implement`, `/validate`, `/quality-review`, `/describe-pr`, `/pre-launch`
 - **Path-specific instructions** — Auto-loaded rules for tests, APIs, and migrations
 - **Chat modes** — RPI Research (documentarian), RPI Planner (interactive planning), RPI Auditor (validation)
 

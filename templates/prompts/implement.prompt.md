@@ -10,12 +10,14 @@ Process:
 2. Use #codebase to gather relevant context.
 3. For the CURRENT phase only:
    a. Implement the changes as specified.
-   b. Self-review: re-read your changes critically.
+   b. Self-review: re-read your changes critically for plan compliance.
    c. If issues found, fix them before proceeding.
    d. Run ALL automated verification commands via #tool:terminal.
    e. Update checkboxes in the plan file.
+   f. Recommend running `/quality-review` for a second-pass review (code reuse, quality, efficiency). This is a separate concern from plan compliance — self-review checks "did I follow the plan?" while quality review checks "is the code good?"
 4. STOP. Report results and wait for human confirmation.
 5. Do NOT proceed to the next phase without confirmation.
+6. If the plan marks phases as `[batch-eligible]`, inform the user they can run those phases in parallel via separate `copilot -p` processes or `@copilot` issues.
 
 If plan doesn't match reality:
 

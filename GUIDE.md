@@ -102,8 +102,9 @@ That's it. Those four commands are 90% of your interaction with the methodology.
 
 | Command | What It Does | When to Use |
 |---------|-------------|-------------|
+| `/quality-review` | Reviews changed files for code reuse, quality, and efficiency. Finds issues and fixes them interactively. | After each implementation phase, or after a `/pre-launch` audit. |
 | `/describe-pr` | Generates a PR description from the current branch's diff and commit history. | Before opening or updating a PR. |
-| `/pre-launch` | Runs a comprehensive multi-domain audit (QA, security, performance, architecture, UX, devops). | Before any production release. |
+| `/pre-launch` | Runs a comprehensive multi-domain audit (QA, security, performance, architecture, UX, devops). Recommends `/quality-review` for code quality findings. | Before any production release. |
 
 ### Copilot-Specific Features
 
@@ -151,11 +152,12 @@ You type `/implement docs/plans/2026-02-21-rate-limiting.md` and the agent:
 
 1. Reads the plan.
 2. Starts with Phase 1 only.
-3. Implements the changes, self-reviews, runs all automated verification.
-4. Updates the plan's checkboxes.
-5. **Stops and waits for your confirmation.**
+3. Implements the changes, self-reviews for plan compliance, runs all automated verification.
+4. Recommends running `/quality-review` for a second-pass review (code reuse, quality, efficiency).
+5. Updates the plan's checkboxes.
+6. **Stops and waits for your confirmation.**
 
-You review, approve, and it moves to Phase 2. One phase at a time. Never auto-proceeding.
+You review, approve, and it moves to Phase 2. One phase at a time. Never auto-proceeding. If the plan marks phases as `[batch-eligible]`, you can run them in parallel via `copilot -p` or `@copilot` issues.
 
 **Your job:** Confirm each phase. If something doesn't look right, say so.
 

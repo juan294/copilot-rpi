@@ -16,8 +16,9 @@ Process:
 8. Write detailed plan with separate phase files.
 9. Use pseudocode notation for changes.
 10. Separate automated vs. manual success criteria.
-11. Maximum 3 [NEEDS CLARIFICATION] markers.
-12. Iterate with user until all questions resolved.
+11. Assess phase independence: mark phases that have no file overlap and no dependency on another phase's output as `[batch-eligible]`. These can be executed in parallel via separate `copilot -p` processes or `@copilot` issues.
+12. Maximum 3 [NEEDS CLARIFICATION] markers.
+13. Iterate with user until all questions resolved.
 
 Save to docs/plans/YYYY-MM-DD-[description].md
 Phase files: docs/plans/YYYY-MM-DD-[description]-phases/phase-N.md

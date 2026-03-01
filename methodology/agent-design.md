@@ -234,6 +234,27 @@ Assign a GitHub Issue to `@copilot` for async implementation. The cloud agent:
 
 **Best for:** Well-specified implementation tasks where the plan is complete and unambiguous. Not suitable for tasks requiring interactive Q&A or complex judgment calls.
 
+### Quality Review Pattern
+
+After each implementation phase, run a quality review pass. This is separate from self-review:
+
+- **Self-review** checks plan compliance — "did I follow the plan?"
+- **Quality review** (`/quality-review`) checks code reuse, quality, and efficiency — "is the code good?"
+
+This two-pass model ensures that plan compliance and code quality are evaluated independently. In a single Copilot session, both passes happen sequentially. Alternatively, start a fresh Chat window for the quality review to get an unbiased second opinion (Writer/Reviewer pattern).
+
+The `/quality-review` prompt reviews the `git diff` for three concerns: code reuse opportunities (existing utilities that could replace new code), code quality issues (redundant state, copy-paste, leaky abstractions), and efficiency problems (unnecessary work, missed concurrency, hot-path bloat). Unlike a full `/pre-launch` audit, this is scoped to changed files only.
+
+### Batch-Eligible Parallel Execution
+
+Plans should assess phase independence and mark phases with no file overlap and no dependency on another phase's output as `[batch-eligible]`. When phases are marked batch-eligible, the user can choose to:
+
+- **Fan-out with `copilot -p`** — run one terminal per phase, each implementing independently
+- **Assign to `@copilot`** — create a GitHub Issue per phase, assign all to the cloud agent for parallel async implementation
+- **Run sequentially** — the default, always works
+
+This is a planning-time optimization. The agent identifies the opportunity; the user decides whether to parallelize.
+
 ### Pre-Launch Audit Pattern
 
 The most common parallel pattern. Run specialist audits in parallel:
