@@ -8,8 +8,6 @@
 
 A blueprint repository for setting up and running projects with [GitHub Copilot](https://docs.github.com/en/copilot). Contains the RPI (Research-Plan-Implement) methodology, a catalog of known agent errors, and operational rules learned from hundreds of real sessions.
 
-![Chapa Badge](https://chapa.thecreativetoken.com/u/juan294/badge.svg)
-
 ---
 
 ## Requirements
@@ -70,7 +68,6 @@ Sample documents illustrating the methodology in practice — a research documen
 Ready-to-use starting points for new projects:
 
 - **AGENTS.md template** — Cross-tool instruction file with all operational rules
-- **README header template** — Standard project README structure with badges
 - **VS Code settings template** — `.vscode/settings.json` for Copilot configuration
 - **MCP config template** — `.vscode/mcp.json` for external tool access
 - **Setup checklist** — Step-by-step guide including prompt files, instructions, chatmodes, CI, and hooks

@@ -65,7 +65,6 @@ copilot-rpi/
 │   └── agent-errors.md               # Detailed error catalog with solutions
 └── templates/                        # Files to adapt for new projects
     ├── AGENTS.md.template            # Starting point for project AGENTS.md
-    ├── README-header.md              # Standard README header (badges, Chapa, divider)
     ├── vscode-settings.json.template # .vscode/settings.json (Copilot config)
     ├── vscode-mcp.json.template      # .vscode/mcp.json (MCP server config)
     ├── setup-checklist.md            # Step-by-step new project setup

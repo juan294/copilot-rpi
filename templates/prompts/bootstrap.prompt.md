@@ -21,8 +21,6 @@ Read these files:
 1. `templates/setup-checklist.md` — Your step-by-step guide.
 2. `templates/AGENTS.md.template` — Starting point for this project's AGENTS.md.
 3. `templates/vscode-settings.json.template` — Starting point for .vscode/settings.json.
-4. `templates/README-header.md` — Standard README header structure.
-
 ## Phase 3: Set Up This Project
 
 Execute the setup checklist:
