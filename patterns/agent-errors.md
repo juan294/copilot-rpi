@@ -405,3 +405,103 @@ The `exec` replaces the initial shell process, so the agent script still runs as
 ```
 
 **Key detail:** This error has minimal debug output — the CLI crashes before reaching initialization. The exit code may be 0 despite the error, which means auth preflight checks can silently pass, masking the problem. A working launchd agent plist should always use the `-c exec` ProgramArguments wrapper pattern, include `HardResourceLimits`/`SoftResourceLimits` for file descriptors, and set `EnvironmentVariables` for HOME, TERM, and PATH.
+
+---
+
+## Error #19: `git pull --rebase` fails with uncommitted changes
+
+**Symptom:** `git pull --rebase && git push` exits with `error: cannot pull with rebase: You have unstaged changes. Please commit or stash them.` The agent just edited files and tried to pull without committing first.
+
+**Root cause:** `git pull --rebase` requires a clean working tree. The agent finishes editing files, then immediately runs the pull+push sequence without committing the edits first. This is the most-repeated agent error across all observed sessions — in one batch of 16 screenshots, it appeared 6 times (37%).
+
+**Correct approach — always do this:**
+
+```bash
+# ALWAYS commit first, then pull, then push:
+git add <files> && git commit -m "feat(scope): description"
+git pull --rebase && git push
+
+# Or as a single chain:
+git add <files> && git commit -m "msg" && git pull --rebase && git push
+```
+
+**Never do this:**
+
+```bash
+# Don't pull with uncommitted changes:
+git pull --rebase && git push
+# ← fails if you have any modified or untracked files
+
+# Don't chain pull+push right after editing files:
+# [edit files]
+git pull --rebase && git push  # ← forgot to commit!
+```
+
+**Key detail:** Git itself blocks this operation, so no data is lost — but the agent wastes a turn hitting the error and then fixing it. The push recipe (`commit → pull → push`) should be used as a single compound command every time.
+
+---
+
+## Error #20: `git push --tags` pushes ALL local tags — old tags cause push failure
+
+**Symptom:** `git push origin main --tags` exits non-zero with `! [rejected] v1.0 -> v1.0 (already exists)`. The new commits and new tags pushed fine, but the agent sees exit code 1 and treats the entire push as failed.
+
+**Root cause:** `--tags` pushes every local tag to the remote, not just tags created in this session. If any tag was previously pushed, recreated locally, or already exists on the remote, git rejects it — and the non-zero exit code makes the agent think nothing was pushed. The agent then retries or panics, wasting turns.
+
+**Correct approach — always do this:**
+
+```bash
+# Push commits and a specific tag by name:
+git push origin main && git push origin v1.3.0
+
+# Or use --follow-tags (only pushes annotated tags reachable from pushed commits):
+git push origin main --follow-tags
+```
+
+**Never do this:**
+
+```bash
+# Don't push all tags blindly:
+git push origin main --tags
+# ← pushes EVERY local tag, fails if any already exists on remote
+
+# Don't use --force to fix it:
+git push origin main --tags --force
+# ← force-pushes all tags, potentially overwriting remote tag history
+```
+
+**Key detail:** `--tags` and `--follow-tags` are very different. `--tags` pushes all refs under `refs/tags/`. `--follow-tags` only pushes annotated tags that point to commits being pushed. Use `--follow-tags` for release workflows, or push specific tags by name.
+
+---
+
+## Error #21: Agent fabricates filesystem paths — "No such file or directory"
+
+**Symptom:** `git -C /Users/name/Documents/GenAI_Projects/cc-rpi pull --rebase` fails with `fatal: cannot change to '/Users/name/Documents/GenAI_Projects/cc-rpi': No such file or directory`. The actual path was `/Users/name/Documents/code/cc-rpi`.
+
+**Root cause:** The agent guesses or hallucinates a plausible filesystem path instead of using the known working directory or discovering the path. Common fabrications include inventing parent directory names (`Projects`, `GenAI_Projects`, `repos`, `workspace`), getting the nesting level wrong, or mixing up similar project names.
+
+**Correct approach — always do this:**
+
+```bash
+# Use the project's working directory (provided by the environment):
+git -C /Users/name/Documents/code/cc-rpi pull --rebase
+
+# If you need to find another project, discover it:
+ls /Users/name/Documents/code/
+# Then use the actual name from the listing
+
+# Or ask the user for the path if it's not discoverable
+```
+
+**Never do this:**
+
+```bash
+# Don't guess directory names:
+git -C /Users/name/Documents/GenAI_Projects/cc-rpi pull --rebase
+# ← "GenAI_Projects" is fabricated — the real dir is "code"
+
+# Don't assume paths from previous sessions are still valid:
+cd /Users/name/projects/old-name/src
+# ← directories may have been renamed, moved, or deleted
+```
+
+**Key detail:** The working directory is always available from the environment. For cross-project operations, use `ls` or file search to discover paths — never guess directory names. Even plausible-sounding names like `Projects` or `repos` are often wrong.

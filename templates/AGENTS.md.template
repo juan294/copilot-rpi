@@ -79,7 +79,7 @@ Chain with `;`: `pnpm run typecheck 2>&1; pnpm run lint 2>&1`
 2. Never commit directly to `main`
 3. Release to production via PR: `develop` → `main`
 4. Always run checks before committing (pre-commit hooks enforce this)
-5. Always `git pull --rebase` before pushing
+5. Always commit before pulling — `git pull --rebase` requires a clean working tree
 
 ### Commit Messages
 
@@ -98,12 +98,26 @@ docs: description
 
 ## Agent Operational Rules
 
+### Git Recipes (use these exact sequences)
+```bash
+# Push sequence — ALWAYS commit before pulling (Error #19)
+git add <files> && git commit -m "msg" && git pull --rebase && git push
+
+# First push — set upstream tracking
+git add <files> && git commit -m "msg" && git push -u origin <branch>
+
+# Push with tag — NEVER use --tags (Error #20)
+git push origin main && git push origin v1.0.0
+# Or: git push origin main --follow-tags
+
+# Worktree cleanup
+git worktree remove --force <path>; git branch -D <branch>
+```
+
 ### Git Operations
 - Run typecheck/lint BEFORE committing (pre-commit hooks run the same checks)
-- `git pull --rebase` before every push
 - Remove worktrees BEFORE merging PRs with `--delete-branch`
-- `git worktree remove --force` (always use --force)
-- Use `;` not `&&` for multiple cleanup operations
+- Never fabricate filesystem paths — use the working directory or discover with `ls`
 
 ### GitHub CLI
 - Don't guess `gh --json` field names — query available fields first

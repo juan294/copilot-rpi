@@ -14,6 +14,12 @@ These rules must be internalized before starting any work. They prevent the most
 
 5. **Always `git branch -D` (uppercase) for worktree branches** — worktree branches are almost never "fully merged" in git's view (squash merges, deleted remotes, abandoned work). Full cleanup idiom: `git worktree remove --force <path>; git branch -D <branch>`
 
+6. **Commit or stash before `git pull --rebase`** — `git pull --rebase` requires a clean working tree. Always commit your changes first. The push recipe is: `git add <files> && git commit -m "msg" && git pull --rebase && git push`. This is the single most-repeated agent error.
+
+7. **Use `git push origin <tag>` instead of `--tags`** — `--tags` pushes ALL local tags. If any old tag already exists on the remote, git exits non-zero even though commits and new tags pushed fine. Push specific tags by name, or use `--follow-tags`.
+
+8. **Don't fabricate filesystem paths — use the working directory or discover with `ls`** — the agent invents plausible directory names (`Projects`, `GenAI_Projects`, `repos`) that don't exist. Use the environment's working directory for the current project, and `ls` or file search to discover paths for other projects.
+
 ## GitHub CLI Rules
 
 1. **Don't guess `gh` CLI `--json` field names** — fields differ per subcommand. Run `gh <cmd> --json 2>&1 | head -5` first if unsure. `conclusion` exists on `gh run` but NOT `gh pr checks`.

@@ -27,9 +27,41 @@ Level 3: Push-time (CI workflows)
 
 Each level catches progressively harder-to-detect issues. The goal: **no broken code ever reaches the shared branch.**
 
+## Why Passive Rules Aren't Enough
+
+Documented rules in AGENTS.md fail because of a fundamental mismatch: LLMs don't have procedural memory. A rule read at the start of the session has near-zero influence on the decision being made 200 turns later. In one observed batch of 16 agent errors, 10 were duplicates of already-documented patterns — the rules existed, the agent "knew" them, and it violated them anyway. The most common single error (commit before git pull --rebase) appeared 6 times despite being documented.
+
+This means the error prevention system needs three tiers, not one:
+
+### Three-Tier Error Prevention Model
+
+| Tier | Mechanism | Reliability | When to Use |
+|------|-----------|-------------|-------------|
+| **Enforce** | Pre-commit hooks, pre-push hooks, CI | High — mechanically prevented | Top repeat offenders. Commit-time and push-time checks. |
+| **Prompt** | Command recipes in AGENTS.md | Medium — agent copies the pattern | Frequent operations. Give compound commands to copy instead of compose. |
+| **Document** | agent-errors.md, quick-reference.md | Low — advisory only | Long tail. Reference for when things go wrong. |
+
+Rules should graduate upward: a pattern documented in tier 3 that keeps recurring should be promoted to tier 2 (recipe) or tier 1 (hook).
+
+**Copilot-specific limitation:** Unlike some coding agents that support command-interception hooks (PreToolUse), Copilot and VS Code do not intercept terminal commands before execution. This means Tier 1 enforcement is limited to git hooks (pre-commit, pre-push) and CI — there is no agent-time interception layer. Tier 2 (recipes) is therefore more critical for Copilot users.
+
+### Command Recipes (Tier 2)
+
+AGENTS.md should provide compound command sequences the agent copies as a unit, rather than passive rules the agent must remember to compose correctly. For example:
+
+```text
+# Passive rule (fails in practice):
+"Always git pull --rebase before pushing"
+
+# Command recipe (agent copies this):
+git add <files> && git commit -m "msg" && git pull --rebase && git push
+```
+
+The recipe encodes the correct sequence — commit first, then pull, then push — as a single block. The agent doesn't need to remember the ordering; it copies the recipe.
+
 ## Pre-Commit Hooks
 
-Pre-commit hooks are the first line of defense. They run automatically before every commit and reject the commit if any check fails.
+Pre-commit hooks run automatically before every commit and reject the commit if any check fails.
 
 ### Setup
 
