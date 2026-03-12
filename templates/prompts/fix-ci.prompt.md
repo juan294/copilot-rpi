@@ -38,6 +38,7 @@ Process:
    Then push and verify CI passes.
 
 Rules:
+
 - Never weaken a test to make it pass — fix the source code.
 - Never delete a test.
 - If a failure is flaky (passes locally, fails in CI), note it but don't skip.
