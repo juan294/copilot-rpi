@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.7.0] - 2026-03-14
+
+### Added
+
+- **`/detach` command** -- clean removal of copilot-rpi from a project. Inventories all blueprint artifacts in 4 tiers (prompt files, chat modes, instructions, AGENTS.md sections, VS Code settings, user work products), previews what will be removed, asks for confirmation, then executes in a single atomic commit. Preserves project config and research/plan documents by default. Ported from cc-rpi v1.7.0.
+
 ## [1.6.1] - 2026-03-14
 
 ### Added

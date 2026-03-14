@@ -88,6 +88,7 @@ That's it. Those four commands are 90% of your interaction with the methodology.
 |---------|-------------|-------------|
 | `/bootstrap` | Reads the copilot-rpi blueprint, asks about your project, creates AGENTS.md, settings, prompt files, instructions, chat modes, and full directory structure. | New projects. Run once at the start. |
 | `/adopt` | Reads the blueprint, audits the existing project, presents a gap report, then migrates what you approve. | Existing projects you want to bring up to standard. |
+| `/detach` | Inventories all copilot-rpi artifacts, previews what will be removed, asks for confirmation, then cleanly removes prompts, chat modes, instructions, AGENTS.md sections, and sync metadata. Preserves project config and work products. | When you want to stop using the RPI methodology and remove all blueprint artifacts. |
 
 ### The Core Four
 
