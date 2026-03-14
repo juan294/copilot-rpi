@@ -197,7 +197,7 @@ Use the **RPI Research** chat mode to enforce this structurally at the session l
 
 ### Error Prevention
 
-The blueprint includes 29 operational rules learned from real sessions — including 6 Copilot-specific rules covering prompt file frontmatter, `${input:var}` syntax, instruction file globs, CLI auth, auto-compaction, and chatmode directories.
+The blueprint includes 30 operational rules learned from real sessions — including 6 Copilot-specific rules covering prompt file frontmatter, `${input:var}` syntax, instruction file globs, CLI auth, auto-compaction, and chatmode directories.
 
 When your project is set up via the blueprint, these rules are baked into the AGENTS.md file that every tool reads every session.
 
@@ -301,8 +301,8 @@ The blueprint adapts to six project archetypes: web applications, libraries, CLI
 | Plan notation | `methodology/pseudocode-notation.md` | How to write and read implementation plans |
 | Testing approach | `methodology/testing.md` | TDD protocol, verification hierarchy |
 | CI ownership | `methodology/push-accountability.md` | Background CI monitoring, fix-and-repush |
-| Error patterns | `patterns/agent-errors.md` | 28 documented errors with symptoms and solutions |
-| Operational rules | `patterns/quick-reference.md` | 29 rules to prevent known mistakes |
+| Error patterns | `patterns/agent-errors.md` | 29 documented errors with symptoms and solutions |
+| Operational rules | `patterns/quick-reference.md` | 30 rules to prevent known mistakes |
 | Worked examples | `examples/README.md` | Sample research docs, plans, logs, pseudocode |
 
 ## Credits
