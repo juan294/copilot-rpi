@@ -79,13 +79,16 @@ copilot-rpi/
     │   ├── quality-review.prompt.md  # /quality-review — code reuse, quality, efficiency review
     │   ├── describe-pr.prompt.md     # /describe-pr — PR description
     │   ├── pre-launch.prompt.md      # /pre-launch — production audit
+    │   ├── remediate.prompt.md      # /remediate — fix all pre-launch findings
+    │   ├── triage.prompt.md         # /triage — morning agent report processing
     │   ├── status.prompt.md          # /status — quick project orientation
     │   ├── fix-ci.prompt.md          # /fix-ci — self-healing CI
     │   ├── detach.prompt.md          # /detach — clean removal of copilot-rpi
     │   ├── release.prompt.md         # /release — version release automation
     │   └── update-docs.prompt.md     # /update-docs — comprehensive docs refresh
     ├── scripts/                      # Agent shell script templates
-    │   └── copilot-rpi-update-agent.sh  # Nightly blueprint sync agent
+    │   ├── copilot-rpi-update-agent.sh  # Nightly blueprint sync agent
+    │   └── morning-triage.sh            # Multi-project morning triage
     └── github/                       # Copilot-specific templates
         ├── copilot-instructions.md.template
         ├── instructions/             # Path-specific rule templates

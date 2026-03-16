@@ -105,16 +105,26 @@ That's it. Those four commands are 90% of your interaction with the methodology.
 |---------|-------------|-------------|
 | `/quality-review` | Reviews changed files for code reuse, quality, and efficiency. Finds issues and fixes them interactively. | After each implementation phase, or after a `/pre-launch` audit. |
 | `/describe-pr` | Generates a PR description from the current branch's diff and commit history. | Before opening or updating a PR. |
-| `/pre-launch` | Runs a comprehensive multi-domain audit (QA, security, performance, architecture, UX, devops). Recommends `/quality-review` for code quality findings. | Before any production release. |
+| `/pre-launch` | Runs a comprehensive multi-domain audit (QA, security, performance, architecture, UX, devops). Run `/remediate` after to fix all findings. | Before any production release. |
+| `/remediate` | Parses the pre-launch report, creates GitHub issues for every finding, spawns parallel TDD agents in worktrees, merges sequentially, verifies CI, runs `/quality-review` twice. | After `/pre-launch` when findings exist. Automates the full fix cycle. |
+| `/triage` | Discovers all overnight agent reports exhaustively, checks for agent failures in logs, synthesizes findings, proposes action plan for all items, implements fixes, commits reports for history. | Every morning. First command of the day for each project. |
 | `/status` | Quick 5-line project orientation: branch, last commit, working tree, CI status, open items. | Start of session. Quick check without starting a full task. |
 | `/update-docs` | Investigates 4 areas (changes, doc inventory, diagrams, version refs), then updates all documentation, Mermaid diagrams, version references, and inline code docs based on changes since last release. | After features/fixes are done, before releasing. |
 | `/release` | Detects project type and branching strategy, bumps versions everywhere, generates CHANGELOG entry, creates release commit and tag, publishes GitHub release, advises on registry publish. | When ready to cut a new version. Run `/update-docs` first. |
 | `/fix-ci` | Self-healing CI: gets failure logs, spawns parallel fix agents per failure category, iterates until green or retry budget exhausted. | When CI is red. Automates the diagnose-fix-verify loop. |
 
+The recommended daily workflow:
+
+```text
+/triage -> fix all findings -> continue development
+```
+
+For multi-project orchestration, use `morning-triage.sh` to run `/triage` across all projects automatically.
+
 The recommended pre-release sequence:
 
 ```text
-/pre-launch -> fix findings -> /update-docs -> /release
+/pre-launch -> /remediate -> /update-docs -> /release
 ```
 
 ### Copilot-Specific Features
@@ -206,7 +216,7 @@ Use the **RPI Research** chat mode to enforce this structurally at the session l
 
 ### Error Prevention
 
-The blueprint includes 30 operational rules learned from real sessions — including 6 Copilot-specific rules covering prompt file frontmatter, `${input:var}` syntax, instruction file globs, CLI auth, auto-compaction, and chatmode directories.
+The blueprint includes 31 operational rules learned from real sessions — including 6 Copilot-specific rules covering prompt file frontmatter, `${input:var}` syntax, instruction file globs, CLI auth, auto-compaction, and chatmode directories.
 
 When your project is set up via the blueprint, these rules are baked into the AGENTS.md file that every tool reads every session.
 
@@ -251,6 +261,8 @@ your-project/
 │   │   ├── validate.prompt.md
 │   │   ├── describe-pr.prompt.md
 │   │   ├── pre-launch.prompt.md
+│   │   ├── remediate.prompt.md
+│   │   ├── triage.prompt.md
 │   │   ├── status.prompt.md
 │   │   ├── fix-ci.prompt.md
 │   │   ├── update-docs.prompt.md
@@ -313,7 +325,7 @@ The blueprint adapts to six project archetypes: web applications, libraries, CLI
 | Testing approach | `methodology/testing.md` | TDD protocol, verification hierarchy |
 | CI ownership | `methodology/push-accountability.md` | Background CI monitoring, fix-and-repush |
 | Error patterns | `patterns/agent-errors.md` | 29 documented errors with symptoms and solutions |
-| Operational rules | `patterns/quick-reference.md` | 30 rules to prevent known mistakes |
+| Operational rules | `patterns/quick-reference.md` | 31 rules to prevent known mistakes |
 | Worked examples | `examples/README.md` | Sample research docs, plans, logs, pseudocode |
 
 ## Credits

@@ -71,7 +71,7 @@ Ready-to-use starting points for new projects:
 - **VS Code settings template** — `.vscode/settings.json` for Copilot configuration
 - **MCP config template** — `.vscode/mcp.json` for external tool access
 - **Setup checklist** — Step-by-step guide including prompt files, instructions, chatmodes, CI, and hooks
-- **Prompt files** — `/bootstrap`, `/adopt`, `/research`, `/plan`, `/implement`, `/validate`, `/quality-review`, `/describe-pr`, `/pre-launch`, `/status`, `/fix-ci`
+- **Prompt files** — `/bootstrap`, `/adopt`, `/research`, `/plan`, `/implement`, `/validate`, `/quality-review`, `/describe-pr`, `/pre-launch`, `/remediate`, `/triage`, `/status`, `/fix-ci`
 - **Path-specific instructions** — Auto-loaded rules for tests, APIs, and migrations
 - **Chat modes** — RPI Research (documentarian), RPI Planner (interactive planning), RPI Auditor (validation)
 

@@ -72,6 +72,10 @@ These rules must be internalized before starting any work. They prevent the most
 
 7. **Check for existing PRs before `gh pr create`** — `gh pr create` fails if a PR already exists for the head-to-base branch pair. Check with `gh pr list --head <branch> --base <base>` first; if one exists, use `gh pr edit` to update it instead.
 
+## Quality & Attitude Rules
+
+31. **Fix everything, always** — categorize findings by severity (that's useful), but fix 100% of them. With AI agents, the cost of fixing is near-zero. Never suggest deferring items, say "nothing urgent," or recommend leaving low-priority items for a later session. The quality bar is the highest possible.
+
 ## launchd Rules
 
 1. **launchd plist must NOT run project scripts directly** — `<string>/project/scripts/agent.sh</string>` in ProgramArguments causes CLI crashes when the script is inside a project directory. Use `/bin/bash -c "exec /bin/bash <script>"` wrapper instead. Exit code may be 0 despite the error, so preflight checks silently pass.

@@ -60,6 +60,8 @@ Copy and adapt from `templates/prompts/`:
 - [ ] `/validate` — Post-implementation verification
 - [ ] `/describe-pr` — PR description generation
 - [ ] `/pre-launch` — Multi-specialist production audit
+- [ ] `/remediate` — Fix all pre-launch findings with parallel TDD agents
+- [ ] `/triage` — Morning agent report processing and action
 
 Verify each file has valid YAML frontmatter with `mode:` and `description:` fields.
 
@@ -149,6 +151,8 @@ Each file must have `applyTo` in YAML frontmatter — without it, the file is si
 - [ ] Always review plans before approving
 - [ ] Never skip the human confirmation gate between implementation phases
 - [ ] Use `/validate` after implementation
+- [ ] Run `/remediate` after `/pre-launch` to fix all findings with parallel agents
+- [ ] Run `/triage` every morning to process overnight agent reports
 - [ ] Start a new Chat window between unrelated tasks to reset context
 - [ ] Run each RPI phase in its own conversation
 - [ ] Research and plan on the default branch; implement in feature branches

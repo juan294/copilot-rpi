@@ -47,13 +47,13 @@ Write the report to `docs/agents/pre-launch-report.md`:
 
 ## After the Audit
 
-If the verdict is CONDITIONAL or NOT READY with code quality findings (dead code, duplicates,
-inefficiencies, reuse opportunities), recommend running `/quality-review` as the first fix action.
-`/quality-review` checks for code reuse, quality, and efficiency issues and applies fixes
-interactively — it handles the bulk of architecture and performance findings.
+Run `/remediate` to resolve all findings. It creates GitHub issues for every finding, spawns
+parallel TDD agents in worktrees, merges sequentially, verifies CI, and runs `/quality-review`
+twice (per-agent and final).
 
-For findings that `/quality-review` can't address (security, infrastructure, accessibility), those
-require manual implementation or a targeted `/implement` cycle.
+`/remediate` handles the full spectrum — code quality findings that `/quality-review` alone can
+fix AND domain-specific findings (security, infrastructure, accessibility) that require targeted
+implementation.
 
 ## Rules
 
