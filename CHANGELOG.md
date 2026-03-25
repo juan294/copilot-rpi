@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+## [1.10.0] - 2026-03-25
+
+### Fixed
+
+- Markdownlint MD029 -- use 1. prefix for ordered list in quick-reference
+
+### Added
+
+- **Deployment Safety & Resource Efficiency** -- new patterns file (`patterns/deployment-safety.md`) codifying lessons from a real production incident where an agent merged 7 Dependabot PRs to `main`, triggered 80+ CI runs and 21 production deployments, and took down a live site for 2+ hours. Includes deployment topology awareness, dependency risk assessment, production recovery protocol, and resource efficiency patterns. Platform-generic (covers AWS, Vercel, Netlify, Railway, etc.).
+- **Error #30: `git checkout --` fails on unmerged (conflicted) files** -- agent tries to discard changes during a merge/rebase/cherry-pick conflict; files are "unmerged" so plain checkout fails. Solution: use `--ours`/`--theirs` to pick a side, or abort the operation. Ported from cc-rpi Error #54.
+- **Error #31: `git merge` blocked by untracked working tree files** -- untracked files at the same paths as files in the branch being merged cause git to abort. Common in multi-agent workflows. Solution: delete or move untracked copies before merging. Ported from cc-rpi Error #55.
+- **Error #32: Agent merges to `main` without understanding deployment topology** -- agent treats "clean up PRs" as "merge them" without checking that merging to `main` triggers production deployments. Solution: cherry-pick to `develop`, close the Dependabot PR.
+- **Error #33: Sequential merge cascade wastes CI resources** -- merging N PRs one-by-one with "require up-to-date" branch protection creates O(n^2) rebase cascades. Solution: batch all updates into a single PR.
+- **Error #34: Agent deploys untested code to production** -- CI passing is not sufficient for framework upgrades. Build != Runtime. Local != Production. Solution: deploy to staging/preview and verify before merging to `main`.
+- **Error #35: Agent improvises production recovery with repeated failed deployments** -- agent panic-deploys during an outage, each failed attempt extending downtime and costing money. Solution: roll back immediately, investigate on non-production, fix forward on `develop`.
+- **Error #36: Agent treats all dependency updates as equal risk** -- applying uniform verification to framework upgrades and dev patches alike. Solution: classify dependencies by risk level before merging.
+- **Rules #32-#33** -- git conflict resolution quick-reference rules.
+- **Rules #34-#39** -- deployment and resource efficiency rules covering: main=production, batch dependencies, cost awareness, staging verification, recovery protocol, and action justification. New "Deployment & Resource Efficiency Rules" section in quick-reference.md.
+- **Updated AGENTS.md template** -- added deployment safety section for projects with CI/CD deployment pipelines.
+
 ## [1.9.0] - 2026-03-16
 
 ### Added

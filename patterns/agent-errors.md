@@ -790,3 +790,310 @@ gh pr create --base main --head develop --title "Release v0.3.0" --body "..."
 ```
 
 **Key detail:** This is especially common in gitflow-style workflows where a develop-to-main PR persists across multiple release cycles, and in CI/CD pipelines where automated agents create PRs. The same pattern applies to any repeated workflow — release PRs, dependency update PRs, sync PRs. Always check first and update if one exists.
+
+---
+
+## Error #30: `git checkout --` fails on unmerged (conflicted) files
+
+**Symptom:** `git checkout -- src/components/chat/chat-interface.tsx` fails with `error: path 'src/components/chat/chat-interface.tsx' is unmerged`. The agent was trying to discard changes during a merge or rebase conflict, but `git checkout --` doesn't work on files in a conflicted state.
+
+**Root cause:** During a merge, rebase, or cherry-pick that hits conflicts, affected files enter an "unmerged" state. `git checkout -- <file>` is designed to restore a file to its last committed version, but it can't do that for unmerged files because git doesn't know which version to restore to — there are multiple candidates (ours, theirs, base). The agent treats `git checkout --` as a universal "discard changes" command without considering the conflict state.
+
+**Correct approach — always do this:**
+
+```bash
+# If you want to keep YOUR version of conflicted files:
+git checkout --ours src/components/chat/chat-interface.tsx
+git add src/components/chat/chat-interface.tsx
+
+# If you want to keep THEIR version of conflicted files:
+git checkout --theirs src/components/chat/chat-interface.tsx
+git add src/components/chat/chat-interface.tsx
+
+# If you want to abort the entire merge/rebase/cherry-pick:
+git merge --abort       # during a merge
+git rebase --abort      # during a rebase
+git cherry-pick --abort # during a cherry-pick
+
+# To check what state you're in:
+git status  # Shows "Unmerged paths" section with conflicted files
+
+# For bulk resolution (all ours or all theirs):
+git checkout --ours -- . && git add -A     # keep all our versions
+git checkout --theirs -- . && git add -A   # keep all their versions
+```
+
+**Never do this:**
+
+```bash
+# Don't use plain checkout -- on conflicted files:
+git checkout -- src/components/chat/chat-interface.tsx
+# <- "error: path '...' is unmerged"
+
+# Don't retry the same command on more files:
+git checkout -- file1.tsx file2.tsx file3.tsx
+# <- same error for every file, all are unmerged
+```
+
+**Key detail:** The error message "is unmerged" means you're in the middle of a conflicted merge/rebase/cherry-pick. Before trying to discard changes, check `git status` to see the conflict state. The three options are: resolve the conflicts (edit + `git add`), pick a side (`--ours`/`--theirs`), or abort the operation entirely. Plain `git checkout --` is only for non-conflicted files.
+
+---
+
+## Error #31: `git merge` blocked by untracked working tree files
+
+**Symptom:** `git merge feature-branch --no-edit` fails with `error: The following untracked working tree files would be overwritten by merge:` followed by a list of files. Git aborts the merge.
+
+**Root cause:** The branch being merged contains files that also exist as untracked files in the current working tree. Git refuses to merge because it would overwrite the untracked copies with no way to recover them. This commonly happens when an agent creates files in the main repo (plans, docs, reports) while a parallel agent independently creates the same files on its branch. When the lead agent tries to merge, the duplicate untracked files block the merge.
+
+**Correct approach — always do this:**
+
+```bash
+# 1. Check what untracked files would conflict:
+git merge --no-commit --no-ff <branch> 2>&1 | grep "error:"
+# Or just attempt the merge and read the error output
+
+# 2. Remove or move the conflicting untracked files:
+rm docs/plans/phase2.md docs/plans/phase3.md
+# Or move them to a backup:
+mkdir -p /tmp/merge-backup && mv <conflicting-files> /tmp/merge-backup/
+
+# 3. Then retry the merge:
+git merge <branch> --no-edit
+
+# Prevention: when orchestrating parallel agents, ensure the main repo
+# doesn't create files in the same paths the parallel agent will produce
+```
+
+**Never do this:**
+
+```bash
+# Don't retry the merge without removing the conflicting files:
+git merge <branch> --no-edit  # <- same error, files still there
+
+# Don't use git clean -fd blindly (may delete other needed files):
+git clean -fd && git merge <branch>
+# <- deletes ALL untracked files, not just the conflicting ones
+
+# Don't create the same files in both the main repo and a feature branch:
+# Main repo: creates docs/plans/phase2.md (untracked)
+# Agent branch: commits docs/plans/phase2.md to branch
+# <- merge will fail
+```
+
+**Key detail:** This is a coordination problem in multi-agent workflows. When the lead agent and parallel agents work simultaneously, they must not produce files at the same paths. The lead agent should defer creating shared artifacts (plans, docs, reports) until after merging, or the parallel agent should create them in a distinct location. If the conflict occurs, the simplest fix is to delete the local untracked copies (the branch version will replace them on merge).
+
+---
+
+## Error #32: Agent merges to `main` without understanding deployment topology
+
+**Symptom:** Agent is asked to "clean up Dependabot PRs" or "merge the passing PRs." It merges them to `main`, triggering production deployments. One of the merged dependencies contains a production-only bug. The live site goes down. The agent didn't realize that merging to `main` = deploying to production.
+
+**Root cause:** The agent doesn't check what happens when code lands on `main`. In any project with CI/CD connected to `main` (Vercel, AWS, Netlify, Railway, etc.), a merge to `main` is an immediate production deployment. Dependabot PRs target `main` by default. The agent treats "merge the PR" as a git operation without considering the deployment side effects.
+
+**Correct approach — always do this:**
+
+```bash
+# Before merging anything, understand the deployment topology:
+# 1. Which branches trigger deployments? (check CI/CD config)
+# 2. Does main deploy to production? (almost always yes)
+# 3. Is there a develop/staging branch? (use that instead)
+
+# For Dependabot PRs (which target main by default):
+# Option A: Cherry-pick updates to develop, close the Dependabot PR
+git checkout develop
+git cherry-pick <dependabot-commit-sha>
+# Then close the Dependabot PR without merging
+
+# Option B: Retarget the PR to develop (if repo allows)
+gh pr edit <N> --base develop
+
+# Never merge Dependabot PRs directly to main
+```
+
+**Never do this:**
+
+```bash
+# Don't merge Dependabot PRs to main without explicit production
+# deployment authorization:
+gh pr merge 171 --squash   # <- triggers production deployment
+gh pr merge 170 --squash   # <- triggers another production deployment
+# Each merge is a production deployment.
+
+# Don't assume "merge the PRs" means "deploy to production":
+# User said "clean up the Dependabot PRs" — that means close/retarget,
+# not deploy
+```
+
+**Key detail:** "Merge the PRs" is never implicit authorization to deploy to production. The agent must recognize that Dependabot PRs target `main` and that merging them has deployment side effects. The correct interpretation of "clean up" for Dependabot PRs is: assess, cherry-pick to develop, close the PRs. If the user wants a production deployment, they will say "deploy to production" or "merge to main" explicitly.
+
+---
+
+## Error #33: Sequential merge cascade wastes CI resources (O(n^2) rebase storm)
+
+**Symptom:** Agent merges N dependency PRs one-by-one on a branch with "require branches to be up-to-date" branch protection. Each merge invalidates the checks on all remaining PRs, forcing a rebase and full CI re-run for each. For 7 PRs with 9 CI workflows, this creates 30+ unnecessary CI runs from rebases alone — pure waste.
+
+**Root cause:** The agent doesn't consider the cost multiplication of sequential merges. When branch protection requires branches to be up-to-date before merging, each merge to the target branch invalidates every other PR targeting the same branch. The remaining PRs must rebase and re-run all checks. This creates O(n^2) CI runs instead of O(1).
+
+**Correct approach — always do this:**
+
+```bash
+# Batch all dependency updates into a single branch:
+git checkout -b chore/dependency-updates develop
+
+# Apply all updates to the single branch:
+git cherry-pick <dep-1-sha> <dep-2-sha> <dep-3-sha>
+# Or manually update package.json/requirements.txt/Cargo.toml and run install
+
+# Run CI once on the combined result:
+git push -u origin chore/dependency-updates
+gh pr create --base develop --title "chore: batch dependency updates"
+# = 1 CI run instead of 30+
+```
+
+**Never do this:**
+
+```bash
+# Don't merge PRs one-by-one when branch protection requires
+# up-to-date checks:
+gh pr merge 171 --squash   # <- triggers rebase of all other PRs
+gh pr merge 170 --squash   # <- triggers rebase again
+# Each step: rebase K remaining PRs x M workflows = waste
+```
+
+**Key detail:** The cost formula is: for N PRs with M CI workflows, sequential merging with up-to-date requirements costs approximately N x (N-1) / 2 x M workflow runs in rebases alone. Batching into a single PR costs M runs total. Always batch dependency updates.
+
+---
+
+## Error #34: Agent deploys untested code to production (no staging verification)
+
+**Symptom:** Agent merges a framework upgrade (e.g., Next.js, Django, Rails minor version bump) after CI passes. Build succeeds, tests pass, local server works. But on the deployment platform, the app crashes at runtime. The bug only manifests on the platform's specific runtime — local and CI environments don't reproduce it.
+
+**Root cause:** The agent treats CI passing as sufficient evidence that code is production-ready. But CI tests build correctness, not runtime correctness on the target platform. Build success != runtime success. Local success != production success. Platform-specific behaviors (serverless cold starts, container startup, edge runtimes, module resolution) can cause failures that no local test or CI check would catch.
+
+**Correct approach — always do this:**
+
+```bash
+# For framework upgrades and risky changes:
+# 1. Push to a non-main branch to trigger a staging/preview deployment
+git push -u origin chore/framework-upgrade
+
+# 2. Wait for the staging deployment to complete
+# (Most platforms create preview/staging URLs for non-main branches)
+
+# 3. Verify the staging deployment:
+# - Site loads, API routes respond, key pages render
+# - Health checks pass, serverless functions execute
+curl -s -o /dev/null -w "%{http_code}" https://staging-url.example.com
+
+# 4. Only after staging verification passes, create PR to main
+gh pr create --base main --title "chore: upgrade framework to X.Y.Z"
+
+# For low-risk changes (dev dependency patches):
+# CI passing is sufficient — no staging verification needed
+```
+
+**Never do this:**
+
+```bash
+# Don't merge framework upgrades after CI alone:
+# CI passes -> merge to main -> production crashes
+# CI checks build, lint, and tests — not platform runtime behavior
+
+# Don't trust local verification for production readiness:
+# npm run build && npm start -> works locally
+# But on serverless/container runtime: different module resolution, crash
+
+# Don't merge without checking the risk level of the dependency
+```
+
+**Key detail:** Platform-specific bugs are invisible to CI and local testing. A framework that works perfectly in local Node.js/Python can fail on AWS Lambda, ECS, or any serverless/container runtime because module resolution, environment variables, file system access, and startup behavior all differ. A single staging deployment catches what CI cannot.
+
+---
+
+## Error #35: Agent improvises production recovery with repeated failed deployments
+
+**Symptom:** Production is down. The agent promotes a broken deployment "briefly" to capture logs — site goes down again. Deploys a fix with errors — fails. Deploys again with env var issues — fails. Each failed attempt is another billed deployment and another outage window. The investigation took multiple deployments and hours when a simple rollback would have restored service in minutes.
+
+**Root cause:** The agent panics and improvises instead of following a structured recovery protocol. It tries to diagnose and fix simultaneously, using production as its test environment. Each failed recovery attempt extends the outage and costs money (build minutes, compute, bandwidth).
+
+**Correct approach — always do this:**
+
+```text
+When production is down, follow this exact sequence:
+
+1. ROLL BACK immediately to the last known good deployment.
+   Do not investigate. Do not "try one more thing." Restore service first.
+
+2. VERIFY the rollback — confirm the site is operational.
+
+3. INVESTIGATE on a non-production environment:
+   - Read deployment platform logs (they persist after rollback)
+   - Deploy the broken code to a staging URL for isolated reproduction
+   - Test locally (but remember: local != production)
+
+4. FIX FORWARD on develop:
+   - Create the fix on a feature branch
+   - Verify on staging deployment
+   - Merge to main only after staging verification
+
+5. COUNT THE COST — if you've deployed more than 2 times during recovery,
+   stop and re-evaluate your approach. Something is wrong.
+```
+
+**Never do this:**
+
+```text
+# Don't promote broken deployments to "capture logs":
+# Platform logs persist — you don't need to break production to read them
+
+# Don't deploy to diagnose:
+# "Let me deploy this to see what error I get" = another billed deploy + outage
+
+# Don't attempt multiple recovery deployments without a plan:
+# Each failed attempt is another billed deployment and another outage window
+```
+
+**Key detail:** The key insight is that rollback and investigation are separate actions. Roll back first (minutes), then investigate at your own pace (no time pressure, no outage). The worst pattern is investigating while production is down — every minute spent diagnosing is a minute of outage, and the pressure to "fix it fast" leads to more mistakes.
+
+---
+
+## Error #36: Agent treats all dependency updates as equal risk
+
+**Symptom:** Agent processes multiple Dependabot PRs identically — same review depth, same merge strategy, same verification level. The batch includes both a framework upgrade (high risk — affects entire runtime) and a dev-tool patch (zero runtime risk). The framework upgrade breaks production; the dev patches would have been fine.
+
+**Root cause:** The agent doesn't assess dependency risk before merging. It applies a uniform strategy to all dependency updates regardless of: (a) whether the dependency is a runtime or dev dependency, (b) whether it's a patch, minor, or major version bump, (c) whether it's a framework (affects everything) or a utility library (affects one feature).
+
+**Correct approach — always do this:**
+
+```text
+Before merging any dependency update, classify it:
+
+| Factor | Low Risk | Medium Risk | High Risk |
+|--------|----------|-------------|-----------|
+| Type | devDependency | dependency (utility) | dependency (framework) |
+| Bump | patch (x.y.Z) | minor (x.Y.0) | major (X.0.0) |
+| Scope | single tool | single feature | entire runtime |
+
+Verification by risk level:
+- Low: CI passing is sufficient
+- Medium: CI + local smoke test
+- High: CI + staging/preview deployment + manual verification
+- Critical (major framework): Full QA cycle, staged rollout
+
+Merge low-risk updates together. High-risk updates get individual attention.
+```
+
+**Never do this:**
+
+```text
+# Don't treat all updates the same:
+# "All 7 PRs passed CI, merge them all" — CI doesn't catch platform issues
+
+# Don't merge framework upgrades in a batch with other updates:
+# If the batch breaks production, you can't tell which update caused it
+
+# Don't skip risk assessment because "it's just a minor version":
+# Minor versions of frameworks can introduce production-breaking changes
+```
+
+**Key detail:** The risk matrix is not just about the version number. A patch to a framework can be higher risk than a major bump to a dev dependency. The factors are: (1) is it in the runtime path? (2) how much of the app does it affect? (3) does the deployment platform have specific behaviors the dependency interacts with? Framework upgrades for serverless/container deployments are always high risk because the deployment runtime differs from local/CI environments.

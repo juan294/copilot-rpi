@@ -80,6 +80,28 @@ These rules must be internalized before starting any work. They prevent the most
 
 1. **launchd plist must NOT run project scripts directly** — `<string>/project/scripts/agent.sh</string>` in ProgramArguments causes CLI crashes when the script is inside a project directory. Use `/bin/bash -c "exec /bin/bash <script>"` wrapper instead. Exit code may be 0 despite the error, so preflight checks silently pass.
 
+## Git Conflict Resolution Rules
+
+1. **`git checkout --` doesn't work on unmerged files — use `--ours`/`--theirs` or abort** — during a merge/rebase/cherry-pick conflict, files are "unmerged" and plain `git checkout -- <file>` fails. Use `git checkout --ours <file>` or `git checkout --theirs <file>` to pick a side, or `git merge --abort` / `git rebase --abort` to cancel entirely. Check `git status` first to see the conflict state.
+
+2. **Remove conflicting untracked files before `git merge`** — if untracked files exist at the same paths as files in the branch being merged, git aborts with "untracked working tree files would be overwritten." Delete or move the untracked copies first, then merge. Common in multi-agent workflows where the lead agent and parallel agents create files at the same paths.
+
+## Deployment & Resource Efficiency Rules
+
+1. **Merging to `main` IS deploying to production** — in any project with CI/CD connected to `main`, a merge is a production deployment. Dependabot PRs target `main` by default — merging them deploys to production. "Clean up PRs" means close/retarget, not merge. Cherry-pick dependency updates to `develop`, close the Dependabot PR, release via the normal process.
+
+2. **Batch dependency updates into a single PR — never merge sequentially** — merging N PRs one-by-one on a branch with "require up-to-date" protection creates O(n^2) CI waste from rebase cascades. Create a single branch, apply all updates, run CI once.
+
+3. **Every CI run and deployment costs money — count before triggering** — before starting work, estimate how many CI runs and deployments you'll trigger. If the answer is more than 2-3, find a more efficient approach. Never push partial work to branches that trigger CI. Never deploy to diagnose. Work locally until confident, then push once.
+
+4. **Framework upgrades require platform staging verification** — CI passing is necessary but NOT sufficient for framework upgrades (Next.js, React, Django, Rails, etc.). Build != Runtime. Local != Production. Deploy to a staging/preview environment and verify the site loads, API routes respond, and health checks pass before merging to production.
+
+5. **When production is down: roll back first, investigate second** — restore service immediately by rolling back to the last known good deployment. Then investigate on a non-production environment. Fix forward on `develop`, verify on staging, release to `main`. Never promote broken deployments "briefly to capture logs." Never deploy to diagnose.
+
+6. **Justify every external action before triggering** — before any CI run, deployment, or API call, answer: Is this needed? Is this justified? Is this verifiable? If any answer is "no," do not proceed. Track your deployment count during recovery — if you've deployed more than twice without success, stop and re-evaluate.
+
 ---
 
 For detailed symptoms, root causes, and examples, see [agent-errors.md](agent-errors.md).
+
+For the full deployment safety guide and resource efficiency patterns, see [deployment-safety.md](deployment-safety.md).

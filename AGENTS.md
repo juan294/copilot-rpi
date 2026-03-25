@@ -62,7 +62,8 @@ copilot-rpi/
 │       └── refactor-existing-code.md # Auth service extraction with phased refactor
 ├── patterns/                         # Operational knowledge
 │   ├── quick-reference.md            # Rules to internalize before any work
-│   └── agent-errors.md               # Detailed error catalog with solutions
+│   ├── agent-errors.md               # Detailed error catalog with solutions
+│   └── deployment-safety.md          # Resource efficiency and production deployment rules
 └── templates/                        # Files to adapt for new projects
     ├── AGENTS.md.template            # Starting point for project AGENTS.md
     ├── vscode-settings.json.template # .vscode/settings.json (Copilot config)
