@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [1.10.1] - 2026-03-25
+
+### Added
+
+- **Error #37: Silent fallback masks production data failure** -- agent writes "resilient" code with graceful degradation (fallback data, default responses) but no observability. Fallback activates silently in production, serving placeholder content while hiding the real bug. Solution: every fallback path needs ERROR-level logging, health endpoint degraded state, and alerting. Ported from cc-rpi Error #61.
+- **Rule #40: Every fallback path must be observable** -- when writing fallback behavior, always add error logging, health check coverage, and monitoring hooks. New "Observability Rules" section in quick-reference.md.
+- **Supabase migration rules** in AGENTS.md template -- every migration creating a public table must include `GRANT SELECT TO anon, authenticated`; `ALTER DEFAULT PRIVILEGES` belongs in the initial setup migration; fallback paths must log at ERROR level; health endpoints must check actual data access.
+
 ## [1.10.0] - 2026-03-25
 
 ### Fixed

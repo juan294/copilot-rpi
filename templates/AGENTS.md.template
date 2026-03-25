@@ -119,6 +119,18 @@ When merging PRs, handling dependency updates, or deploying:
 - **Batch dependency updates** into a single branch and PR. Never merge N PRs one-by-one (causes O(n^2) CI waste from rebase cascades).
 - **Justify every external action** — before any CI run, deployment, or API call: Is this needed? Is this justified? Is this verifiable? If any answer is "no," stop.
 
+### Supabase Migration Rules
+
+When writing Supabase migrations or creating tables:
+
+- **Every migration that creates a public-facing table must include explicit grants:**
+  ```sql
+  GRANT SELECT ON table_name TO anon, authenticated;
+  ```
+- **Add `ALTER DEFAULT PRIVILEGES` in the initial setup migration** so all future tables automatically get anon SELECT. Never rely on Supabase dashboard-granted defaults for migration-created tables.
+- **Fallback data paths must log at ERROR level.** If a query fails and the code falls back to default/placeholder data, log `[TABLE_FALLBACK]` at ERROR — not INFO. Silent fallbacks hide permission bugs for days.
+- **Health endpoints must check actual data access**, not just connectivity. Return `"degraded"` if primary tables are inaccessible.
+
 ## Agent Operational Rules
 
 ### Git Recipes (use these exact sequences)
