@@ -34,3 +34,8 @@ All code changes follow Red-Green-Refactor:
 - One logical assertion per test (multiple `expect` calls are fine if testing one behavior)
 - Use the most specific matcher available (`.toEqual` over `.toBeTruthy`)
 - Always assert error types/messages, not just that an error was thrown
+
+## Verification Sequencing
+
+Run checks sequentially, never as parallel processes.
+Chain: `typecheck ; lint ; test`

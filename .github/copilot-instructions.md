@@ -45,12 +45,6 @@ This is the standard flow — no need for the user to check if errors are alread
 - New templates → `templates/` directory with clear naming
 - Keep entries generic — no project-specific references
 
-## Available Prompt Files
-
-This repo includes prompt files in `.github/prompts/` for maintaining itself:
-
-- `/process-errors` — Process error screenshots from the Desktop folder
-
 ## Relationship to cc-rpi
 
 This repo is the Copilot counterpart to cc-rpi (Claude Code Reference & Project Intelligence). They share ~60% of content (philosophy, phases, testing, logging) but differ in tool-specific mechanics. Keep them conceptually aligned but tool-appropriate.

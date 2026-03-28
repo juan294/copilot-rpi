@@ -43,11 +43,27 @@ Use this when setting up a new project to follow copilot-rpi best practices.
 
 ## AGENTS.md Configuration
 
+### Authoring Principles
+
+- Keep AGENTS.md **LEAN** -- loaded every session,
+  only universally applicable instructions.
+- Budget: ~150 usable instruction slots.
+  The tool's system prompt uses some. Don't waste them.
+- Test: "Would removing this line cause mistakes?"
+  If not, cut it.
+- Domain rules go in `.github/instructions/` (conditional loading
+  via `applyTo` globs). Don't duplicate their content in AGENTS.md.
+- Use `.github/instructions/` with `applyTo` frontmatter for rules
+  that only apply when working with specific file types.
+- Manually craft every line --
+  don't auto-generate.
+
+### Checklist
+
 - [ ] Fill in project name, description, and stack
 - [ ] Document build/test/lint commands
 - [ ] Document deployment pipeline (which branch deploys where)
 - [ ] Document git workflow (default branch, production branch)
-- [ ] Include all Agent Operational Rules from the template
 - [ ] Add project-specific context (key routes, data types, code ownership)
 
 ## Prompt Files
@@ -69,11 +85,20 @@ Verify each file has valid YAML frontmatter with `mode:` and `description:` fiel
 
 ## Path-Specific Instructions
 
-- [ ] Create test conventions: `.github/instructions/tests.instructions.md` with `applyTo: "**/*.test.{ts,tsx}"`
-- [ ] Create API conventions: `.github/instructions/api.instructions.md` with `applyTo: "**/routes/**"`
-- [ ] Create migration conventions: `.github/instructions/migrations.instructions.md` with `applyTo: "**/migrations/**"` (if applicable)
+Copy instruction templates from `templates/github/instructions/`:
 
-Each file must have `applyTo` in YAML frontmatter — without it, the file is silently ignored.
+- [ ] Always: `tests.instructions.md` with `applyTo: "**/*.test.{ts,tsx}"`
+- [ ] If API routes exist: `api.instructions.md` with `applyTo: "**/routes/**"`
+- [ ] If deployment pipeline exists: `deployment-safety.instructions.md`
+  with `applyTo` for deploy-related files (.github/**, Dockerfile, etc.)
+- [ ] If using Supabase: `supabase.instructions.md`
+  with `applyTo` for supabase/sql/migration files
+- [ ] If migrations exist: `migrations.instructions.md` with `applyTo: "**/migrations/**"`
+- [ ] Review `applyTo` globs in each file --
+  adjust to match your project's actual file structure
+- [ ] Add project-specific instructions as needed
+
+Each file must have `applyTo` in YAML frontmatter -- without it, the file is silently ignored.
 
 ## Chat Modes
 

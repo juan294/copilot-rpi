@@ -10,17 +10,18 @@ You are setting up a new project using the copilot-rpi blueprint repository. The
 
 Read these files from copilot-rpi IN ORDER. Do not skip any.
 
-1. `patterns/quick-reference.md` — Internalize every operational rule.
-2. `patterns/agent-errors.md` — Know every error pattern and its solution.
-3. `methodology/README.md` — Read the one-paragraph summary and reading order.
+1. `patterns/quick-reference.md` -- Internalize every operational rule.
+2. `methodology/README.md` -- Read the one-paragraph summary and reading order.
+
+The full error catalog (`patterns/agent-errors.md`) is available for debugging but not required for onboarding.
 
 ## Phase 2: Understand the Templates
 
 Read these files:
 
-1. `templates/setup-checklist.md` — Your step-by-step guide.
-2. `templates/AGENTS.md.template` — Starting point for this project's AGENTS.md.
-3. `templates/vscode-settings.json.template` — Starting point for .vscode/settings.json.
+1. `templates/setup-checklist.md` -- Your step-by-step guide.
+2. `templates/AGENTS.md.template` -- Starting point for this project's AGENTS.md.
+3. `templates/vscode-settings.json.template` -- Starting point for .vscode/settings.json.
 
 ## Phase 3: Set Up This Project
 
@@ -28,11 +29,17 @@ Execute the setup checklist:
 
 1. **Ask me** what type of project this is (web app, library, CLI, monorepo, Python, static site).
 2. **Ask me** for the project name, description, stack, and specifics.
-3. Create AGENTS.md — adapt from the template, manually crafting every line.
-4. Create `.vscode/settings.json` — adapt from the template.
-5. Create `.github/prompts/` — copy prompt files and adjust.
-6. Create `.github/instructions/` — set up path-specific instructions.
-7. Create `.github/chatmodes/` — set up research and planning chat modes.
+3. Create AGENTS.md -- adapt from the template, manually crafting every line.
+4. Create `.vscode/settings.json` -- adapt from the template.
+5. Create `.github/prompts/` -- copy prompt files and adjust.
+6. Create `.github/instructions/` -- set up path-specific instructions:
+   - Always copy: `tests.instructions.md`
+   - If deployment pipeline exists: copy `deployment-safety.instructions.md`
+   - If using Supabase: copy `supabase.instructions.md`
+   - If API routes exist: copy `api.instructions.md`
+   - If migrations exist: copy `migrations.instructions.md`
+   - Adapt `applyTo` globs in frontmatter to match the project's actual file structure.
+7. Create `.github/chatmodes/` -- set up research and planning chat modes.
 8. Create the directory structure (`docs/research/`, `docs/plans/`, `docs/decisions/`).
 9. Set up the README with the standard header.
 10. Walk through remaining checklist items (pre-commit hooks, CI, git setup).
@@ -56,7 +63,7 @@ Operational knowledge that persists across sessions. Agents read this at session
 
 ## Setup Decisions
 
-[Decisions made during bootstrap — why certain template sections were kept, removed, or adapted]
+[Decisions made during bootstrap -- why certain template sections were kept, removed, or adapted]
 
 ## Internalized Rules
 
@@ -68,14 +75,14 @@ Operational knowledge that persists across sessions. Agents read this at session
 
 ## Operational Lessons
 
-[Append new lessons here as they are discovered — one line per lesson]
+[Append new lessons here as they are discovered -- one line per lesson]
 ```
 
-Fill every section from what you learned in Phases 1–3. Don't leave placeholders.
+Fill every section from what you learned in Phases 1-3. Don't leave placeholders.
 
 ## Rules
 
 - **Ask before assuming.** Every project is different.
 - **Adapt, don't copy.** Templates are starting points.
-- **Keep AGENTS.md lean.** Only include instructions that would cause mistakes if missing.
+- **Keep AGENTS.md lean.** Only include instructions that would cause mistakes if missing. Domain rules go in `.github/instructions/`, not AGENTS.md.
 - **Always save to memory.** Phase 4 is not optional. Every bootstrap must end with a memory save.

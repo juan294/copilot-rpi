@@ -214,11 +214,19 @@ During research, agents describe what IS — never what SHOULD BE. No improvemen
 
 Use the **RPI Research** chat mode to enforce this structurally at the session level.
 
-### Error Prevention
+### Error Prevention -- Three-Layer Progressive Disclosure
 
-The blueprint includes 43 operational rules learned from real sessions -- including 6 Copilot-specific rules covering prompt file frontmatter, `${input:var}` syntax, instruction file globs, CLI auth, auto-compaction, and chatmode directories. Rules are organized by domain with scope/stack tags for easy scanning.
+The blueprint uses three layers to deliver operational knowledge without bloating every session:
 
-When your project is set up via the blueprint, these rules are baked into the AGENTS.md file that every tool reads every session.
+| Layer | Scope | Load Trigger | Location |
+|-------|-------|--------------|----------|
+| **AGENTS.md** | Universal, always-on | Every session | Project root |
+| **`.github/instructions/`** | Conditional on file types | When matching files are in context | `applyTo` globs |
+| **Reference catalogs** | On-demand debugging | Agent reads when needed | `patterns/` |
+
+The 43 operational rules (including 6 Copilot-specific rules covering prompt file frontmatter, `${input:var}` syntax, instruction file globs, CLI auth, auto-compaction, and chatmode directories) are organized by domain with scope/stack tags for easy scanning in `patterns/quick-reference.md`.
+
+Domain-specific rules (deployment safety, Supabase, testing) load automatically from `.github/instructions/` when relevant files are in context -- without bloating AGENTS.md.
 
 ### Path-Specific Instructions
 
@@ -226,9 +234,11 @@ Copilot's `applyTo` glob system is one of its strongest features. Rules defined 
 
 - Test conventions activate when test files are open
 - API conventions activate when route files are open
+- Deployment safety rules activate when CI/deploy configs are open
+- Supabase rules activate when SQL/migration files are open
 - Migration rules activate when migration files are open
 
-This is progressive disclosure in action — the agent gets domain-specific rules exactly when it needs them, without bloating AGENTS.md.
+This is progressive disclosure in action -- the agent gets domain-specific rules exactly when it needs them, without bloating AGENTS.md. The blueprint provides 5 instruction templates (tests, API, migrations, deployment-safety, supabase) that projects install selectively based on their stack.
 
 ### The `@copilot` Cloud Agent
 
@@ -251,7 +261,7 @@ After bootstrapping, your project will have:
 
 ```text
 your-project/
-├── AGENTS.md                         # Cross-tool instruction file
+├── AGENTS.md                         # Cross-tool instruction file (~90 lines)
 ├── .github/
 │   ├── copilot-instructions.md       # Copilot-specific addenda (optional)
 │   ├── prompts/                      # Prompt files (invoked with /)
@@ -267,9 +277,11 @@ your-project/
 │   │   ├── fix-ci.prompt.md
 │   │   ├── update-docs.prompt.md
 │   │   └── release.prompt.md
-│   ├── instructions/                 # Path-specific rules (auto-loaded)
-│   │   ├── tests.instructions.md
-│   │   └── api.instructions.md
+│   ├── instructions/                 # Path-specific rules (auto-loaded by glob)
+│   │   ├── tests.instructions.md     # applyTo: **/*.test.*
+│   │   ├── api.instructions.md       # applyTo: **/routes/**, **/api/**
+│   │   ├── deployment-safety.instructions.md  # applyTo: .github/**, Dockerfile, etc.
+│   │   └── supabase.instructions.md  # applyTo: supabase/**, **/*.sql (if applicable)
 │   └── chatmodes/                    # Specialized personas
 │       ├── rpi-research.chatmode.md
 │       └── rpi-planner.chatmode.md
@@ -327,6 +339,7 @@ The blueprint adapts to six project archetypes: web applications, libraries, CLI
 | Error patterns | `patterns/agent-errors.md` | 38 documented errors with symptoms and solutions |
 | Operational rules | `patterns/quick-reference.md` | 43 rules with scope/stack tags, organized by domain |
 | Deployment safety | `patterns/deployment-safety.md` | Resource efficiency and production deployment rules |
+| Instruction templates | `templates/github/instructions/` | 5 path-specific rule templates (tests, API, migrations, deployment, supabase) |
 | Worked examples | `examples/README.md` | Sample research docs, plans, logs, pseudocode |
 
 ## Credits

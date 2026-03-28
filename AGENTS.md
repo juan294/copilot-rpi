@@ -1,13 +1,12 @@
-# copilot-rpi — GitHub Copilot Reference & Project Intelligence
+# copilot-rpi -- GitHub Copilot Reference & Project Intelligence
 
-## What This Is
+## One-liner
 
-This is the blueprint repository for projects that use GitHub Copilot. It contains:
+Blueprint repository for GitHub Copilot projects. Contains the RPI methodology, 38 known agent error patterns, 43 operational rules, and templates for AGENTS.md, prompt files, instructions, chat modes, and project setup.
 
-- The RPI (Research-Plan-Implement) methodology adapted for GitHub Copilot
-- A catalog of known agent errors with proven solutions
-- Operational rules that prevent recurring mistakes
-- Templates for AGENTS.md, prompt files, path-specific instructions, and project setup
+## Stack
+
+Markdown documentation, shell scripts (bash). CI: GitHub Actions with markdownlint.
 
 ## How This Repo Is Used
 
@@ -15,14 +14,15 @@ When starting a new project, the agent is told: "Go check my copilot-rpi reposit
 
 The agent should:
 
-1. Read `patterns/quick-reference.md` — internalize all operational rules
-2. Read `patterns/agent-errors.md` — know every known error pattern
-3. Read `methodology/README.md` — understand the RPI approach (follow reading order for depth)
-4. Use `templates/setup-checklist.md` to set up the new project
-5. Adapt `templates/AGENTS.md.template` for the new project's AGENTS.md
-6. Copy `templates/prompts/` into the new project's `.github/prompts/`
-7. Copy `templates/github/instructions/` into `.github/instructions/`
-8. Copy `templates/github/chatmodes/` into `.github/chatmodes/`
+1. Read `patterns/quick-reference.md` -- internalize all operational rules
+2. Read `methodology/README.md` -- understand the RPI approach (follow reading order for depth)
+3. Use `templates/setup-checklist.md` to set up the new project
+4. Adapt `templates/AGENTS.md.template` for the new project's AGENTS.md
+5. Copy `templates/prompts/` into the new project's `.github/prompts/`
+6. Copy relevant `templates/github/instructions/` into `.github/instructions/`
+7. Copy `templates/github/chatmodes/` into `.github/chatmodes/`
+
+The full error catalog (`patterns/agent-errors.md`) is available for debugging but not required for onboarding.
 
 ## Repo Structure
 
@@ -31,7 +31,7 @@ copilot-rpi/
 ├── .github/
 │   ├── copilot-instructions.md       # Copilot auto-loaded project instructions
 │   └── prompts/                      # Prompt files for maintaining THIS repo
-│       └── process-errors.prompt.md  # /process-errors — error screenshot pipeline
+│       └── process-errors.prompt.md  # /process-errors -- error screenshot pipeline
 ├── AGENTS.md                         # This file (repo self-description)
 ├── GUIDE.md                          # Human-readable quick-start guide
 ├── README.md                         # Public documentation
@@ -39,7 +39,7 @@ copilot-rpi/
 │   ├── README.md                     # Overview and reading order
 │   ├── philosophy.md                 # Core tenets, error amplification
 │   ├── context-engineering.md        # Context management, compaction, settings
-│   ├── four-phases.md                # Research → Plan → Implement → Validate
+│   ├── four-phases.md                # Research -> Plan -> Implement -> Validate
 │   ├── agent-design.md               # Documentarian rule, research catalog, autonomy
 │   ├── pseudocode-notation.md        # Plan notation format
 │   ├── testing.md                    # Automated-first verification, TDD protocol
@@ -48,62 +48,75 @@ copilot-rpi/
 │   ├── scheduled-agents.md           # Recurring quality agents, cron/launchd
 │   └── error-success-logging.md      # Systematic improvement framework
 ├── examples/                         # Sample documents and workflow walkthroughs
-│   ├── README.md                     # Index of all examples
-│   ├── research-document.md          # Sample research phase output
-│   ├── implementation-plan.md        # Sample plan with phases and pseudocode
-│   ├── implementation-plan-phases/   # Per-phase detail files
-│   │   └── phase-1.md
-│   ├── error-log.md                  # Sample error log entry
-│   ├── success-log.md                # Sample success log entry
-│   ├── pseudocode-examples.md        # Additional pseudocode notation examples
-│   └── workflows/                    # End-to-end developer interaction walkthroughs
-│       ├── bootstrap-new-project.md  # New project setup + first feature
-│       ├── add-new-feature.md        # Adding rate limiting with full RPI cycle
-│       └── refactor-existing-code.md # Auth service extraction with phased refactor
 ├── patterns/                         # Operational knowledge
-│   ├── quick-reference.md            # Rules to internalize before any work
-│   ├── agent-errors.md               # Detailed error catalog with solutions
-│   └── deployment-safety.md          # Resource efficiency and production deployment rules
+│   ├── quick-reference.md            # 43 rules to internalize before any work
+│   ├── agent-errors.md               # 38-error catalog with solutions
+│   └── deployment-safety.md          # Resource efficiency and production deployment
 └── templates/                        # Files to adapt for new projects
     ├── AGENTS.md.template            # Starting point for project AGENTS.md
     ├── vscode-settings.json.template # .vscode/settings.json (Copilot config)
     ├── vscode-mcp.json.template      # .vscode/mcp.json (MCP server config)
     ├── setup-checklist.md            # Step-by-step new project setup
     ├── prompts/                      # Prompt file templates (.github/prompts/)
-    │   ├── bootstrap.prompt.md       # /bootstrap — new project setup
-    │   ├── adopt.prompt.md           # /adopt — existing project migration
-    │   ├── update.prompt.md          # /update — blueprint sync
-    │   ├── research.prompt.md        # /research — codebase research
-    │   ├── plan.prompt.md            # /plan — implementation planning
-    │   ├── implement.prompt.md       # /implement — phased execution
-    │   ├── validate.prompt.md        # /validate — verification
-    │   ├── quality-review.prompt.md  # /quality-review — code reuse, quality, efficiency review
-    │   ├── describe-pr.prompt.md     # /describe-pr — PR description
-    │   ├── pre-launch.prompt.md      # /pre-launch — production audit
-    │   ├── remediate.prompt.md      # /remediate — fix all pre-launch findings
-    │   ├── triage.prompt.md         # /triage — morning agent report processing
-    │   ├── status.prompt.md          # /status — quick project orientation
-    │   ├── fix-ci.prompt.md          # /fix-ci — self-healing CI
-    │   ├── detach.prompt.md          # /detach — clean removal of copilot-rpi
-    │   ├── release.prompt.md         # /release — version release automation
-    │   └── update-docs.prompt.md     # /update-docs — comprehensive docs refresh
     ├── scripts/                      # Agent shell script templates
-    │   ├── copilot-rpi-update-agent.sh  # Nightly blueprint sync agent
-    │   ├── morning-triage.sh            # Multi-project morning triage
-    │   └── agents/                      # Per-project agent infrastructure
-    │       ├── install-agents.sh        # Automated launchd installer
-    │       └── lib/agent-utils.sh       # Shared agent utility library
     └── github/                       # Copilot-specific templates
         ├── copilot-instructions.md.template
         ├── instructions/             # Path-specific rule templates
         │   ├── tests.instructions.md.template
         │   ├── api.instructions.md.template
-        │   └── migrations.instructions.md.template
+        │   ├── migrations.instructions.md.template
+        │   ├── deployment-safety.instructions.md.template
+        │   └── supabase.instructions.md.template
         └── chatmodes/                # Specialized chat persona templates
             ├── rpi-research.chatmode.md
             ├── rpi-planner.chatmode.md
             └── rpi-auditor.chatmode.md
 ```
+
+## RPI Workflow
+
+This project follows its own Research-Plan-Implement pattern.
+
+1. /research -- Understand the codebase as-is
+2. /plan -- Create a phased implementation spec
+3. /implement -- Execute one phase at a time with review gates
+4. /validate -- Verify implementation against the plan
+
+Each phase is its own conversation. STOP after each phase.
+
+## Key Commands
+
+```bash
+# Verification (CI runs markdownlint)
+npx markdownlint '**/*.md' --ignore node_modules --ignore .claude 2>&1
+```
+
+Run verification sequentially with `&&` or `;`, NEVER as parallel Bash calls.
+
+## Git Workflow
+
+**`main` is the only branch. Documentation project -- no develop/main split.**
+
+1. All work happens directly on `main`
+2. Always run markdownlint before committing
+3. Always commit before pulling (hook enforced)
+4. Verify current branch before any commit
+
+### Commit Messages
+
+```text
+feat: description       # New errors, rules, methodology content
+fix: description        # Corrections to existing content
+docs: description       # GUIDE.md, README, examples
+chore: description      # CI, templates, scripts
+release: vX.Y.Z         # Version bumps
+```
+
+## Agent Behavior
+
+Exhaust tools before asking the user. Production actions need human authorization.
+
+After pushing, verify CI: `gh run list --branch main --limit 1`. If CI fails, investigate with `gh run view <id> --log-failed`, fix, and re-push.
 
 ## Contributing to This Repo
 
@@ -111,9 +124,22 @@ When new error patterns are discovered during work on ANY project:
 
 1. Add them to `patterns/agent-errors.md` following the existing format
 2. Add a one-liner to `patterns/quick-reference.md`
-3. Keep entries generic — no project-specific references
+3. Update counts in `GUIDE.md` (two locations: prose paragraph + "Where to Go Deeper" table)
+4. Update `CHANGELOG.md`
+5. Keep entries generic -- no project-specific references
 
-When new best practices or methodology refinements are confirmed:
+## Project File Locations
 
-1. Add them to the appropriate file under `methodology/`
-2. Or create a new file under `patterns/` if it's a distinct topic
+Go directly to these paths -- never search the codebase for them.
+
+| Topic | Path | Notes |
+|-------|------|-------|
+| Error catalog | `patterns/agent-errors.md` | 38 errors, source of truth |
+| Operational rules | `patterns/quick-reference.md` | 43 rules with scope/stack tags |
+| Deployment safety | `patterns/deployment-safety.md` | Resource efficiency rules |
+| Instruction templates | `templates/github/instructions/` | 5 path-specific rule templates |
+| Methodology | `methodology/` | 11 files, order in README.md |
+| Prompts | `templates/prompts/` | Canonical prompt definitions |
+| Active prompts | `.github/prompts/` | This repo's own prompts |
+| Research | `docs/research/YYYY-MM-DD-*.md` | RPI research about copilot-rpi |
+| Plans | `docs/plans/YYYY-MM-DD-*.md` | RPI plans for copilot-rpi |

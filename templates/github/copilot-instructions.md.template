@@ -16,12 +16,20 @@ Use the appropriate chat mode when starting an RPI phase for better behavioral c
 ## Prompt Files
 
 RPI workflow prompts are in `.github/prompts/`:
-- `/research` — Codebase exploration
-- `/plan` — Implementation planning
-- `/implement` — Phase-by-phase execution
-- `/validate` — Post-implementation verification
-- `/describe-pr` — PR description generation
-- `/pre-launch` — Production audit
+- `/research` -- Codebase exploration
+- `/plan` -- Implementation planning
+- `/implement` -- Phase-by-phase execution
+- `/validate` -- Post-implementation verification
+- `/describe-pr` -- PR description generation
+- `/pre-launch` -- Production audit
+
+## Path-Specific Instructions
+
+Domain rules load automatically from `.github/instructions/` when matching files are in context:
+- Test conventions -- when test files are open
+- API conventions -- when route files are open
+- Deployment safety -- when CI/deploy configs are open
+- Supabase rules -- when SQL/migration files are open (if applicable)
 
 ## Context References
 

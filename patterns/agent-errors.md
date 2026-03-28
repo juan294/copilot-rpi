@@ -2,7 +2,7 @@
 
 Documented from real recurring issues across projects. Each entry includes the symptom, root cause, and the correct approach to use from the start.
 
-**How to use this file:** Read this before starting any work. These are patterns coding agents hit repeatedly — the solutions are known and should be applied from the first attempt, not rediscovered.
+**How to use this file:** This is a debugging reference -- consult when encountering unexpected behavior, tool errors, or CI failures. Not required for onboarding. The operational rules in `patterns/quick-reference.md` provide the essential condensed reference for everyday work.
 
 ---
 

@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [1.13.0] - 2026-03-28
+
+### Added
+
+- **Instruction templates: `deployment-safety.instructions.md` and `supabase.instructions.md`** -- new path-specific rule templates that auto-load via `applyTo` globs when deployment configs or Supabase/SQL files are in context. Projects install them selectively based on stack.
+- **Authoring Principles** section in setup checklist -- guidance on keeping AGENTS.md lean (~90 lines), using `.github/instructions/` for domain rules, and budget awareness (~150 usable instruction slots).
+- **Instruction sync phase** in `/update` prompt (Phase 4) -- compares blueprint instruction templates against project's `.github/instructions/`, preserves custom `applyTo` globs, adds new instructions, never deletes project-specific files. Sync metadata now tracks `instructionsSynced` and `instructionsCustom`.
+
+### Changed
+
+- **AGENTS.md template** -- reduced from ~225 to ~90 lines (60% reduction). Deployment Safety, Supabase Migration Rules, Supabase Migration Safety, TDD Protocol, and Working Patterns (4 `<examples>` blocks) extracted to `.github/instructions/` templates. Agent Autonomy + Memory Management merged into Agent Behavior. Push Accountability condensed to 2 lines within Agent Behavior.
+- **`/bootstrap` prompt** -- removed mandatory reading of `patterns/agent-errors.md` during onboarding. Phase 3 now includes step 6 for installing `.github/instructions/` templates (tests always; deployment-safety, supabase, api, migrations conditionally). Rules section updated: "Domain rules go in `.github/instructions/`, not AGENTS.md."
+- **`/adopt` prompt** -- removed mandatory `agent-errors.md` reading. Phase 2 audit now checks `.github/instructions/` coverage and whether AGENTS.md contains domain rules that should be in instructions. Phase 4 includes instruction installation and inline rule migration. Added `applyTo` adaptation guidance.
+- **`/update` prompt** -- removed mandatory `agent-errors.md` reading. New Phase 4 (Update Instructions) syncs blueprint instruction templates. Phase 5 (Update AGENTS.md) blueprint-managed sections reduced to 3 (RPI Workflow, Agent Behavior, Project File Locations). Migration guidance for older sections (Working Patterns, TDD Protocol, Push Accountability, Deployment Safety, Supabase) moved to `.github/instructions/`.
+- **Setup checklist** -- added Authoring Principles subsection under AGENTS.md Configuration. Path-Specific Instructions section expanded with deployment-safety and supabase templates. Updated instruction count references.
+- **`tests.instructions.md` template** -- added Verification Sequencing section (run checks sequentially, never parallel).
+- **AGENTS.md** (this repo) -- applied same reduction: extracted Contributing rules to dedicated section, updated structure diagram to show 5 instruction templates, updated error/rule counts.
+- **GUIDE.md** -- Error Prevention section rewritten as "Three-Layer Progressive Disclosure" (AGENTS.md, `.github/instructions/`, reference catalogs). Path-Specific Instructions section expanded with deployment-safety and supabase examples. Project structure diagram updated with instruction file details and `applyTo` annotations. Where to Go Deeper table: added instruction templates row.
+- **README.md** -- fixed stale error count (26 to 38). Updated templates description to include deployment safety and Supabase instructions.
+- **`copilot-instructions.md` template** -- added Path-Specific Instructions section documenting auto-loaded domain rules.
+- **`patterns/agent-errors.md`** -- preamble updated: file is now a debugging reference, not required for onboarding. Points to `quick-reference.md` for everyday use.
+
 ## [1.12.0] - 2026-03-26
 
 ### Added
