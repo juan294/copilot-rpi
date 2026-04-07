@@ -186,7 +186,8 @@ Each file must have `applyTo` in YAML frontmatter -- without it, the file is sil
 
 ## Workflow Habits
 
-- [ ] Always `/research` before `/plan`
+- [ ] Always `/research` before `/plan` (except greenfield —
+  no code means nothing to research; start with `/plan`)
 - [ ] Always `/plan` before `/implement`
 - [ ] Always review plans before approving
 - [ ] Never skip the human confirmation gate between implementation phases

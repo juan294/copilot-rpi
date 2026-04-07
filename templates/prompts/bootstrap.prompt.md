@@ -80,6 +80,19 @@ Operational knowledge that persists across sessions. Agents read this at session
 
 Fill every section from what you learned in Phases 1-3. Don't leave placeholders.
 
+## Recommended Next Step
+
+After bootstrap is complete, your project has structure but no code yet.
+For your first feature, skip /research and start directly with /plan:
+
+```text
+/plan [your first feature]
+```
+
+There is nothing to research in an empty project. Once your first
+implementation produces code, /research becomes your starting point
+for every subsequent task.
+
 ## Rules
 
 - **Ask before assuming.** Every project is different.
