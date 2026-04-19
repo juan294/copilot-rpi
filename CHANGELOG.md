@@ -6,6 +6,42 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [1.14.0] - 2026-04-18
+
+### Changed
+
+- **`/pre-launch` prompt** -- upgraded from 6-domain audit to 8-specialist
+  deep-dive. Adds Principal Architect, Staff FE, Staff BE, Performance
+  Engineer, DevOps/SRE Lead, Security Reviewer, QA/Reliability Lead, and
+  Product Designer/UX Lead as named specialist domains. Model tier raised to
+  opus. Introduces structured finding IDs (`<DOMAIN>-(B|H|M|L|S)<COUNTER>`,
+  e.g. `SE-B1`, `UX-M3`), Domain Model preamble per specialist, and
+  16-section report format (sections 4-11 per domain, sections 12-16 for
+  synthesis). Wave-ordering index in Section 14 drives `/remediate` grouping.
+  Rule #44 enforced: only QA/Reliability Lead runs the full test suite.
+- **`/remediate` prompt** -- complete restructure to 3-wave model driven by
+  the pre-launch report's Section 14. Wave 1 (Before launch): launch-blockers
+  and high severity, must pass before release. Wave 2 (After launch): medium
+  severity, post-release sprint. Wave 3 (Later/strategic): low and strategic
+  items get GitHub issues only -- no worktree fix agents spawn. Adds finding
+  ID parser contract (regex: `(AR|FE|BE|PE|DO|SE|QA|UX)-(B|H|M|L|S)[0-9]+`),
+  per-wave integration and cleanup steps, wave-resume via `wave=N` input,
+  and updated report structure with per-wave tables.
+- **`/adopt` prompt** -- Phase 2 audit now uses 3 parallel Explore agents
+  (Configuration Audit, Infrastructure Audit, Workflow Audit) instead of a
+  single sequential investigation. Recommended next step updated to mention
+  all 8 specialist domains by name.
+- **`/implement` prompt** -- batch-eligible phase detection moved to an
+  explicit step (step 4) before sequential execution begins. Old inline note
+  removed.
+- **`/fix-ci` prompt** -- failing tests now spawn a dedicated sub-agent per
+  test (step 4), matching cc-rpi behavior.
+- **`/research` prompt** -- added greenfield note: skip for projects with no
+  code yet, start directly with `/plan`.
+- **`methodology/agent-design.md`** -- Pre-Launch Audit Pattern table updated
+  from 6 to 8 specialists with domain codes and Rule #44 enforcement note.
+  Adds 3-wave remediation summary.
+
 ## [1.13.1] - 2026-04-04
 
 ### Added

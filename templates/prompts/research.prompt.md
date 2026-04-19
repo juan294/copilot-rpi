@@ -6,6 +6,9 @@ Model tier: **opus** — invoke this prompt in an Opus session.
 
 Research the codebase to answer: ${input:question}
 
+Note: This prompt applies to existing codebases only. For greenfield
+projects with no code yet, skip /research and start directly with /plan.
+
 Process:
 
 1. Read any directly mentioned files FULLY before doing anything else.

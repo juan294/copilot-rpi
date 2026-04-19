@@ -105,8 +105,8 @@ That's it. Those four commands are 90% of your interaction with the methodology.
 |---------|-------------|-------------|
 | `/quality-review` | Reviews changed files for code reuse, quality, and efficiency. Finds issues and fixes them interactively. | After each implementation phase, or after a `/pre-launch` audit. |
 | `/describe-pr` | Generates a PR description from the current branch's diff and commit history. | Before opening or updating a PR. |
-| `/pre-launch` | Runs a comprehensive multi-domain audit (QA, security, performance, architecture, UX, devops). Run `/remediate` after to fix all findings. | Before any production release. |
-| `/remediate` | Parses the pre-launch report, creates GitHub issues for every finding, spawns parallel TDD agents in worktrees, merges sequentially, verifies CI, runs `/quality-review` twice. | After `/pre-launch` when findings exist. Automates the full fix cycle. |
+| `/pre-launch` | 8-specialist deep-dive audit (Principal Architect, Staff FE/BE, Performance Engineer, DevOps/SRE Lead, Security Reviewer, QA/Reliability Lead, UX Lead). Produces a 16-section report with structured finding IDs and a READY/CONDITIONAL/NOT READY verdict. | Before any production release. |
+| `/remediate` | Parses the pre-launch report, creates GitHub issues for every finding, processes in 3 waves (Before launch / After launch / Later). Wave 1-2 spawn TDD agents in worktrees; Wave 3 files issues only. Merges sequentially, verifies CI, runs `/quality-review` twice. | After `/pre-launch` when findings exist. |
 | `/triage` | Discovers all overnight agent reports exhaustively, checks for agent failures in logs, synthesizes findings, proposes action plan for all items, implements fixes, commits reports for history. | Every morning. First command of the day for each project. |
 | `/status` | Quick 5-line project orientation: branch, last commit, working tree, CI status, open items. | Start of session. Quick check without starting a full task. |
 | `/update-docs` | Investigates 4 areas (changes, doc inventory, diagrams, version refs), then updates all documentation, Mermaid diagrams, version references, and inline code docs based on changes since last release. | After features/fixes are done, before releasing. |
@@ -255,7 +255,15 @@ This lets you delegate well-specified implementation work and review the result 
 
 ### Pre-Launch Audit
 
-Before any production release, run `/pre-launch` to audit 6 domains: QA, security, performance, architecture, UX/accessibility, and infrastructure. The audit produces a single report with a verdict: READY, CONDITIONAL, or NOT READY.
+Before any production release, run `/pre-launch` to audit 8 specialist
+domains: Principal Architect, Staff FE, Staff BE, Performance Engineer,
+DevOps/SRE Lead, Security Reviewer, QA/Reliability Lead, and Product
+Designer/UX Lead. The audit produces a 16-section report with structured
+finding IDs and a verdict: READY, CONDITIONAL, or NOT READY.
+
+Run `/remediate` after to process findings in 3 waves: Wave 1 (Before
+launch -- blockers and high severity), Wave 2 (After launch -- medium
+severity), Wave 3 (Later/strategic -- issues filed, no auto-fix).
 
 ## Project Structure After Setup
 

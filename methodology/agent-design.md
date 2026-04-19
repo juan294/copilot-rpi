@@ -257,20 +257,35 @@ This is a planning-time optimization. The agent identifies the opportunity; the 
 
 ### Pre-Launch Audit Pattern
 
-The most common parallel pattern. Run specialist audits in parallel:
+The most common parallel pattern. Run all 8 specialist domains as parallel
+`copilot -p` processes, each writing to its own report file. Synthesize
+into a 16-section pre-launch report afterward.
 
-| Specialist | Focus |
-|------------|-------|
-| **architect** | Dependency health, TypeScript config, circular deps, dead code |
-| **qa-lead** | Full test suite, coverage gaps, graceful degradation |
-| **security-reviewer** | Dependency audit, hardcoded secrets, auth flows, injection vectors |
-| **performance-eng** | Bundle sizes, unused exports, code splitting, Core Web Vitals |
-| **ux-reviewer** | ARIA/a11y, keyboard nav, error states, design consistency |
-| **devops** | Build verification, CI status, env vars, error pages, git state |
+| Specialist | Code | Focus |
+|------------|------|-------|
+| **Principal Architect** | AR | Architecture, module boundaries, coupling, dependency health, circular deps, dead code, typecheck |
+| **Staff Frontend Engineer** | FE | Component structure, state management, routing, client-side perf, hydration, bundle composition |
+| **Staff Backend Engineer** | BE | API design, validation, error handling, retry/idempotency, DB access, transactions, queues |
+| **Performance Engineer** | PE | Bundle sizes, unused exports, code splitting, cache strategy, CPU/memory/IO inefficiencies |
+| **DevOps / SRE Lead** | DO | Deployment safety, rollback, env config, secrets, migrations, CI/CD, health checks, observability |
+| **Security Reviewer** | SE | Dependency audit, hardcoded secrets, auth/authz gaps, injection (SQL/XSS/SSRF), unsafe defaults |
+| **QA / Reliability Lead** | QA | Full test suite (sole domain authorized), coverage, graceful degradation, retry/idempotency |
+| **Product Designer / UX Lead** | UX | Visual hierarchy, design system, a11y (ARIA, focus, keyboard nav), error/loading/empty states |
 
-Run as parallel `copilot -p` processes, each writing to its own report file. Synthesize into a single pre-launch report afterward.
+Rule #44: QA/Reliability Lead is the ONLY specialist authorized to run
+the full `$TEST_CMD`. Other 7 domains must not run it in parallel.
 
-Each produces findings categorized as **blockers** (must fix), **warnings** (should fix), or **recommendations** (nice to have). Results synthesize into a single report with a verdict: READY, CONDITIONAL, or NOT READY.
+Each specialist:
+
+1. Reports a **Domain Model** first (entry points, data flow, key files)
+2. Lists findings using a structured format with Finding IDs
+   (`<DOMAIN>-(B|H|M|L|S)<COUNTER>`, e.g., `SE-B1`, `UX-M3`, `BE-H2`)
+3. Categorizes by severity: launch-blocker | high | medium | low | strategic
+4. Tags by time horizon: Before launch | After launch | Later
+
+The report drives `/remediate` which processes findings in 3 waves:
+Wave 1 (Before launch), Wave 2 (After launch), Wave 3 (Later/strategic).
+Wave 3 items create GitHub issues only -- no fix agents spawn.
 
 ---
 

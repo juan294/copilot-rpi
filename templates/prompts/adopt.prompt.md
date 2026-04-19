@@ -21,15 +21,37 @@ The full error catalog (`patterns/agent-errors.md`) is available for debugging b
 
 ## Phase 2: Audit This Project
 
-Investigate THIS project systematically:
+Now investigate THIS project. Spawn parallel Explore agents to assess
+the current state:
 
-**Configuration:** Does AGENTS.md exist? .vscode/settings.json? .github/prompts/? .github/instructions/? .github/chatmodes/? .vscode/mcp.json?
+**Agent 1 -- Configuration Audit:**
 
-**Instructions Coverage:** Which `.github/instructions/` files exist? Are deployment-safety, supabase, testing rules present where applicable? Does AGENTS.md contain domain rules that should be in `.github/instructions/` instead?
+- Does AGENTS.md exist? If so, read it fully. How complete is it vs the template?
+- Does `.github/prompts/` exist? Which prompt files are present?
+- Does `.github/instructions/` exist? Which instruction files are present?
+  Are deployment-safety, supabase, testing rules present where applicable?
+  Does AGENTS.md contain domain rules that should be in `.github/instructions/` instead?
+- Does `.github/chatmodes/` exist?
+- Does `.vscode/settings.json` exist?
+- Does `.vscode/mcp.json` exist?
 
-**Infrastructure:** What's the stack? Pre-commit hooks? CI? Git workflow? README?
+**Agent 2 -- Infrastructure Audit:**
 
-**Workflow:** Does docs/ exist? Research documents, plans, decision records? Testing setup?
+- What's the project type? (web app, library, CLI, monorepo, Python, static site)
+- What's the stack? (language, framework, package manager, test runner, linter)
+- Are pre-commit hooks set up? What do they run?
+- Is there CI? What does it check?
+- What's the git workflow? (branches, protection rules)
+- Does the README follow the standard header format?
+
+**Agent 3 -- Workflow Audit:**
+
+- Does `docs/` exist? What's the directory structure?
+- Are there research documents, plans, or decision records?
+- Is there an error/success logging structure?
+- How is testing set up? (test runner, coverage, TDD patterns)
+
+Wait for all agents to complete, then synthesize their findings.
 
 ## Phase 3: Present the Audit Report
 
@@ -109,7 +131,7 @@ Fill every section from what you learned in Phases 1-4. Don't leave placeholders
 
 ## Recommended Next Step
 
-After adoption is complete, suggest the user run `/pre-launch` in a new session to baseline their codebase quality. `/pre-launch` audits 6 domains (architecture, QA, security, performance, UX, infrastructure) and produces a report with blockers, warnings, and recommendations.
+After adoption is complete, suggest the user run `/pre-launch` in a new session to baseline their codebase quality. `/pre-launch` spawns 8 specialist domains (Principal Architect, Staff FE, Staff BE, Performance Engineer, DevOps/SRE Lead, Security Reviewer, QA/Reliability Lead, Product Designer/UX Lead) that audit the entire codebase and produce a launch-readiness report.
 
 For code quality findings (dead code, duplicates, inefficiencies), `/quality-review` handles fixes interactively. Security, infrastructure, and accessibility findings require manual implementation or a targeted `/implement` cycle.
 

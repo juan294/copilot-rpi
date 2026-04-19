@@ -21,7 +21,7 @@ Process:
    - Test failures (list each failing test)
    - Build failures
 
-4. For each failing test, fix it:
+4. For each failing test, spawn a sub-agent to:
    a. Read the failing test file and the source file it covers
    b. Identify the root cause from the error message
    c. Fix the SOURCE code (never weaken or delete a test)
