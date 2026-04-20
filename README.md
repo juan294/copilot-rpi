@@ -6,6 +6,8 @@
 [![Status: Active](https://img.shields.io/badge/Status-Active-brightgreen.svg)](https://github.com/juan294/copilot-rpi)
 [![GitHub Copilot](https://img.shields.io/badge/Built%20for-GitHub%20Copilot-blue.svg)](https://docs.github.com/en/copilot)
 
+![Chapa Badge](https://chapa.thecreativetoken.com/u/juan294/badge.svg)
+
 A blueprint repository for setting up and running projects with [GitHub Copilot](https://docs.github.com/en/copilot). Contains the RPI (Research-Plan-Implement) methodology, a catalog of known agent errors, and operational rules learned from hundreds of real sessions.
 
 ---
@@ -102,6 +104,26 @@ This repository is the GitHub Copilot counterpart to [cc-rpi](https://github.com
 | **Settings** | `.claude/settings.json` | `.vscode/settings.json` + `.vscode/mcp.json` |
 | **Parallelism** | Task tool + Agent Teams | `copilot -p` + `@copilot` cloud agent |
 | **Headless mode** | `claude -p` | `copilot -p` |
+
+## Harness Scope
+
+**Principle: one harness per blueprint.** copilot-rpi is authored for
+GitHub Copilot and maintained for a single author syncing downstream
+projects. Every additional harness is ongoing sync surface --
+parallel prompt trees, parallel wrappers, extra work on every
+blueprint bump -- so by default new harness support lives outside
+this repo.
+
+**AGENTS.md is the shared cross-tool layer.** Both copilot-rpi and
+[cc-rpi][] ship an `AGENTS.md` because it is a widely adopted
+cross-agent markdown convention that multiple tools read natively.
+The compatibility cost is low -- a single file with no parallel
+command tree.
+
+For Claude Code or other harnesses, use [cc-rpi][] or a sibling
+project rather than layering on top of copilot-rpi.
+
+[cc-rpi]: https://github.com/juan294/cc-rpi
 
 ## Adding New Patterns
 
