@@ -115,9 +115,11 @@ Stack: `[node]` `[python]` `[macos]` `[github]` (omitted = all stacks)
 
 ## Agent Reports
 
-42. **Never commit agent reports to the repository** `[universal]` -- `docs/agents/`, `logs/`, and `scripts/agents/` are gitignored in all projects. Reports stay on disk as local operational history. Only code fixes are committed.
+42. **Agent report commit policy depends on repo visibility** `[universal]` -- check `gh repo view --json visibility` at setup time. **Public repos:** gitignore `docs/agents/`, `logs/`, `scripts/agents/` so operational details (security findings, internal metrics, agent status) don't leak. Reports stay local; only code fixes are committed. **Private repos:** track all three directories. Triage commits reports alongside code fixes as historical artifacts. Missing remote or `gh` unavailable fail-safes to PUBLIC behavior.
 
 43. **Use timestamp-based discovery for triage, not git status** `[universal]` -- touch `docs/agents/.last-triage` after each triage run. Next triage discovers new reports with `find docs/agents/ -name "*-report.md" -newer docs/agents/.last-triage`. On first run (no marker), process all reports.
+
+45. **Triage processes Dependabot PRs** `[frequent]` `[github]` -- `/triage` scans `gh pr list --author "app/dependabot"` in Step 1 Discovery and processes them after the triage commit is pushed. Patch and minor with green CI auto-merge via `gh pr merge --squash --auto --delete-branch`. Major bumps defer for human review. CI red with an obvious fix (snapshot/lockfile drift, generated files) gets one fix attempt before deferring. Conflicts get one rebase via `gh pr update-branch`, then re-evaluated. Dependabot processing happens last so a flaky dependency PR can't block triage code fixes.
 
 ---
 

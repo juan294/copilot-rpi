@@ -156,14 +156,25 @@ Each file must have `applyTo` in YAML frontmatter -- without it, the file is sil
 - [ ] Create `scripts/agents/` directory for agent shell scripts
 - [ ] Create `docs/agents/` directory for agent reports and shared context
 - [ ] Create `logs/` directory for agent output capture
-- [ ] Add gitignore entries for agent operational output:
+- [ ] **Determine repo visibility** (Rule #42 -- commit policy depends on it):
+
+  ```bash
+  gh repo view --json visibility --jq '.visibility' 2>/dev/null
+  # PUBLIC -> gitignore the directories below (next step)
+  # PRIVATE / INTERNAL -> SKIP the gitignore step; agent dirs are tracked
+  # (no remote / gh unavailable) -> treat as PUBLIC (fail-safe)
+  ```
+
+- [ ] **(Public repos only) Gitignore agent operational directories** so operational details don't leak:
 
   ```gitignore
-  # Agent operational output (never committed)
+  # Agent operational output (gitignored on public repos; tracked on private repos)
   docs/agents/
   logs/
   scripts/agents/
   ```
+
+  On private repos, omit this -- reports are committed by `/triage` as historical artifacts.
 
 - [ ] Copy shared utilities:
   - `templates/scripts/agents/lib/agent-utils.sh` to `scripts/agents/lib/agent-utils.sh`

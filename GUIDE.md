@@ -107,7 +107,7 @@ That's it. Those four commands are 90% of your interaction with the methodology.
 | `/describe-pr` | Generates a PR description from the current branch's diff and commit history. | Before opening or updating a PR. |
 | `/pre-launch` | 8-specialist deep-dive audit (Principal Architect, Staff FE/BE, Performance Engineer, DevOps/SRE Lead, Security Reviewer, QA/Reliability Lead, UX Lead). Produces a 16-section report with structured finding IDs and a READY/CONDITIONAL/NOT READY verdict. | Before any production release. |
 | `/remediate` | Parses the pre-launch report, creates GitHub issues for every finding, processes in 3 waves (Before launch / After launch / Later). Wave 1-2 spawn TDD agents in worktrees; Wave 3 files issues only. Merges sequentially, verifies CI, runs `/quality-review` twice. | After `/pre-launch` when findings exist. |
-| `/triage` | Discovers all overnight agent reports exhaustively, checks for agent failures in logs, synthesizes findings, proposes action plan for all items, implements fixes, commits reports for history. | Every morning. First command of the day for each project. |
+| `/triage` | Discovers overnight agent reports via timestamp-based scanning, checks for agent failures in logs, scans open Dependabot PRs (Rule #45), synthesizes findings, proposes action plan, implements fixes, then auto-merges patch/minor Dependabot PRs with green CI. Public repos: reports stay local. Private repos: reports are committed alongside fixes. | Every morning. First command of the day for each project. |
 | `/status` | Quick 5-line project orientation: branch, last commit, working tree, CI status, open items. | Start of session. Quick check without starting a full task. |
 | `/update-docs` | Investigates 4 areas (changes, doc inventory, diagrams, version refs), then updates all documentation, Mermaid diagrams, version references, and inline code docs based on changes since last release. | After features/fixes are done, before releasing. |
 | `/release` | Detects project type and branching strategy, bumps versions everywhere, generates CHANGELOG entry, creates release commit and tag, publishes GitHub release, advises on registry publish. | When ready to cut a new version. Run `/update-docs` first. |
@@ -347,7 +347,7 @@ The blueprint adapts to six project archetypes: web applications, libraries, CLI
 | Testing approach | `methodology/testing.md` | TDD protocol, verification hierarchy |
 | CI ownership | `methodology/push-accountability.md` | Background CI monitoring, fix-and-repush |
 | Error patterns | `patterns/agent-errors.md` | 39 documented errors with symptoms and solutions |
-| Operational rules | `patterns/quick-reference.md` | 44 rules with scope/stack tags, organized by domain |
+| Operational rules | `patterns/quick-reference.md` | 45 rules with scope/stack tags, organized by domain |
 | Deployment safety | `patterns/deployment-safety.md` | Resource efficiency and production deployment rules |
 | Instruction templates | `templates/github/instructions/` | 5 path-specific rule templates (tests, API, migrations, deployment, supabase) |
 | Worked examples | `examples/README.md` | Sample research docs, plans, logs, pseudocode |

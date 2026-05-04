@@ -28,24 +28,45 @@ Scheduled agents run outside of interactive sessions on a recurring schedule. Th
 
 ## Report Lifecycle
 
-Agent reports are internal operational tools, not project artifacts. They follow a strict lifecycle that applies to all projects -- open-source and closed-source alike:
+Agent reports are internal operational tools. Their commit policy is conditional on repo visibility (Rule #42):
 
 1. **Agents write reports to `docs/agents/`** on disk during overnight runs.
 2. **Reports accumulate historically** -- never deleted, always available for review.
-3. **Reports are never committed to version control.** `docs/agents/`, `logs/`, and `scripts/agents/` are gitignored.
-4. **Triage discovers reports via timestamps**, not git status. A `.last-triage` marker file in `docs/agents/` tracks which reports have been processed.
-5. **Only code fixes are committed.** When triage resolves findings, the fix goes into git. The report that triggered the fix stays local.
+3. **Commit policy depends on repo visibility:**
+   - **Public repos:** `docs/agents/`, `logs/`, and `scripts/agents/` are gitignored. Reports stay local; only code fixes are committed.
+   - **Private repos:** all three directories are tracked. Triage commits reports alongside code fixes as historical artifacts.
+4. **Triage discovers reports via timestamps** (Rule #43), not git status. A `.last-triage` marker file in `docs/agents/` tracks which reports have been processed -- this is independent of whether reports are committed.
 
-### Required `.gitignore` entries
+The rationale:
 
-Every project using scheduled agents must gitignore these directories:
+- Public repositories must never expose operational details (security audit findings, internal metrics, agent status).
+- Private repositories benefit from a committed audit trail of what agents found and when.
+- Historical reports remain on disk indefinitely for the operator to review either way.
+- Triage works identically regardless of git tracking -- no git status dependency.
+
+### Detecting repo visibility
+
+At setup time and during triage, check visibility with:
+
+```bash
+gh repo view --json visibility --jq '.visibility'
+# Returns: PUBLIC | PRIVATE | INTERNAL
+```
+
+Treat `PUBLIC` as "gitignore the operational directories." Treat `PRIVATE` and `INTERNAL` as "track them." If `gh` is unavailable or the repo has no remote, default to gitignoring (fail-safe -- never leak by accident).
+
+### `.gitignore` entries (public repos only)
+
+For public repos, add to `.gitignore`:
 
 ```gitignore
-# Agent operational output (never committed)
+# Agent operational output (gitignored on public repos; tracked on private repos)
 docs/agents/
 logs/
 scripts/agents/
 ```
+
+For private repos, omit these entries -- the directories are tracked normally.
 
 ## Agent Shell Script Template
 
@@ -393,12 +414,14 @@ After scheduled agents finish their overnight runs, use `/triage` to process all
 
 1. Discovers new reports via `.last-triage` marker timestamps (not git status)
 2. Checks `logs/` for agent failures (a missing report might mean a crashed agent)
-3. Reads all reports and shared-context.md
-4. Synthesizes findings and drafts an action plan
-5. Implements all fixes (fix everything -- Rule #31)
-6. Commits only code fixes (reports are never committed -- they stay on disk)
-7. Touches `.last-triage` marker to record which reports have been processed
-8. Updates shared-context.md with triage results
+3. Scans open Dependabot PRs (Rule #45) and classifies them by update type and CI status
+4. Reads all reports and shared-context.md
+5. Synthesizes findings and drafts an action plan
+6. Implements all fixes (fix everything -- Rule #31)
+7. Commits code fixes (and reports too, on private repos -- Rule #42)
+8. Processes Dependabot PRs (auto-merge patch/minor with green CI, attempt-fix obvious failures, defer majors)
+9. Touches `.last-triage` marker to record which reports have been processed
+10. Updates shared-context.md with triage results
 
 For multi-project orchestration, the `morning-triage.sh` script template (in `templates/scripts/`) runs `/triage` across all configured projects sequentially, producing a cross-project summary.
 
@@ -410,3 +433,4 @@ For multi-project orchestration, the `morning-triage.sh` script template (in `te
 - Project dependencies installed (agents may run test/build commands)
 - `docs/agents/` directory exists in the project
 - `logs/` directory exists for output capture
+- `docs/agents/`, `logs/`, and `scripts/agents/` gitignored on public repos; tracked on private repos (Rule #42)

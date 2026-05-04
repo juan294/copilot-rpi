@@ -269,7 +269,7 @@ doubt.
 ### Report Output
 
 - Path: `docs/agents/pre-launch-report.md`
-- Not committed to git (Rule #42)
+- Commit policy follows repo visibility (Rule #42): gitignored on public repos, tracked on private repos
 - Markdown only.
 - Finding IDs are the `/remediate` parse anchor -- never reuse an ID,
   never list a finding without an ID.

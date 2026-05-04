@@ -6,6 +6,41 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### Added
+
+- **Rule #45: Triage processes Dependabot PRs.** `/triage` now scans
+  open Dependabot PRs (`gh pr list --author "app/dependabot"`) as part
+  of Step 1 Discovery and processes them in a new Step 5 (after the
+  triage commit is pushed). Patch and minor updates with green CI
+  auto-merge via `gh pr merge --squash --auto --delete-branch`. Major
+  bumps defer for human review. CI red with an obvious fix (snapshot
+  drift, lockfile, generated files) gets one fix attempt before
+  deferring. Conflicts are rebased via `gh pr update-branch` and
+  re-evaluated. Dependabot processing happens last so a flaky dependency
+  PR can't block triage code fixes. Updated:
+  `patterns/quick-reference.md`, `methodology/scheduled-agents.md`
+  Morning Triage section, `.github/prompts/triage.prompt.md` and
+  `templates/prompts/triage.prompt.md`, and `GUIDE.md`.
+
+### Changed
+
+- **Rule #42 is now conditional on repo visibility.** Previously, agent
+  operational directories (`docs/agents/`, `logs/`, `scripts/agents/`)
+  were gitignored across all projects. They are now gitignored only on
+  public repos so operational details (security findings, internal
+  metrics, agent status) don't leak. On private repos these directories
+  are tracked, and `/triage` commits reports alongside code fixes as a
+  historical audit trail. Visibility is detected via
+  `gh repo view --json visibility`; missing remote or `gh` unavailable
+  fail-safes to PUBLIC behavior. Ports cc-rpi v1.18.0 changes to
+  copilot-rpi. Updated:
+  `patterns/quick-reference.md` (Rule #42),
+  `methodology/scheduled-agents.md` (Report Lifecycle, gitignore
+  section, Morning Triage, Prerequisites),
+  `templates/setup-checklist.md`,
+  `.github/prompts/triage.prompt.md` and template counterpart,
+  `templates/prompts/pre-launch.prompt.md`, and `GUIDE.md`.
+
 ## [1.14.0] - 2026-04-18
 
 ### Changed
