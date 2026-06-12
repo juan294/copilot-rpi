@@ -91,6 +91,12 @@ Stack: `[node]` `[python]` `[macos]` `[github]` (omitted = all stacks)
 
 35. **Justify every external action before triggering** `[universal]` -- before any CI run, deployment, or API call: Is this needed? Is this justified? Is this verifiable? If any answer is "no", stop.
 
+## Cost & Models
+
+46. **Pin a model tier to every workflow** `[universal]` -- model choice is the biggest lever on the inference bill. Each prompt declares a `Model tier` (opus/sonnet/haiku); bind each tier to a concrete model and run the floor by default. Frontier is for `/research` and `/plan` only. Subagents inherit their workflow's tier. Override upward when a task proves harder; never silently downward. See [cost-monitoring.md](../methodology/cost-monitoring.md).
+
+47. **Measure cost per outcome before betting beyond the floor** `[frequent]` -- track cost per merged PR and per workflow run, not per token. Stand up the weekly cost-report agent before investing in custom agents or large fan-outs, so you can confirm net-positive ROI instead of assuming it.
+
 ## Supabase
 
 36. **Test migrations locally before pushing to remote** `[frequent]` -- run `supabase start` + `supabase db reset` locally, verify with `docker exec ... psql`, then `supabase db push`. The local instance has full Postgres with RLS and extensions -- treat it as UAT.

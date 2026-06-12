@@ -6,6 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### Added
+
+- **Model tier system (3 tiers) bound to every workflow.** Added a
+  `haiku` floor tier alongside the existing `opus`/`sonnet` tiers and
+  gave every prompt an explicit `Model tier` line. `/status` and
+  `/describe-pr` run on the floor; `/research`, `/plan`, `/pre-launch`
+  stay frontier; the rest run mid-tier. The blueprint pins the tier; the
+  org binds the tier to a concrete model on adoption.
+- **`methodology/cost-monitoring.md`.** New doc on model economics: the
+  four cost pools, model tiers as the primary lever, access tiers
+  (frontier access for authoring loops, the floor for consumption), and
+  measuring cost-per-outcome. Added to the methodology reading order.
+- **Cost-report scheduled agent.** Weekly agent (runs on the floor tier)
+  that turns provider usage exports into cost-per-outcome numbers and
+  flags workflows drifting above their declared tier.
+- **Rule #46 (Pin a model tier to every workflow)** and **Rule #47
+  (Measure cost per outcome before betting beyond the floor)** in the
+  quick-reference, under a new "Cost & Models" section.
+
+### Changed
+
+- **`context-engineering.md` model-selection section rewritten.** Replaced
+  the "leave the `model` field empty" guidance — which contradicted the
+  per-prompt tier lines — with the 3-tier system, a tier→concrete-model
+  binding table, subagent tier-inheritance, and an
+  override-upward-never-silently-downward rule.
+
 ## [1.15.0] - 2026-05-04
 
 ### Added

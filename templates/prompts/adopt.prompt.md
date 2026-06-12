@@ -2,6 +2,8 @@
 mode: agent
 description: "Audit an existing project and adopt copilot-rpi best practices"
 ---
+Model tier: **sonnet** — invoke this prompt in a Sonnet session.
+
 # Adopt copilot-rpi Best Practices into Existing Project
 
 You are auditing and migrating an existing project to follow the copilot-rpi blueprint. The blueprint lives at `${input:blueprintPath}`.

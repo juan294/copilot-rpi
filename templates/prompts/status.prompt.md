@@ -2,6 +2,7 @@
 mode: agent
 description: Quick project status check — 5-line orientation
 ---
+Model tier: **haiku** — invoke this prompt in a fast/cheap session (mechanical task).
 
 Quick project status check. Output a concise orientation and stop.
 

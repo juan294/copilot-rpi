@@ -2,6 +2,8 @@
 mode: agent
 description: "Cleanly remove all copilot-rpi artifacts from this project"
 ---
+Model tier: **sonnet** — invoke this prompt in a Sonnet session.
+
 # Detach Project from copilot-rpi Blueprint
 
 You are cleanly removing copilot-rpi artifacts from this project. The blueprint lives at `${input:blueprintPath}`.

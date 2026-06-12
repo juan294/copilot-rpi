@@ -2,6 +2,8 @@
 mode: agent
 description: "Set up a new project using the copilot-rpi blueprint"
 ---
+Model tier: **sonnet** — invoke this prompt in a Sonnet session.
+
 # Bootstrap New Project from copilot-rpi Blueprint
 
 You are setting up a new project using the copilot-rpi blueprint repository. The blueprint lives at `${input:blueprintPath}`.

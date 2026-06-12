@@ -2,6 +2,8 @@
 mode: agent
 description: "Sync this project with the latest copilot-rpi blueprint improvements"
 ---
+Model tier: **sonnet** — invoke this prompt in a Sonnet session.
+
 # Update Project from copilot-rpi Blueprint
 
 You are syncing this project with the latest copilot-rpi blueprint. The blueprint lives at `${input:blueprintPath}`.

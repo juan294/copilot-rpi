@@ -241,15 +241,34 @@ Configure `.vscode/settings.json` to control Copilot behavior:
 }
 ```
 
-### Model Selection
+### Model Selection — Tier Each Workflow
 
-Different tasks benefit from different models. Configure in VS Code settings or select per-session:
+Model choice is the biggest single lever on your inferencing bill. The same task on a frontier model can cost 10-30x what it costs on a fast model, and for most of the RPI loop the frontier model buys you nothing — `/status` does not reason, it summarizes. The discipline: **explore once at frontier cost, then run the codified loop on the cheapest model that still does the job.**
 
-- **Complex reasoning** (architecture, debugging, planning) → most capable model available (e.g., GPT-4.1, o3)
-- **Routine tasks** (formatting, simple edits, file operations) → faster model
-- **Bulk operations** (migrating many files, batch formatting) → fastest model
+Every prompt in this blueprint declares a **model tier** on the line directly under its frontmatter (e.g. `Model tier: **sonnet**`). Three tiers:
 
-Leave the `model` field empty in `.prompt.md` files — let VS Code settings control model selection centrally. This keeps prompt files portable.
+| Tier | Use for | Prompts | Why |
+|------|---------|---------|-----|
+| **opus** (frontier) | Deep reasoning where a bad output amplifies downstream | `/research`, `/plan`, `/pre-launch` | A bad line of research → thousands of bad lines of code. Spend here. |
+| **sonnet** (mid) | Building and executing against a reviewed plan | `/implement`, `/validate`, `/quality-review`, `/remediate`, `/fix-ci`, `/triage`, `/bootstrap`, `/adopt`, `/detach`, `/release`, `/update-docs`, `/update` | The plan already removed the ambiguity; this tier executes it reliably. |
+| **haiku** (floor) | Mechanical read-and-summarize, no judgment | `/status`, `/describe-pr` | Deterministic-ish output. Frontier models are pure waste here. |
+
+**The blueprint pins the tier; you bind the concrete model.** Tier names (opus/sonnet/haiku) keep the prompt files portable across orgs and survive model renames. On adoption, map each tier to a concrete model your org has access to, and bind it so the choice is enforced rather than left to whatever model a developer happens to have selected:
+
+| Tier | Bind to (fill in for your org) | Example |
+|------|-------------------------------|---------|
+| opus | _your most capable model_ | Claude Opus 4.x · GPT-5.5 |
+| sonnet | _your mid / default coding model_ | Claude Sonnet 4.x · GPT-5.4 |
+| haiku | _your cheapest versatile model_ | Claude Haiku 4.x · GPT-5.4 mini |
+
+Bind it in one of two places:
+
+- **Per-prompt (strongest):** set the `model:` frontmatter field in each `.prompt.md` to your org's concrete model for that tier. The choice travels with the workflow and re-applies every time anyone runs it.
+- **Centrally:** set the default model in `.vscode/settings.json` and switch per-session to match the tier line. Lower friction, weaker enforcement.
+
+**Subagents inherit the tier.** Fan-out prompts spawn helpers — `/pre-launch`'s 8 specialists, `/remediate`'s parallel TDD agents, `/triage`'s sub-tasks. A frontier parent that spawns 8 frontier children multiplies the bill by 8. Pin spawned agents to the same tier as their workflow (or lower) unless a child genuinely needs to reason at a higher tier.
+
+**Override upward, never silently downward.** The tier is the default, not a ceiling. If a task turns out harder than its tier — gnarly `/implement` phase, a `/validate` that uncovers a design flaw — bump that session up a tier and note why. Never quietly drop a workflow below its declared tier to save tokens; that trades a small bill for a large downstream error. See [cost-monitoring.md](cost-monitoring.md) for measuring whether a tier change actually paid back.
 
 ### MCP Servers
 

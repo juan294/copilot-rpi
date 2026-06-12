@@ -2,6 +2,8 @@
 mode: agent
 description: "Process error screenshots from the error screenshots folder"
 ---
+Model tier: **sonnet** — invoke this prompt in a Sonnet session.
+
 # Process Error Screenshots
 
 You are processing new agent error patterns from screenshots that the user has saved.

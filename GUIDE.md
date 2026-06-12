@@ -113,6 +113,16 @@ That's it. Those four commands are 90% of your interaction with the methodology.
 | `/release` | Detects project type and branching strategy, bumps versions everywhere, generates CHANGELOG entry, creates release commit and tag, publishes GitHub release, advises on registry publish. | When ready to cut a new version. Run `/update-docs` first. |
 | `/fix-ci` | Self-healing CI: gets failure logs, spawns parallel fix agents per failure category, iterates until green or retry budget exhausted. | When CI is red. Automates the diagnose-fix-verify loop. |
 
+### Model Tiers at a Glance
+
+Each command runs on a model tier — frontier where reasoning matters, the cheap floor where the task is mechanical. Bind each tier to a concrete model on adoption and run the floor by default. See [methodology/cost-monitoring.md](methodology/cost-monitoring.md).
+
+| Tier | Commands | Why |
+|------|----------|-----|
+| **opus** (frontier) | `/research`, `/plan`, `/pre-launch` | Deep reasoning — a bad output amplifies downstream. |
+| **sonnet** (mid) | `/implement`, `/validate`, `/quality-review`, `/remediate`, `/fix-ci`, `/triage`, `/bootstrap`, `/adopt`, `/detach`, `/release`, `/update-docs`, `/update` | Executes against a reviewed plan. |
+| **haiku** (floor) | `/status`, `/describe-pr` | Mechanical read-and-summarize. |
+
 The recommended daily workflow:
 
 ```text

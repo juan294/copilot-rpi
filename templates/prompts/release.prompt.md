@@ -2,6 +2,8 @@
 mode: agent
 description: "Prepare and publish a new version release, adapted to the project type"
 ---
+Model tier: **sonnet** — invoke this prompt in a Sonnet session.
+
 # Release New Version
 
 Prepare and publish a new version release, adapted to the project type.

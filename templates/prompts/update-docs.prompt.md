@@ -2,6 +2,8 @@
 mode: agent
 description: "Research all changes since last release and update every document, diagram, and version reference"
 ---
+Model tier: **sonnet** — invoke this prompt in a Sonnet session.
+
 # Update All Documentation
 
 Research all changes since the last release and update every document,

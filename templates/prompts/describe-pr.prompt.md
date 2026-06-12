@@ -2,6 +2,8 @@
 mode: agent
 description: "Generate a PR description from the current branch's diff and history"
 ---
+Model tier: **haiku** — invoke this prompt in a fast/cheap session (mechanical task).
+
 Generate a PR description for the current branch.
 
 Process:
