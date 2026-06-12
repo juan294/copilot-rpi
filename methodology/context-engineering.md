@@ -257,9 +257,9 @@ Every prompt in this blueprint declares a **model tier** on the line directly un
 
 | Tier | Bind to (fill in for your org) | Example |
 |------|-------------------------------|---------|
-| opus | _your most capable model_ | Claude Opus 4.x · GPT-5.5 |
-| sonnet | _your mid / default coding model_ | Claude Sonnet 4.x · GPT-5.4 |
-| haiku | _your cheapest versatile model_ | Claude Haiku 4.x · GPT-5.4 mini |
+| opus | *your most capable model* | Claude Opus 4.x · GPT-5.5 |
+| sonnet | *your mid / default coding model* | Claude Sonnet 4.x · GPT-5.4 |
+| haiku | *your cheapest versatile model* | Claude Haiku 4.x · GPT-5.4 mini |
 
 Bind it in one of two places:
 
