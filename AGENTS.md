@@ -2,7 +2,7 @@
 
 ## One-liner
 
-Blueprint repository for GitHub Copilot projects. Contains the RPI methodology, 39 known agent error patterns, 44 operational rules, and templates for AGENTS.md, prompt files, instructions, chat modes, and project setup.
+Blueprint repository for GitHub Copilot projects. Contains the RPI methodology, 39 known agent error patterns, 54 operational rules, and templates for AGENTS.md, prompt files, instructions, chat modes, and project setup.
 
 ## Stack
 
@@ -49,7 +49,7 @@ copilot-rpi/
 │   └── error-success-logging.md      # Systematic improvement framework
 ├── examples/                         # Sample documents and workflow walkthroughs
 ├── patterns/                         # Operational knowledge
-│   ├── quick-reference.md            # 44 rules to internalize before any work
+│   ├── quick-reference.md            # 54 rules to internalize before any work
 │   ├── agent-errors.md               # 39-error catalog with solutions
 │   └── deployment-safety.md          # Resource efficiency and production deployment
 └── templates/                        # Files to adapt for new projects
@@ -135,7 +135,7 @@ Go directly to these paths -- never search the codebase for them.
 | Topic | Path | Notes |
 |-------|------|-------|
 | Error catalog | `patterns/agent-errors.md` | 39 errors, source of truth |
-| Operational rules | `patterns/quick-reference.md` | 44 rules with scope/stack tags |
+| Operational rules | `patterns/quick-reference.md` | 54 rules with scope/stack tags |
 | Deployment safety | `patterns/deployment-safety.md` | Resource efficiency rules |
 | Instruction templates | `templates/github/instructions/` | 5 path-specific rule templates |
 | Methodology | `methodology/` | 11 files, order in README.md |
