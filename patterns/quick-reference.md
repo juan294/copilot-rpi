@@ -77,6 +77,16 @@ Stack: `[node]` `[python]` `[macos]` `[github]` (omitted = all stacks)
 
 44. **Parallel agents run scoped tests only -- full suite runs once at integration** `[universal]` -- N agents each running the full test suite creates N x workers processes that exhaust CPU/memory. Agents test only their changed files; limit concurrent agents to 3-4; run the full suite once after merging.
 
+48. **Spawn agents with a terminal condition, watchdog the rest** `[situational]` -- every spawned `copilot -p` agent gets a single-sentence task and an explicit stop condition ("stop the moment X is true"); never open-ended "look into"/"investigate". Set a ~15-20 min wall-clock budget and kill agents that overrun rather than assuming progress. Prevents the runaway agent that works hours past completion. See [agent-design.md](../methodology/agent-design.md).
+
+49. **Dedup against repo state before doing or continuing work** `[situational]` -- before an agent starts or resumes, check `git log`/`git status`/`grep` for the artifact. If a sibling already landed it, stop and report -- don't produce a duplicate (e.g. a second copy of a test block already on the branch). The orchestrator owns this check; worktree agents can't see each other.
+
+## Code & Edit Discipline
+
+50. **Verify an API supports a call before chaining on it** `[frequent]` -- confirm a method/type actually exists (docs, types, or a tiny probe) before building on it, and run the targeted test BEFORE committing the first attempt, not after. About a quarter of sessions started with a fix that didn't typecheck and needed a full revert (e.g. chaining `.abortSignal()` after a Supabase `.single()` that doesn't return it).
+
+51. **Format markdown tables programmatically, never by hand** `[universal]` -- run `markdownlint --fix` / `prettier --write` to align tables; never byte-tweak column padding to satisfy the linter. Hand-alignment is slow and regresses on the next edit.
+
 ## Deployment & Resources
 
 30. **Merging to main IS deploying to production** `[universal]` -- in projects with CI/CD, a merge is a deployment. Dependabot PRs target main by default -- merging them deploys to production.
@@ -91,6 +101,10 @@ Stack: `[node]` `[python]` `[macos]` `[github]` (omitted = all stacks)
 
 35. **Justify every external action before triggering** `[universal]` -- before any CI run, deployment, or API call: Is this needed? Is this justified? Is this verifiable? If any answer is "no", stop.
 
+52. **No CodeQL workflow without GHAS** `[github]` -- a code-scanning workflow fails CI on every push unless GitHub Advanced Security is enabled. Confirm first (`gh api repos/{owner}/{repo}/code-scanning/alerts` returns non-403) before adding the workflow. GHAS is free on public repos but a paid add-on on private repos -- on private, enabling it is a human cost decision, not an autonomous fix. Querying existing alerts (what `/triage` does) is always safe; creating the scanner is not. See [ci-and-guardrails.md](../methodology/ci-and-guardrails.md).
+
+53. **Standardize GitHub repo settings for every project** `[universal]` `[github]` -- apply the canonical configuration at setup so bootstrapped repos don't drift: squash-merge only (disable merge commits and rebase merges), auto-merge enabled, delete-branch-on-merge enabled, Dependabot alerts + security update PRs on, and the Production deployment environment restricted to protected branches only. Squash-only is why worktree cleanup needs `git branch -D` and why `develop` -> `main` release PRs must NOT use `--delete-branch`. Configure via `gh api -X PATCH repos/{owner}/{repo} -f allow_squash_merge=true -f allow_merge_commit=false -f allow_rebase_merge=false -f delete_branch_on_merge=true -f allow_auto_merge=true`.
+
 ## Cost & Models
 
 46. **Pin a model tier to every workflow** `[universal]` -- model choice is the biggest lever on the inference bill. Each prompt declares a `Model tier` (opus/sonnet/haiku); bind each tier to a concrete model and run the floor by default. Frontier is for `/research` and `/plan` only. Subagents inherit their workflow's tier. Override upward when a task proves harder; never silently downward. See [cost-monitoring.md](../methodology/cost-monitoring.md).
@@ -104,6 +118,8 @@ Stack: `[node]` `[python]` `[macos]` `[github]` (omitted = all stacks)
 ## Quality & Process
 
 37. **Fix everything, always** `[universal]` -- categorize by severity, but fix 100%. With AI agents, fix cost is near-zero.
+
+54. **No emojis in documentation** `[universal]` -- use text equivalents (PASS, `[x]`, `->`), not emoji/pictographs. Arrows, dashes, and box-drawing characters are allowed. Markdown CI lints structure but does not block emoji, so this is a discipline rule -- keep docs plain text.
 
 ## Observability
 

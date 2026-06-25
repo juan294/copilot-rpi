@@ -107,7 +107,9 @@ That's it. Those four commands are 90% of your interaction with the methodology.
 | `/describe-pr` | Generates a PR description from the current branch's diff and commit history. | Before opening or updating a PR. |
 | `/pre-launch` | 8-specialist deep-dive audit (Principal Architect, Staff FE/BE, Performance Engineer, DevOps/SRE Lead, Security Reviewer, QA/Reliability Lead, UX Lead). Produces a 16-section report with structured finding IDs and a READY/CONDITIONAL/NOT READY verdict. | Before any production release. |
 | `/remediate` | Parses the pre-launch report, creates GitHub issues for every finding, processes in 3 waves (Before launch / After launch / Later). Wave 1-2 spawn TDD agents in worktrees; Wave 3 files issues only. Merges sequentially, verifies CI, runs `/quality-review` twice. | After `/pre-launch` when findings exist. |
-| `/triage` | Discovers overnight agent reports via timestamp-based scanning, checks for agent failures in logs, scans open Dependabot PRs (Rule #45), synthesizes findings, proposes action plan, implements fixes, then auto-merges patch/minor Dependabot PRs with green CI. Public repos: reports stay local. Private repos: reports are committed alongside fixes. | Every morning. First command of the day for each project. |
+| `/brainstorm` | Socratic, one-question-at-a-time intake that refines a vague or greenfield idea into a design brief at `docs/research/`, which `/plan` then consumes. Optional RPI pre-step, not a fifth phase. | Greenfield or vague work where the request is a goal, not a spec, and there is no existing code to `/research`. |
+| `/debug` | A disciplined root-cause procedure for novel bugs: reproduce, isolate, hypothesize, fix-root-cause, verify, plus stop-conditions. Routes known tool/git/CI failures to `patterns/`. | A non-obvious bug, a fix that didn't hold, or the same thing tried twice without progress. |
+| `/triage` | Discovers overnight agent reports via timestamp-based scanning, checks for agent failures in logs, queries GitHub Security & Quality Alerts (code scanning/CodeQL, Dependabot security, secret scanning), scans open Dependabot PRs (Rule #45), synthesizes findings (including `leanness-report.md`), proposes action plan, implements fixes, then auto-merges patch/minor Dependabot PRs with green CI. Public repos: reports stay local. Private repos: reports are committed alongside fixes. | Every morning. First command of the day for each project. |
 | `/status` | Quick 5-line project orientation: branch, last commit, working tree, CI status, open items. | Start of session. Quick check without starting a full task. |
 | `/update-docs` | Investigates 4 areas (changes, doc inventory, diagrams, version refs), then updates all documentation, Mermaid diagrams, version references, and inline code docs based on changes since last release. | After features/fixes are done, before releasing. |
 | `/release` | Detects project type and branching strategy, bumps versions everywhere, generates CHANGELOG entry, creates release commit and tag, publishes GitHub release, advises on registry publish. | When ready to cut a new version. Run `/update-docs` first. |
@@ -236,7 +238,7 @@ The blueprint uses three layers to deliver operational knowledge without bloatin
 | **`.github/instructions/`** | Conditional on file types | When matching files are in context | `applyTo` globs |
 | **Reference catalogs** | On-demand debugging | Agent reads when needed | `patterns/` |
 
-The 44 operational rules (including 6 Copilot-specific rules covering prompt file frontmatter, `${input:var}` syntax, instruction file globs, CLI auth, auto-compaction, and chatmode directories) are organized by domain with scope/stack tags for easy scanning in `patterns/quick-reference.md`.
+The 54 operational rules (including 6 Copilot-specific rules covering prompt file frontmatter, `${input:var}` syntax, instruction file globs, CLI auth, auto-compaction, and chatmode directories) are organized by domain with scope/stack tags for easy scanning in `patterns/quick-reference.md`.
 
 Domain-specific rules (deployment safety, Supabase, testing) load automatically from `.github/instructions/` when relevant files are in context -- without bloating AGENTS.md.
 
@@ -285,8 +287,10 @@ your-project/
 ├── .github/
 │   ├── copilot-instructions.md       # Copilot-specific addenda (optional)
 │   ├── prompts/                      # Prompt files (invoked with /)
+│   │   ├── brainstorm.prompt.md
 │   │   ├── research.prompt.md
 │   │   ├── plan.prompt.md
+│   │   ├── debug.prompt.md
 │   │   ├── implement.prompt.md
 │   │   ├── validate.prompt.md
 │   │   ├── describe-pr.prompt.md

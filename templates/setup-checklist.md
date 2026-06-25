@@ -70,14 +70,16 @@ Use this when setting up a new project to follow copilot-rpi best practices.
 
 Copy and adapt from `templates/prompts/`:
 
+- [ ] `/brainstorm` — Optional RPI pre-step: refine a vague/greenfield idea into a design brief
 - [ ] `/research` — Codebase research with documentarian constraint
 - [ ] `/plan` — Interactive plan creation with phases
 - [ ] `/implement` — Phase-by-phase execution with review gates
 - [ ] `/validate` — Post-implementation verification
+- [ ] `/debug` — Systematic root-cause procedure for novel bugs
 - [ ] `/describe-pr` — PR description generation
 - [ ] `/pre-launch` — Multi-specialist production audit
 - [ ] `/remediate` — Fix all pre-launch findings with parallel TDD agents
-- [ ] `/triage` — Morning agent report processing and action
+- [ ] `/triage` — Morning processing of agent reports, GitHub alerts, and Dependabot PRs
 
 Verify each file has valid YAML frontmatter with `mode:` and `description:` fields.
 

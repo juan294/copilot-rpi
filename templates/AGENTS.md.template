@@ -77,6 +77,31 @@ git pull --rebase && git push
 
 Run verification sequentially with `;` or `&&`, never as parallel processes.
 
+### Cleanup After Merge
+
+`gh pr merge --squash --delete-branch` deletes only the **remote** branch. A
+complete cleanup also covers worktrees, the local branch, and stale tracking
+refs -- then verifies nothing is left dangling (otherwise the "done" leaves a
+second pass behind):
+
+```bash
+# 1. Remove worktrees FIRST (a branch checked out in a worktree won't delete)
+git worktree remove --force /absolute/path/to/worktree
+git worktree prune
+
+# 2. Delete the local branch (remote went with --delete-branch at merge)
+git branch -D <branch>      # uppercase -D: squash merges are never "fully merged"
+
+# 3. Drop stale remote-tracking refs for branches deleted on the remote
+git fetch --prune
+
+# 4. Verify -- these should list ONLY active work, nothing merged
+git branch --merged         # local branches already merged
+git worktree list           # lingering worktrees
+```
+
+Anything still listed in step 4 is the "second pass" -- finish it now, not later.
+
 ## Deployment
 
 [Describe your deployment pipeline -- which branch deploys where]

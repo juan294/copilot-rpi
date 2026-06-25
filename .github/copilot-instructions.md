@@ -11,7 +11,7 @@ Always internalize `patterns/quick-reference.md` before any work. The most criti
 2. `git pull --rebase` before pushing — remote may have advanced
 3. Remove worktrees BEFORE merging PRs with `--delete-branch`
 4. `git worktree remove --force` — always force; use `;` not `&&` for chains
-5. `git branch -D` (uppercase) for worktree branches — squash merges mean they're never "fully merged"
+5. `git branch -D` (uppercase) for worktree branches — squash merges mean they're never "fully merged". After merge, finish cleanup: `git fetch --prune`, then verify with `git branch --merged` / `git worktree list` so nothing is left dangling
 6. Don't guess `gh` CLI `--json` field names — run `gh <cmd> --json 2>&1 | head -5` first
 7. Always TDD — Red-Green-Refactor, no "tests later"
 8. Exhaust all tools before suggesting manual steps
