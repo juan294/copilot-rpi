@@ -6,6 +6,58 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [1.17.0] - 2026-06-25
+
+Catch-up sync porting cc-rpi v1.18-v1.24 learnings (the contract-layer **hooks**
+and metrics from cc-rpi v1.22-v1.23 are intentionally NOT ported -- GitHub Copilot
+has no PreToolUse/PostToolUse hook mechanism, so they could only land as inert
+documentation).
+
+### Added
+
+- **7 new operational rules (#48-#54), rule count 47 -> 54.**
+  - #48 **Watchdog + terminal condition** -- every spawned `copilot -p` agent gets
+    a single-sentence task, an explicit stop condition, and a ~15-20 min wall-clock
+    budget; kill overruns rather than assuming progress.
+  - #49 **Dedup against repo state** -- check `git log`/`git status`/`grep` before
+    doing or continuing work so a sibling's committed work is not duplicated.
+  - #50 **Verify an API supports a call before chaining on it** -- confirm the
+    method/type exists and run the targeted test BEFORE committing the first attempt.
+  - #51 **Format markdown tables programmatically** -- `markdownlint --fix` /
+    `prettier --write`, never hand-aligned column padding.
+  - #52 **No CodeQL workflow without GHAS** -- a code-scanning workflow fails CI on
+    every push unless GitHub Advanced Security is enabled; confirm first.
+  - #53 **Standardize GitHub repo settings** -- squash-only merges, auto-merge,
+    delete-branch-on-merge, Dependabot alerts, protected Production environment.
+  - #54 **No emojis in documentation** -- text equivalents (PASS, `[x]`, `->`).
+- **Methodology: "Scope Discipline and the Watchdog"** (`agent-design.md`) --
+  orchestrator obligations table plus wrong/right spawn and dedup examples, drawn
+  from a real 2h+ runaway agent incident.
+- **Methodology: "Code Scanning Requires GHAS"** (`ci-and-guardrails.md`) --
+  `gh api` probe, public-free vs private-paid distinction.
+- **Methodology: "Checkpoint and Resume"** (`scheduled-agents.md`) -- bash
+  step-marker pattern (`done_step`/`mark_step`) so headless `copilot -p` agents
+  survive mid-flight auth/5xx/529 errors without restarting from scratch.
+- **Git Workflow: "Cleanup After Merge"** (`AGENTS.md` template +
+  copilot-instructions) -- complete post-merge recipe: worktree remove -> local
+  branch delete -> `git fetch --prune` -> verify nothing dangling.
+- **`/brainstorm` prompt** (ported from cc-rpi v1.21) -- Socratic, one-question-at-a-time
+  intake that produces a design brief for `/plan`. Optional RPI pre-step.
+- **`/debug` prompt** (systematic-debugging, ported from cc-rpi v1.21) -- disciplined
+  root-cause loop for novel bugs (Copilot has no auto-consulted skills, so this is an
+  invocable prompt).
+- **`/triage` covers GitHub Security & Quality Alerts and `leanness-report.md`**
+  (ported from cc-rpi v1.22). Every triage run now queries code scanning/CodeQL,
+  Dependabot security, and secret scanning alerts (a failed query is itself a
+  finding), and extracts each leanness recommendation as its own action item.
+- **`/release` adds the develop-based flow** (ported from cc-rpi v1.20) -- detects a
+  permanent `develop` integration branch and releases via a direct `develop` -> `main`
+  PR, never passing `--delete-branch` on the permanent branch.
+
+### Fixed
+
+- `/triage` "fix everything" rule reference corrected from Rule #31 to Rule #37.
+
 ## [1.16.0] - 2026-06-12
 
 ### Added
