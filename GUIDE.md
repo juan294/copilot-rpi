@@ -112,6 +112,7 @@ That's it. Those four commands are 90% of your interaction with the methodology.
 | `/triage` | Discovers overnight agent reports via timestamp-based scanning, checks for agent failures in logs, queries GitHub Security & Quality Alerts (code scanning/CodeQL, Dependabot security, secret scanning), scans open Dependabot PRs (Rule #45), synthesizes findings (including `leanness-report.md`), proposes action plan, implements fixes, then auto-merges patch/minor Dependabot PRs with green CI. Public repos: reports stay local. Private repos: reports are committed alongside fixes. | Every morning. First command of the day for each project. |
 | `/status` | Quick 5-line project orientation: branch, last commit, working tree, CI status, open items. | Start of session. Quick check without starting a full task. |
 | `/update-docs` | Investigates 4 areas (changes, doc inventory, diagrams, version refs), then updates all documentation, Mermaid diagrams, version references, and inline code docs based on changes since last release. | After features/fixes are done, before releasing. |
+| `/explore-release` | Wave B of E2E Pro: diff-driven, fresh-context exploratory charters against a fixed release candidate. Every charter reports all eight maneuvers (repeat, recover, interrupt, second role, locale/viewport, copy-vs-outcome, downstream readback, should-this-exist) as PASS/FAIL/N-A. Blocks on any FAIL or skipped high-risk area. Feeds evidence to `/release`; never tags. | After the release candidate is fixed, before tagging. |
 | `/release` | Detects project type and branching strategy, bumps versions everywhere, generates CHANGELOG entry, creates release commit and tag, publishes GitHub release, advises on registry publish. | When ready to cut a new version. Run `/update-docs` first. |
 | `/fix-ci` | Self-healing CI: gets failure logs, spawns parallel fix agents per failure category, iterates until green or retry budget exhausted. | When CI is red. Automates the diagnose-fix-verify loop. |
 
@@ -121,7 +122,7 @@ Each command runs on a model tier — frontier where reasoning matters, the chea
 
 | Tier | Commands | Why |
 |------|----------|-----|
-| **opus** (frontier) | `/research`, `/plan`, `/pre-launch` | Deep reasoning — a bad output amplifies downstream. |
+| **opus** (frontier) | `/research`, `/plan`, `/pre-launch`, `/explore-release` | Deep reasoning — a bad output amplifies downstream. |
 | **sonnet** (mid) | `/implement`, `/validate`, `/quality-review`, `/remediate`, `/fix-ci`, `/triage`, `/bootstrap`, `/adopt`, `/detach`, `/release`, `/update-docs`, `/update` | Executes against a reviewed plan. |
 | **haiku** (floor) | `/status`, `/describe-pr` | Mechanical read-and-summarize. |
 
@@ -136,8 +137,34 @@ For multi-project orchestration, use `morning-triage.sh` to run `/triage` across
 The recommended pre-release sequence:
 
 ```text
-/pre-launch -> /remediate -> /update-docs -> /release
+/pre-launch -> /remediate -> /update-docs -> /explore-release -> /release
 ```
+
+`/pre-launch` + `/remediate` audit the code as written. `/explore-release` runs
+last, against the *fixed candidate*, and exercises the deployed thing's actual
+behavior. The two catch different classes of defect; neither substitutes for the
+other. See [Release Verification](#release-verification-e2e-pro).
+
+### Release Verification (E2E Pro)
+
+`templates/e2e-pro-playbook-template.md` is a copy-and-adapt blueprint that turns
+release verification into auditable evidence. It answers one question: did every
+*required* check actually run and pass against the exact artifact being tagged?
+
+The mandatory floor is **Wave A** — a release gate that cannot lie. Zero passing
+checks fails. A required check that skips or fails blocks the release, even when
+quarantined. Candidate identity is fixed and verified. The tag comes last. Wave A
+is cheap and mechanical; adopt it on every project.
+
+**Wave B** is `/explore-release`: diff-driven exploratory charters run in fresh
+contexts by agents that did not implement the change. Waves C-H (capability
+registry, constrained-combination engine, release-plan compiler, staging fidelity,
+model-based harnesses, TTL automation) are structural and expensive — adopt them by
+project risk, delete what doesn't apply, and record why.
+
+E2E Pro sits alongside the existing machinery rather than replacing it: `/release`
+keeps tagging authority, `/pre-launch` + `/remediate` stay the static audit, and
+`methodology/testing.md` still governs everyday test design.
 
 ### Copilot-Specific Features
 
@@ -364,6 +391,7 @@ The blueprint adapts to six project archetypes: web applications, libraries, CLI
 | Operational rules | `patterns/quick-reference.md` | 55 rules with scope/stack tags, organized by domain |
 | Deployment safety | `patterns/deployment-safety.md` | Resource efficiency and production deployment rules |
 | Instruction templates | `templates/github/instructions/` | 5 path-specific rule templates (tests, API, migrations, deployment, supabase) |
+| Release verification | `templates/e2e-pro-playbook-template.md` | E2E Pro playbook; Wave A gate + structural waves, `/explore-release` runs Wave B |
 | Worked examples | `examples/README.md` | Sample research docs, plans, logs, pseudocode |
 
 ## Credits

@@ -6,6 +6,122 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [1.18.0] - 2026-07-29
+
+Catch-up sync porting the generic, Copilot-applicable parts of cc-rpi v1.25.0
+through v1.28.2. The contract-layer **hooks** and their telemetry remain
+un-ported for the same reason as v1.17.0 -- GitHub Copilot has no
+PreToolUse/PostToolUse mechanism -- but this release closes that gap a different
+way: the mechanically-checkable rules now run in CI instead.
+
+### Added
+
+- **Error #40 + Rule #55 -- "a finding's recommendation is a hypothesis."**
+  A remediation agent implements an audit finding's proposed fix literally and
+  breaks a correctness/UX invariant the fix never verified. Real case: a
+  Performance finding traded server-side locale resolution for ISR on the
+  highest-traffic route, breaking i18n for every cookie-based (returning) user
+  -- the symptom test ("ISR restored") passed; no test guarded "an English user
+  sees an English body." Error count: 39 -> 40. Rule count: 54 -> 55.
+- **Three repo-invariant scripts, all CI-enforced**, each emitting BLOCKED/WHY/FIX
+  with a runnable fix:
+  - `verify-counts.sh` -- stated error/rule counts match the catalogs, no
+    duplicate rule numbers, and no gap in the numbering that the Retirement
+    Ledger does not explain.
+  - `verify-version.sh` -- CHANGELOG is the source of truth; the previous
+    version must survive nowhere outside it. This repo's README badge is
+    *dynamic* (shields.io reads the releases API), so check 1 adapts rather than
+    demanding a hardcoded location -- and stays ready for projects that have one.
+  - `verify-prompts.sh` -- **the Copilot-native analogue of cc-rpi's hook layer.**
+    Copilot cannot enforce at edit time, so CI is the enforcement point: prompt
+    frontmatter (Rule #20), no `$ARGUMENTS` (Rule #21), `applyTo` on instruction
+    files (Rule #22), chatmode placement (Error #16), template-vs-self-applied
+    drift, and no emoji (Rule #54). Four rules that were advisory prose are now
+    a hard gate.
+- **New `Validate` workflow** running all three scripts plus shellcheck over
+  every shipped script.
+- **E2E Pro release-verification playbook** (`templates/e2e-pro-playbook-template.md`)
+  -- a copy-and-adapt blueprint that turns release verification into auditable
+  evidence: it proves every *required* check actually ran and passed against the
+  exact artifact being tagged. 20-decision ledger, 8-wave implementation plan,
+  capability registry, constrained-combination engine, per-release plan compiler,
+  multi-layer evidence model. Its mandatory floor is **Wave A** (a release gate
+  that cannot lie: zero-pass fails, required skip/fail blocks even when
+  quarantined, candidate identity is fixed, tag is last); Waves C-H are adopted
+  by project risk. Sits alongside `/release`, `/pre-launch` + `/remediate`, and
+  `methodology/testing.md` -- it does not replace them.
+- **`/explore-release` prompt** -- Wave B of E2E Pro: diff-driven, fresh-context
+  exploratory charters with a mandatory eight-maneuver table, a synthetic-fixture
+  safety contract, and a block-on-failure gate. Feeds evidence to `/release`;
+  never tags.
+- **Retirement path for the rule corpus** (`CONTRIBUTING.md`): four admissible
+  grounds (superseded / tool-enforced / model-native / merged), a procedure that
+  blocks while inbound references remain, and a Retirement Ledger. `/release`
+  now asks what came OUT each cycle, not just what went in. The corpus had an
+  intake path and no exit path.
+- **Deviation log** -- `/implement` records departures taken inside its own
+  authority as plan said / found / chose / why, and `/validate` reads it instead
+  of reconstructing intent from the diff.
+- Methodology: **"Interface Design Over Worked Examples"** (`agent-design.md`) --
+  design parameters, enums, and `applyTo` globs so correct use is implied; reach
+  for an example only when it encodes an environment fact the interface cannot
+  carry. **"A Spec Doesn't Have to Be Prose"** (`context-engineering.md`) -- a
+  failing test, a module to port semantics from, a mockup, a schema, or a rubric
+  all beat prose; point at what can be executed or diffed.
+- Implement-phase guard against Error #40 in `methodology/four-phases.md`.
+
+### Changed
+
+- **`/pre-launch`** gains a **Second-order rule** (a finding is a hypothesis, not
+  a work order; when a non-functional goal conflicts with a correctness,
+  security, or UX invariant, default to the invariant and flag the trade) and a
+  new **required `Regression risk` field** on every finding. A blanket "none" on
+  a behavior-changing finding is a contract failure.
+- **`/remediate`** gains a **verify-the-recommendation gate**: worktree agents
+  independently confirm a finding's assumptions in real code and write the guard
+  test against the invariant (not the symptom) before implementing. A
+  recommendation that fails verification or trades away an invariant **halts**
+  and escalates to a human rather than being implemented literally. Adds a
+  "Halted" report line.
+- **`/release`** hardened against missed version strings: Step 1 now mandates a
+  `git grep` of the current version instead of relying on memory, and names the
+  recurring blind spots (shields.io badges carry the version up to 3x on one
+  line); Step 2 re-greps the OLD version after the bump. Also adds the
+  retirement review.
+- **`/plan`** prefers pointing at an executable or checkable artifact over
+  describing behavior in prose.
+- **`/validate`** offers -- does not force -- a short explainer of what changed
+  and why for whoever reviews the merge.
+- `/bootstrap`, `/adopt`, `/update`, `/detach`, `templates/setup-checklist.md`,
+  `GUIDE.md`, and `README.md` all wired for E2E Pro and `/explore-release`.
+- The pre-release sequence is now
+  `/pre-launch -> /remediate -> /update-docs -> /explore-release -> /release`.
+
+### Fixed
+
+- **`.github/prompts/remediate.prompt.md` had drifted several releases behind
+  its template** -- the copy this repo actually runs on itself was missing the
+  parser contract, the wave selector, and the grouping hierarchy. Found by the
+  new `verify-prompts.sh`, which now prevents it recurring.
+- **`GUIDE.md` claimed "45 rules" against a corpus of 54.** Caught by
+  `verify-counts.sh` on its first run; that class of drift is now mechanically
+  impossible.
+- **`/detach` orphaned eight project-level prompts** it never listed
+  (`brainstorm`, `debug`, `remediate`, `release`, `update-docs`, `triage`, and
+  now `explore-release`), leaving them behind after a detach. `/update`'s Phase 3
+  had the same partial list.
+- **The deviation log would have been deleted before `/validate` could read it**
+  -- `docs/plans/` was gitignored wholesale. Now `docs/plans/*` plus
+  `!docs/plans/*-notes.md`. The `/*` matters: git cannot re-include a path whose
+  parent **directory** is excluded, so the obvious form silently does nothing.
+- **Privacy:** Error #21 illustrated itself with the maintainer's real home
+  directory layout, and `morning-triage.sh` named an internal orchestrator.
+  Both genericized, keeping the instructive shape -- Error #21 still contrasts a
+  real parent directory against a plausible invented one, because inventing a
+  believable parent is the specific failure it documents.
+- `PROJECT_NAME` in `agent-utils.sh` is annotated as part of the library's public
+  surface, so shellcheck can gate the scripts without a false positive.
+
 ## [1.17.0] - 2026-06-25
 
 Catch-up sync porting cc-rpi v1.18-v1.24 learnings (the contract-layer **hooks**

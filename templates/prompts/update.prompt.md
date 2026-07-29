@@ -44,7 +44,9 @@ On incremental syncs (lastSyncCommit exists), prioritize reading files that appe
 
 1. Compare each file in copilot-rpi `templates/prompts/` against this project's `.github/prompts/`:
    - **Skip** `bootstrap.prompt.md` and `adopt.prompt.md` -- these are blueprint-level commands, not project-level.
-   - For each remaining prompt (research, plan, implement, validate, describe-pr, pre-launch, update):
+   - For each remaining prompt (brainstorm, research, plan, implement, validate, debug,
+     describe-pr, pre-launch, remediate, explore-release, release, update-docs,
+     quality-review, triage, status, fix-ci, update):
      - If it exists in both locations and the copilot-rpi version is different -> replace the project version.
      - If it exists in copilot-rpi but not in this project -> add it.
      - If it exists only in this project -> leave it (project-specific prompt).
