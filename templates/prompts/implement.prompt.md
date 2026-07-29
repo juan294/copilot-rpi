@@ -24,6 +24,13 @@ Process:
    d. Run ALL automated verification commands via #tool:terminal.
    e. Update checkboxes in the plan file.
    f. Recommend running `/quality-review` for a second-pass review (code reuse, quality, efficiency). This is a separate concern from plan compliance — self-review checks "did I follow the plan?" while quality review checks "is the code good?"
+   g. If you departed from the plan, append the decision to
+      `docs/plans/<plan-name>-notes.md` under `## Deviations`, as:
+      plan said / found / chose / why. Deviations only -- never narration,
+      and no file at all if the phase had none. Reference the plan by name,
+      not as a markdown link -- the plan itself stays untracked, so a link to
+      it dangles in a clean checkout. Commit the notes file with the phase.
+      `/validate` reads it.
 6. STOP. Report results and wait for human confirmation.
 7. Do NOT proceed to the next phase without confirmation.
 

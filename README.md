@@ -73,7 +73,8 @@ Ready-to-use starting points for new projects:
 - **VS Code settings template** — `.vscode/settings.json` for Copilot configuration
 - **MCP config template** — `.vscode/mcp.json` for external tool access
 - **Setup checklist** — Step-by-step guide including prompt files, instructions, chatmodes, CI, and hooks
-- **Prompt files** — `/bootstrap`, `/adopt`, `/research`, `/plan`, `/implement`, `/validate`, `/quality-review`, `/describe-pr`, `/pre-launch`, `/remediate`, `/triage`, `/status`, `/fix-ci`
+- **Prompt files** — `/bootstrap`, `/adopt`, `/research`, `/plan`, `/implement`, `/validate`, `/quality-review`, `/describe-pr`, `/pre-launch`, `/remediate`, `/explore-release`, `/triage`, `/status`, `/fix-ci`
+- **E2E Pro playbook** — Release-verification template that proves every required check ran and passed against the exact artifact being tagged
 - **Path-specific instructions** — Auto-loaded rules for tests, APIs, migrations, deployment safety, and Supabase
 - **Chat modes** — RPI Research (documentarian), RPI Planner (interactive planning), RPI Auditor (validation)
 

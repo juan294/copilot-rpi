@@ -79,6 +79,7 @@ Copy and adapt from `templates/prompts/`:
 - [ ] `/describe-pr` — PR description generation
 - [ ] `/pre-launch` — Multi-specialist production audit
 - [ ] `/remediate` — Fix all pre-launch findings with parallel TDD agents
+- [ ] `/explore-release` — Fresh-context exploratory charters against a fixed release candidate (E2E Pro Wave B)
 - [ ] `/triage` — Morning processing of agent reports, GitHub alerts, and Dependabot PRs
 
 Verify each file has valid YAML frontmatter with `mode:` and `description:` fields.
@@ -197,6 +198,28 @@ Each file must have `applyTo` in YAML frontmatter -- without it, the file is sil
 - [ ] Test with `launchctl start` (macOS) -- don't test from a terminal, it masks launchd issues
 - [ ] Verify with `bash scripts/agents/install-agents.sh --status`
 
+## Release Verification (E2E Pro)
+
+E2E Pro is the release-**verification** layer: it proves every *required* check
+actually ran and passed against the exact artifact being tagged. It sits in front
+of `/release` (which keeps tagging authority) and complements `/pre-launch` +
+`/remediate` (which audit code as written, not the deployed candidate's behavior).
+
+Adopt by risk, not by default:
+
+- [ ] **Wave A is the mandatory floor for every project** — a release gate that
+  cannot lie: zero-pass fails, a required skip or failure blocks even when
+  quarantined, candidate identity is fixed and verified, and the tag is last.
+  Cheap and mechanical; do this even on small projects.
+- [ ] Copy `templates/e2e-pro-playbook-template.md` into the project (suggested:
+  `docs/plans/e2e-pro-implementation.md`) and replace every `<PLACEHOLDER>` with a
+  verified project-specific value.
+- [ ] Install `/explore-release` (Wave B) — diff-driven exploratory charters with
+  the mandatory eight-maneuver table and a synthetic-fixture safety contract.
+- [ ] Waves C-H (capability registry, combination engine, plan compiler, staging
+  fidelity, model-based tests, TTL automation) are structural and expensive.
+  Adopt by project risk; delete inapplicable sections and record why.
+
 ## Workflow Habits
 
 - [ ] Always `/research` before `/plan` (except greenfield —
@@ -206,6 +229,7 @@ Each file must have `applyTo` in YAML frontmatter -- without it, the file is sil
 - [ ] Never skip the human confirmation gate between implementation phases
 - [ ] Use `/validate` after implementation
 - [ ] Run `/remediate` after `/pre-launch` to fix all findings with parallel agents
+- [ ] Run `/explore-release` before tagging, once the release candidate is fixed
 - [ ] Run `/triage` every morning to process overnight agent reports
 - [ ] Start a new Chat window between unrelated tasks to reset context
 - [ ] Run each RPI phase in its own conversation

@@ -44,7 +44,12 @@ Execute the setup checklist:
 7. Create `.github/chatmodes/` -- set up research and planning chat modes.
 8. Create the directory structure (`docs/research/`, `docs/plans/`, `docs/decisions/`).
 9. Set up the README with the standard header.
-10. Walk through remaining checklist items (pre-commit hooks, CI, git setup).
+10. Set up release verification (E2E Pro): copy
+    `templates/e2e-pro-playbook-template.md` into `docs/plans/e2e-pro-implementation.md`
+    and adapt it. **Wave A is the mandatory floor for every project** -- a release
+    gate that cannot lie. Waves C-H are adopted by project risk; delete what
+    doesn't apply and record why. `/explore-release` runs Wave B.
+11. Walk through remaining checklist items (pre-commit hooks, CI, git setup).
 
 ## Phase 4: Save to Memory
 

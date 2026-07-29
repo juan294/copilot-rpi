@@ -20,6 +20,9 @@ set -euo pipefail
 # Project root — two levels up from scripts/agents/
 # ---------------------------------------------------------------------------
 PROJECT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+# shellcheck disable=SC2034  # part of this library's public surface -- sourcing
+# scripts (install-agents.sh, per-project agent scripts) read PROJECT_NAME to
+# build launchd labels and log paths. Unused *here* by design.
 PROJECT_NAME="$(basename "${PROJECT_DIR}")"
 
 # ---------------------------------------------------------------------------

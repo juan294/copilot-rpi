@@ -90,6 +90,12 @@ Things that exist but differ from the blueprint.
    - Extract to `.github/instructions/` files with `applyTo` frontmatter
    - Remove the inline sections from AGENTS.md
    - Verify `applyTo` globs match the project's actual files
+7. **Offer release verification (E2E Pro)** -- if the project cuts releases, copy
+   `templates/e2e-pro-playbook-template.md` into `docs/plans/e2e-pro-implementation.md`
+   and adapt it. Adopt **Wave A** (the release gate that cannot lie) at minimum;
+   Waves C-H are by project risk. Install `/explore-release` for Wave B. Do this
+   after the prompt files are in place, since the playbook delegates tagging to
+   `/release`.
 
 ## Phase 5: Save to Memory
 

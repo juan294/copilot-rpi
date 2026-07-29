@@ -2,7 +2,7 @@
 
 ## One-liner
 
-Blueprint repository for GitHub Copilot projects. Contains the RPI methodology, 39 known agent error patterns, 54 operational rules, and templates for AGENTS.md, prompt files, instructions, chat modes, and project setup.
+Blueprint repository for GitHub Copilot projects. Contains the RPI methodology, 40 known agent error patterns, 55 operational rules, and templates for AGENTS.md, prompt files, instructions, chat modes, and project setup.
 
 ## Stack
 
@@ -134,9 +134,11 @@ Go directly to these paths -- never search the codebase for them.
 
 | Topic | Path | Notes |
 |-------|------|-------|
-| Error catalog | `patterns/agent-errors.md` | 39 errors, source of truth |
-| Operational rules | `patterns/quick-reference.md` | 54 rules with scope/stack tags |
+| Error catalog | `patterns/agent-errors.md` | 40 errors, source of truth |
+| Operational rules | `patterns/quick-reference.md` | 55 rules with scope/stack tags |
 | Deployment safety | `patterns/deployment-safety.md` | Resource efficiency rules |
+| Release verification | `templates/e2e-pro-playbook-template.md` | E2E Pro playbook; Wave A gate + structural waves, `/explore-release` runs Wave B |
+| Repo invariants | `templates/scripts/verify-counts.sh`, `verify-version.sh`, `verify-prompts.sh` | All three gate CI; each prints BLOCKED/WHY/FIX with a runnable fix |
 | Instruction templates | `templates/github/instructions/` | 5 path-specific rule templates |
 | Methodology | `methodology/` | 11 files, order in README.md |
 | Prompts | `templates/prompts/` | Canonical prompt definitions |

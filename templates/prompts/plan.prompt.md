@@ -17,10 +17,13 @@ Process:
 7. Propose phase structure, get feedback.
 8. Write detailed plan with separate phase files.
 9. Use pseudocode notation for changes.
-10. Separate automated vs. manual success criteria.
-11. Assess phase independence: mark phases that have no file overlap and no dependency on another phase's output as `[batch-eligible]`. These can be executed in parallel via separate `copilot -p` processes or `@copilot` issues.
-12. Maximum 3 [NEEDS CLARIFICATION] markers.
-13. Iterate with user until all questions resolved.
+10. When the plan specifies behavior, prefer pointing at an executable or checkable
+    artifact (a failing test, a module with the semantics to match, a mockup, a rubric)
+    over describing the behavior in prose.
+11. Separate automated vs. manual success criteria.
+12. Assess phase independence: mark phases that have no file overlap and no dependency on another phase's output as `[batch-eligible]`. These can be executed in parallel via separate `copilot -p` processes or `@copilot` issues.
+13. Maximum 3 [NEEDS CLARIFICATION] markers.
+14. Iterate with user until all questions resolved.
 
 Save to docs/plans/YYYY-MM-DD-[description].md
 Phase files: docs/plans/YYYY-MM-DD-[description]-phases/phase-N.md

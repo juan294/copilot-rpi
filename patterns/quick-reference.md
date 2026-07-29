@@ -121,6 +121,8 @@ Stack: `[node]` `[python]` `[macos]` `[github]` (omitted = all stacks)
 
 54. **No emojis in documentation** `[universal]` -- use text equivalents (PASS, `[x]`, `->`), not emoji/pictographs. Arrows, dashes, and box-drawing characters are allowed. Markdown CI lints structure but does not block emoji, so this is a discipline rule -- keep docs plain text.
 
+55. **A finding's recommendation is a hypothesis, not a work order** `[universal]` -- an audit diagnoses well and prescribes narrowly. Authors state a **Regression risk** on every finding (invariants that must hold, assumptions the fix depends on, properties traded away); implementers verify those assumptions against real code before writing anything, and the failing test guards the invariant the fix could break, not the symptom the finding named. When a non-functional goal (perf, bundle size, build time) conflicts with a correctness, security, or UX invariant, default to the invariant and escalate the trade -- never decide it autonomously. A recommendation that fails verification **halts**. See [agent-errors.md](agent-errors.md) Error #40.
+
 ## Observability
 
 38. **Every fallback path must be observable** `[universal]` -- add ERROR-level logging when fallbacks activate, health endpoint coverage for degraded state, and alerting hooks. A silent fallback is a silent production bug.

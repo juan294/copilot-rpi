@@ -26,13 +26,20 @@ Check for these files and note which exist:
 
 **Prompt files** (`.github/prompts/`):
 
+- `brainstorm.prompt.md`
 - `research.prompt.md`
 - `plan.prompt.md`
 - `implement.prompt.md`
 - `validate.prompt.md`
+- `debug.prompt.md`
 - `describe-pr.prompt.md`
 - `pre-launch.prompt.md`
+- `remediate.prompt.md`
+- `explore-release.prompt.md`
+- `release.prompt.md`
+- `update-docs.prompt.md`
 - `quality-review.prompt.md`
+- `triage.prompt.md`
 - `status.prompt.md`
 - `fix-ci.prompt.md`
 - `update.prompt.md`
