@@ -31,5 +31,10 @@ scripts/agents/
 
 # Internal working docs
 docs/research/
-docs/plans/
 docs/decisions/
+
+# Plans stay local, but the deviation log /implement writes must survive to
+# /validate. The `/*` matters: git cannot re-include a path whose parent
+# DIRECTORY is excluded, so the obvious `docs/plans/` + negation does nothing.
+docs/plans/*
+!docs/plans/*-notes.md

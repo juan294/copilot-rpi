@@ -159,6 +159,19 @@ Not all context is needed at all times. AGENTS.md is loaded every session, so it
 
 **In supplementary files:** Use `file:line` references instead of code snippets. Snippets go stale; references can be verified at read time.
 
+### A Spec Doesn't Have to Be Prose
+
+Specs are the source of truth (see [GUIDE.md](../GUIDE.md) and [philosophy.md](philosophy.md)), and `file:line` references beat pasted snippets. Both point at the same underlying preference: point at something that can be executed or diffed, rather than describing it in words that can't be checked. Prose is the fallback, not the default — reach for it only when nothing sharper exists.
+
+Concrete alternatives to look for before writing prose:
+
+- **A failing test suite** — the test IS the spec; making it pass is the definition of done, with no separate description of "correct behavior" to keep in sync.
+- **An existing module with the semantics to port** — point at the module and say "match this," instead of re-deriving its behavior in prose that can drift from the thing it describes.
+- **An HTML mockup or a schema** — a mockup pins down layout and interaction more precisely than a paragraph of UI description; a schema pins down shape more precisely than a paragraph of field descriptions.
+- **A grading rubric** — for open-ended output (a report, a review), a rubric is checkable where "write a good report" is not.
+
+Prose still has a place — as the fallback for behavior with no executable or diffable stand-in — but check for one of these first.
+
 ## AGENTS.md as Context Surface
 
 AGENTS.md is your highest-leverage context engineering tool — it's the only file guaranteed to be in every conversation across all tools (Copilot, Claude Code, Cursor, Gemini CLI). Treat it accordingly:

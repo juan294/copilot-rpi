@@ -238,7 +238,7 @@ The blueprint uses three layers to deliver operational knowledge without bloatin
 | **`.github/instructions/`** | Conditional on file types | When matching files are in context | `applyTo` globs |
 | **Reference catalogs** | On-demand debugging | Agent reads when needed | `patterns/` |
 
-The 54 operational rules (including 6 Copilot-specific rules covering prompt file frontmatter, `${input:var}` syntax, instruction file globs, CLI auth, auto-compaction, and chatmode directories) are organized by domain with scope/stack tags for easy scanning in `patterns/quick-reference.md`.
+The 55 operational rules (including 6 Copilot-specific rules covering prompt file frontmatter, `${input:var}` syntax, instruction file globs, CLI auth, auto-compaction, and chatmode directories) are organized by domain with scope/stack tags for easy scanning in `patterns/quick-reference.md`.
 
 Domain-specific rules (deployment safety, Supabase, testing) load automatically from `.github/instructions/` when relevant files are in context -- without bloating AGENTS.md.
 
@@ -360,8 +360,8 @@ The blueprint adapts to six project archetypes: web applications, libraries, CLI
 | Plan notation | `methodology/pseudocode-notation.md` | How to write and read implementation plans |
 | Testing approach | `methodology/testing.md` | TDD protocol, verification hierarchy |
 | CI ownership | `methodology/push-accountability.md` | Background CI monitoring, fix-and-repush |
-| Error patterns | `patterns/agent-errors.md` | 39 documented errors with symptoms and solutions |
-| Operational rules | `patterns/quick-reference.md` | 45 rules with scope/stack tags, organized by domain |
+| Error patterns | `patterns/agent-errors.md` | 40 documented errors with symptoms and solutions |
+| Operational rules | `patterns/quick-reference.md` | 55 rules with scope/stack tags, organized by domain |
 | Deployment safety | `patterns/deployment-safety.md` | Resource efficiency and production deployment rules |
 | Instruction templates | `templates/github/instructions/` | 5 path-specific rule templates (tests, API, migrations, deployment, supabase) |
 | Worked examples | `examples/README.md` | Sample research docs, plans, logs, pseudocode |

@@ -27,9 +27,27 @@ Gather release context before making any changes.
 3. **Find last release tag** and compute changes since then:
    `git log <last-tag>..HEAD --oneline`
 
-4. **Identify all version-bearing files** -- scan for the current version
-   string across the project: manifests, README badges, install instructions,
-   constants files, docker tags, CI configs, doc site configs.
+4. **Identify all version-bearing files** -- do NOT rely on memory or a static
+   list. Grep the CURRENT version string across the whole repo so nothing is
+   missed:
+
+   ```bash
+   git grep -n -F "1.2.3"; git grep -n -F "v1.2.3"   # both bare and v-prefixed
+   ```
+
+   Hand-maintained version strings drift silently when there is no canonical
+   manifest. Explicitly confirm these commonly-missed locations, even if a
+   scoped scan would skip them:
+
+   - **README/docs shield.io badges** -- the version can appear 3x on ONE line
+     (badge label text, the `img.shields.io` URL, and the `releases/tag/` link href).
+   - **Marketplace or extension manifests** that carry their own `"version"`.
+   - manifests, install instructions, constants files, docker tags, CI configs,
+     documentation site configs, compatibility tables.
+
+   For docs/generic repos with no manifest, git tag + CHANGELOG are the source
+   of truth and every other version string is hand-maintained -- the grep is
+   mandatory, not optional.
 
 5. **Detect branching strategy:**
    - Check if current branch is main/master
@@ -49,7 +67,13 @@ Gather release context before making any changes.
    - Detected branching strategy
    - Suggest major/minor/patch bump based on commit types
 
-7. **Consider related commands:**
+7. **Retirement review.** Ask what rules, errors, or instructions came OUT of
+   the project's guidance corpus this cycle, not just what went in. If the
+   project keeps a retirement ledger, confirm it records them. Answer the
+   question every release, even when the answer is "none" -- a corpus with an
+   intake path and no exit path only grows.
+
+8. **Consider related commands:**
    - If there are unreleased changes, remind the user to consider
      running `/update-docs` first to refresh all documentation.
    - If this is the first release, recommend running `/pre-launch`.
@@ -83,10 +107,16 @@ After the user provides a version number, prepare all files. Do not publish.
    Present the draft to the user for review. Apply edits before writing.
 
 3. **Update version references** in all files identified in Step 1:
-   README badges, install instructions, constants, docker tags, etc.
+   README badges (all occurrences on the line), marketplace/extension
+   manifests, install instructions, constants, docker tags, etc. Then re-run
+   the grep from Step 1 for the OLD version and confirm nothing remains
+   outside CHANGELOG history -- a non-empty result (other than dated CHANGELOG
+   entries) means a file was missed.
 
 4. **Run verification commands** via terminal (chain sequentially):
-   typecheck, lint, test, build.
+   typecheck, lint, test, build. For blueprint/docs repos this includes the
+   repo-invariant scripts (`verify-counts.sh`, `verify-version.sh`,
+   `verify-prompts.sh`).
    If any fail, fix before proceeding.
 
 5. **Present the full diff** to the user.

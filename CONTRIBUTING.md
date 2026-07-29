@@ -32,6 +32,34 @@ Thank you for your interest in contributing! This project improves through commu
 - Use plain, direct language. Avoid filler words.
 - When adding error patterns, include a one-liner in `patterns/quick-reference.md` alongside the detailed entry in `patterns/agent-errors.md`.
 
+### Retiring a Rule or Error
+
+The corpus has an intake path — "New error patterns" above — but without an exit path it only ever grows. This section is the exit path.
+
+A rule or error is a retirement candidate only on one of four grounds:
+
+1. **Superseded** — another rule covers it completely; name the successor.
+2. **Tool-enforced** — CI, a git hook, or a `.github/instructions/` glob now catches it mechanically; the rule becomes an annotation on the enforcement rather than prose.
+3. **Model-native** — current frontier models handle it by judgment, and the rule states no environment fact the model cannot observe.
+4. **Merged** — folded into a broader rule; name the absorbing rule.
+
+Rules that state an environment fact or an exact command are NOT retirement candidates on capability grounds. Model improvement does not make a CLI flag or a frontmatter key knowable.
+
+Retirement procedure:
+
+1. Validate the ground — confirm one of the four above applies, stated in one sentence.
+2. Find every inbound reference — `patterns/quick-reference.md`, `patterns/agent-errors.md`, `templates/prompts/`, `.github/prompts/`, `templates/github/instructions/`, `templates/github/chatmodes/`, `methodology/`, `AGENTS.md`, and `GUIDE.md`. **Blocking condition:** if any inbound reference remains, stop and fix the references before continuing.
+3. Write the ledger entry below: number, release, ground, replacement.
+4. The number is permanently retired and never reused.
+
+Every release runs a retirement review — "what came out this cycle" is asked every time, even when the answer is "nothing."
+
+#### Retirement Ledger
+
+| Rule | Retired in | Ground | Replacement |
+|------|------------|--------|-------------|
+| —    | —          | —      | No retirements yet |
+
 ### Markdown Style
 
 - Use ATX-style headings (`#`, `##`, `###`).

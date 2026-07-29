@@ -1,0 +1,44 @@
+name: Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  invariants:
+    name: Repo invariants
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # verify-version.sh check 2 greps tracked files; the default shallow
+          # clone is enough for that, but CHANGELOG parsing needs the file, not
+          # the history. Full history costs little here and avoids surprises.
+          fetch-depth: 0
+
+      # Each script prints BLOCKED / WHY / FIX with a runnable fix command, so a
+      # failure here tells you what to do rather than only that something broke.
+      # Run sequentially -- a failing earlier check should not be masked.
+      - name: Verify error and rule counts
+        run: bash templates/scripts/verify-counts.sh
+
+      - name: Verify version strings
+        run: bash templates/scripts/verify-version.sh
+
+      - name: Verify Copilot surface contract
+        run: bash templates/scripts/verify-prompts.sh
+
+  shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run shellcheck on shipped scripts
+        run: |
+          shellcheck --severity=warning \
+            templates/scripts/*.sh \
+            templates/scripts/agents/*.sh \
+            templates/scripts/agents/lib/*.sh

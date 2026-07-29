@@ -20,6 +20,20 @@ handoff.
 > nitpicks -- if the same issue appears in 5 places, report it once as a
 > systemic pattern, not five times as nitpicks.
 
+### Second-order rule
+
+A finding is a hypothesis, not a work order. Before you recommend a fix,
+reason one step past it: what must stay true after the change, and what
+could the fix break? A change that resolves your finding but regresses
+another property is not an improvement -- surface the trade instead of
+presupposing the win is worth it. Prefer the narrowest fix that trades
+nothing away. When a non-functional goal (perf, bundle size, build time)
+conflicts with a correctness, security, or UX invariant, default to the
+invariant and flag the conflict for a human decision -- do not silently
+trade correctness for a metric. Capture this reasoning in the finding's
+**Regression risk** field; it is the anchor `/remediate` verifies against
+before implementing anything.
+
 ## Input
 
 Optional focus area hint (e.g., "focus on backend"). Biases synthesis
@@ -119,6 +133,11 @@ One entry per finding (use `####` heading + structured fields):
 - **What's happening:** <factual description>
 - **Why it matters:** <impact, tied to severity>
 - **Recommendation:** <concrete fix direction>
+- **Regression risk:** <invariants that must still hold after the fix, the
+  assumptions the recommendation depends on, and any property the fix trades
+  away. If the fix swaps one mechanism for another, state what the replacement
+  must cover for the swap to be valid. Write "none -- isolated/additive change"
+  only after confirming nothing downstream depends on the behavior you touch.>
 - **Expected impact:** <what improves after the fix>
 - **Effort estimate:** S | M | L | XL
 ```
@@ -139,6 +158,10 @@ Rules:
 - Evidence/inference labeling is mandatory on every finding.
 - Prefer systemic findings: one pattern covering 5 instances > five
   separate nitpicks.
+- **Regression risk** is mandatory and is not boilerplate. A blanket
+  "none" on a finding that changes runtime behavior is a contract failure
+  -- name the invariant or the trade. This is the field `/remediate`
+  verifies before it implements your recommendation.
 
 ### Cross-Domain Notes (optional)
 
@@ -258,6 +281,8 @@ doubt.
 - Run verification commands sequentially, never in parallel.
 - Every finding must include `file:line` refs. No refs = no finding.
 - Evidence/inference labeling is mandatory on every finding.
+- **Regression risk** is mandatory on every finding and must name a real
+  invariant, assumption, or trade -- not boilerplate (Rule #55).
 - Domain Model first: every domain reports its model before findings.
 
 ### Verdict Thresholds
