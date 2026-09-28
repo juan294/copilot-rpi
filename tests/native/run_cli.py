@@ -294,7 +294,8 @@ def probe(args, receipt):
             receipt["checks"]["skill_discovered"] = code == 0 and skill_discovered(output, project)
             if not receipt["checks"]["skill_discovered"]:
                 raise ProbeBlocked("CLI did not discover the rendered project skill; inspect skill list output")
-            prompt = ("/rpi-research Inspect README.md and report the exact fixture marker found there. "
+            prompt = ("/rpi-research Load this skill and state its exact title and purpose from SKILL.md. "
+                      "Then inspect README.md and report the exact fixture marker found there. "
                       "Return a concise research result in stdout. Do not create or modify files.")
             argv = [binary, "-p", prompt, *flags, "--output-format=json"]
             code, output, error = run_process(argv, cwd=project, env=env, deadline=deadline,
