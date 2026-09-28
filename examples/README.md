@@ -17,10 +17,12 @@ What the outputs of each phase look like:
 
 ## Workflow Walkthroughs
 
-End-to-end examples showing how a developer interacts with the methodology. Each walkthrough shows the exact prompts, the agent's responses, and where the developer makes decisions:
+Illustrative examples showing how a developer interacts with the methodology.
+Names, dates, test counts and outcomes in the transcripts are examples, not
+qualification evidence for a native client or a real project:
 
 | File | Scenario |
 |------|----------|
-| `workflows/bootstrap-new-project.md` | Setting up a new project from scratch with `/bootstrap`, then building the first feature with `/plan` and `/implement` |
-| `workflows/add-new-feature.md` | Adding rate limiting to an existing API using the full `/research` → `/plan` → `/implement` → `/validate` cycle |
+| `workflows/bootstrap-new-project.md` | Setting up a new project with `/rpi-bootstrap`, then building the first feature with `/rpi-plan` and `/rpi-implement` |
+| `workflows/add-new-feature.md` | Adding rate limiting to an existing API using `/rpi-research`, `/rpi-plan`, `/rpi-implement` and `/rpi-validate` |
 | `workflows/refactor-existing-code.md` | Refactoring scattered auth logic into a dedicated service — where the phased approach prevents cascading breakage |

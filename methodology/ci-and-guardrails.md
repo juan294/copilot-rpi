@@ -178,7 +178,7 @@ triage cycle to discover and remove.
 - GHAS is free on public repos but a **paid add-on on private repos**. On a
   private repo, treat "enable GHAS" as a human decision (it has a cost), not
   an autonomous fix.
-- `/triage` still *queries* existing code-scanning alerts (that query failing
+- `/rpi-triage` still *queries* existing code-scanning alerts (that query failing
   is itself a YELLOW finding) — but querying alerts and *creating the
   scanner* are different acts. Only the first is always safe.
 

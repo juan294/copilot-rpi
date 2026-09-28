@@ -1,6 +1,7 @@
 """Provenance checks for the pinned, offline upstream intake."""
 
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -209,6 +210,75 @@ class UpstreamCheckerTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("crosswalk hash mismatch", result.stdout)
             self.assertIn("crosswalk copilot_ids mismatch", result.stdout)
+
+    def test_future_intake_requires_decisions_for_new_component_and_changed_rule(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            temp = Path(tmp)
+            source = temp / "source"
+            shutil.copytree(ROOT / "upstream/snapshots", source)
+            manifest = source / "templates/distribution.json"
+            data = json.loads(manifest.read_text())
+            data["components"].append({"id": "resource:future", "kind": "resource", "source": "templates/future.txt"})
+            manifest.write_text(json.dumps(data))
+            (source / "templates/future.txt").write_text("new")
+            rules = source / "patterns/quick-reference.md"
+            rules.write_text(rules.read_text().replace("1. ", "1. Revised ", 1))
+            missing = run_check("--compare-source", source, "--content-only", "--check")
+            self.assertNotEqual(0, missing.returncode)
+            self.assertIn("new component resource:future", missing.stdout)
+            self.assertIn("changed catalog rule:1", missing.stdout)
+            self.assertIn("missing future intake decision", missing.stdout)
+            decisions = temp / "decisions.json"
+            change_hash = re.search(r"changes SHA256: ([0-9a-f]{64})", missing.stdout).group(1)
+            decisions.write_text(json.dumps({"source_sha": "content-only", "changes_sha256": change_hash, "decisions": [
+                {"id": "component:resource:future", "disposition": "deferred", "rationale": "Needs a Copilot adapter."},
+                {"id": "component:resource:distribution-manifest", "disposition": "adapted", "rationale": "Review the manifest change."},
+                {"id": "catalog:rule:1", "disposition": "adapted", "rationale": "Update the matching Copilot rule."},
+            ]}))
+            accepted = run_check("--compare-source", source, "--content-only", "--decisions", decisions, "--check")
+            self.assertEqual(0, accepted.returncode, accepted.stdout)
+            self.assertIn("3 future upstream differences have reviewed decisions", accepted.stdout)
+            (source / "templates/future.txt").write_text("changed again")
+            stale = run_check("--compare-source", source, "--content-only", "--decisions", decisions, "--check")
+            self.assertNotEqual(0, stale.returncode)
+            self.assertIn("decision source changed", stale.stdout)
+
+    def test_future_intake_rejects_dirty_checkout(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "source"
+            shutil.copytree(ROOT / "upstream/snapshots", source)
+            subprocess.run(["git", "init", "-q", source], check=True)
+            subprocess.run(["git", "-C", source, "add", "."], check=True)
+            subprocess.run(["git", "-C", source, "-c", "user.name=Test", "-c", "user.email=test@example.invalid", "commit", "-qm", "snapshot"], check=True)
+            (source / "templates/distribution.json").write_text((source / "templates/distribution.json").read_text() + "\n")
+            result = run_check("--compare-source", source, "--check")
+            self.assertNotEqual(0, result.returncode)
+            self.assertIn("future source checkout is dirty", result.stdout)
+
+    def test_future_intake_detects_resource_link_target_change(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "source"
+            shutil.copytree(ROOT / "upstream/snapshots", source, symlinks=True)
+            inventory = json.loads(INVENTORY.read_text())
+            for record in inventory["links"]:
+                path = source / record["path"]
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.symlink_to(record["target"])
+            relative = inventory["links"][0]["path"]
+            link = source / relative
+            link.unlink()
+            link.symlink_to("SKILL.md")
+            result = run_check("--compare-source", source, "--content-only", "--check")
+            self.assertNotEqual(0, result.returncode)
+            self.assertIn(f"changed link {relative}", result.stdout)
+
+    def test_future_intake_empty_diff_is_noop(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "source"
+            shutil.copytree(ROOT / "upstream/snapshots", source)
+            result = run_check("--compare-source", source, "--content-only", "--check")
+            self.assertEqual(0, result.returncode, result.stdout)
+            self.assertIn("no upstream differences", result.stdout)
 
 
 if __name__ == "__main__":

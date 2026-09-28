@@ -6,7 +6,10 @@ A step-by-step walkthrough of adding a feature to an existing project using the 
 
 ## The scenario
 
-You have a Node.js/Express API that's been running for a few weeks. Users are hitting the login endpoint too aggressively and you need rate limiting. The project was set up with copilot-rpi, so AGENTS.md and all prompt files are in place.
+You have a Node.js/Express API that's been running for a few weeks. Users are
+hitting the login endpoint too aggressively and you need rate limiting. The
+project already has Copilot RPI skills, agents and instructions installed.
+This transcript is illustrative; its paths and test results are example data.
 
 ---
 
@@ -15,7 +18,7 @@ You have a Node.js/Express API that's been running for a few weeks. Users are hi
 Before planning anything, understand what exists today. Open a Copilot Chat window:
 
 ```text
-You: /research how does our API handle requests currently? I want to understand
+You: /rpi-research how does our API handle requests currently? I want to understand
      the middleware chain, error handling, and any existing rate limiting or
      throttling before I add rate limiting to the login endpoint.
 ```
@@ -62,7 +65,7 @@ redis://localhost:6379 configured in src/config/redis.ts.
 Start a **new Chat window**. Clean context for planning:
 
 ```text
-You: /plan add rate limiting to the login endpoint. Research is at
+You: /rpi-plan add rate limiting to the login endpoint. Research is at
      docs/research/2026-02-22-request-handling.md — we have Redis available.
 ```
 
@@ -122,7 +125,7 @@ unreachable, requests pass through without rate limiting.
 New Chat window again. Clean context:
 
 ```text
-You: /implement docs/plans/2026-02-22-rate-limiting.md
+You: /rpi-implement docs/plans/2026-02-22-rate-limiting.md
 ```
 
 ```text
@@ -171,7 +174,7 @@ All phases complete.
 ## Step 4: Validate
 
 ```text
-You: /validate docs/plans/2026-02-22-rate-limiting.md
+You: /rpi-validate docs/plans/2026-02-22-rate-limiting.md
 ```
 
 ```text
@@ -194,19 +197,22 @@ Verdict: All plan objectives achieved.
 
 ---
 
-## Step 5: PR and push
+## Step 5: Prepare the change description
 
 ```text
-You: /describe-pr
+You: /rpi-describe-pr
 ```
 
 ```text
-Copilot: PR description generated. Creating PR...
+Copilot: PR description drafted for review. Publication requires authorization.
 
-> https://github.com/yourname/my-api/pull/12
+> Draft text is ready; no remote action taken yet.
 ```
 
-The agent monitors CI after pushing. If CI fails, it investigates and fixes without you needing to intervene.
+An authorized push comes only after local integration and trigger inspection.
+The agent then inspects every expected CI workflow for the exact pushed commit.
+A failed remote result is reported and diagnosed locally; rerunning or pushing
+again is a separate remote action.
 
 ---
 

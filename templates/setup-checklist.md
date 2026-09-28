@@ -19,14 +19,27 @@ changing the target.
 
 ## Plan, apply and check
 
-Use a verified rendered package and actual absolute paths for `package_dir`,
-`project_dir` and `plan_file`. Its bundled runtime uses Python 3.11+ without
-repository development dependencies. Select the profile in the plan command.
-The example shows Copilot CLI:
+Render the selected profile from a verified blueprint checkout into an empty
+`package_dir` first. The package's `.rpi/copilot-render.json` records its
+profile and every rendered file hash; the lifecycle plan checks that receipt.
+Keep its `.rpi/copilot/runtime/` with the package. Use actual absolute paths
+for `source_dir`, `package_dir`, `project_dir` and `plan_file`. The bundled
+runtime uses Python 3.11+ without repository development dependencies. The
+example selects Copilot CLI. Keep `selected_profile` unchanged through render,
+plan, check and detach; set it to `agent-host` or `vscode-local` for those
+profiles:
+
+```bash
+selected_profile=cli
+python3 "$source_dir/templates/scripts/rpi-distribution.py" render \
+  --source "$source_dir" --profile "$selected_profile" --target "$package_dir"
+```
+
+Then preview the target installation:
 
 ```bash
 python3 "$package_dir/.rpi/copilot/runtime/rpi-distribution.py" plan \
-  --package "$package_dir" --target "$project_dir" --profile cli \
+  --package "$package_dir" --target "$project_dir" --profile "$selected_profile" \
   --output "$plan_file"
 ```
 
@@ -40,7 +53,8 @@ python3 "$package_dir/.rpi/copilot/runtime/rpi-distribution.py" plan \
   python3 "$package_dir/.rpi/copilot/runtime/rpi-distribution.py" apply \
     --plan "$plan_file"
   python3 "$package_dir/.rpi/copilot/runtime/rpi-distribution.py" check \
-    --package "$package_dir" --target "$project_dir"
+    --package "$package_dir" --target "$project_dir" \
+    --profile "$selected_profile"
   ```
 
 - [ ] Verify installed skills and bundled resources under `.github/skills/`,
@@ -103,7 +117,8 @@ owned entries and preserves custom work:
 
 ```bash
 python3 "$package_dir/.rpi/copilot/runtime/rpi-distribution.py" detach \
-  --package "$package_dir" --target "$project_dir" --output "$plan_file"
+  --package "$package_dir" --target "$project_dir" \
+  --profile "$selected_profile" --output "$plan_file"
 python3 "$package_dir/.rpi/copilot/runtime/rpi-distribution.py" apply \
   --plan "$plan_file"
 ```

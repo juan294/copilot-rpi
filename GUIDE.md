@@ -1,399 +1,275 @@
-# The copilot-rpi Guide
+# Guide to Copilot RPI
 
-A practical guide to using the copilot-rpi blueprint for AI-assisted software development with GitHub Copilot.
+Copilot RPI gives a project a repeatable Research, Plan, Implement and
+Validate workflow. Research documents what exists, planning defines testable
+phases, implementation changes one accepted phase at a time, and validation
+checks the result against the plan. Errors in early assumptions can spread
+through later work, so review research and plans before implementation.
 
-## What Is This?
+## Why the phases matter
 
-copilot-rpi is a blueprint repository. You clone it once, and every time you start a new project, you point GitHub Copilot at it and say "set this project up." The agent reads the blueprint, learns the rules, and configures your new project with battle-tested practices — prompt files, error prevention rules, CI setup, the works.
-
-At its core, copilot-rpi teaches GitHub Copilot to work the way experienced developers have found works best: research first, plan second, implement third. This sounds obvious, but without explicit structure, AI coding agents tend to skip straight to writing code — and that's where things go wrong.
-
-## The Big Idea: Research-Plan-Implement
-
-The methodology is called RPI, and it's built on one insight that changes everything:
-
-**Errors amplify as they move downstream.**
-
-A mistake in your research becomes a wrong assumption in your plan, which becomes hundreds of lines of code solving the wrong problem. But a mistake in a single line of code is just... a bug. So the system is designed to focus your attention where it matters most: reviewing the research and the plan, not reading every line of generated code.
-
-Here's what the pipeline looks like:
+A wrong research claim can become a wrong plan and then many lines of code.
+Research therefore describes the present system with `file:line` evidence.
+Planning turns that evidence into explicit behavior and checks. Implementation
+proves one phase at a time. Validation asks whether the final result matches
+the approved plan and its acceptance criteria.
 
 ```text
-Research  ──human reviews──▶  Plan  ──human reviews──▶  Implement  ──human reviews──▶  Validate
-   │                           │                           │                            │
-   ▼                           ▼                           ▼                            ▼
- "What exists?"           "What do we change?"        "Make the changes"         "Did it work?"
+Research: What exists? -> Plan: What changes? -> Implement: Make the change
+         -> Validate: Did the planned behavior and checks pass?
 ```
 
-Each phase runs in its own Copilot Chat window. This is intentional — it keeps the AI's context window clean. A fresh conversation reading a well-written plan performs dramatically better than a long conversation that's been going for an hour.
-
-## The Philosophy in Five Minutes
-
-**1. Research before you act.** Never modify code you haven't read. Every change starts with understanding what exists today, described factually — no opinions, no suggestions, just "here's how the code works right now."
-
-**2. Plan before you implement.** Write a phased plan with explicit success criteria before touching production code. Plans are broken into phases, and each phase has automated tests that prove it works.
-
-**3. Humans gate every transition.** The agent stops between phases and waits for you. You read the research before approving the plan. You read the plan before approving implementation. You confirm each implementation phase before the next one starts.
-
-**4. Context is your only lever.** Every time the AI takes a turn, it's a stateless function: the context window goes in, the next action comes out. There's no hidden memory. The quality of what's in that window is literally the only thing that determines output quality. The entire methodology is designed around this constraint.
-
-**5. Specs are the new code.** In AI-assisted development, your plans and research documents are effectively your source code. The generated code is more like a compiled artifact. Treat your specs with the same rigor you'd treat source files — review them carefully, version them in git, iterate on them until they're right.
-
-## Getting Started
-
-### Step 1: Clone the Blueprint
-
-```bash
-git clone https://github.com/juan294/copilot-rpi.git
-```
-
-Keep this repository somewhere permanent on your machine. You'll reference it from every project.
-
-### Step 2: Set Up Your Project
-
-**Starting a new project?** Open Copilot Chat in VS Code and run:
-
-```text
-/bootstrap
-```
-
-Point it at the copilot-rpi directory. The agent reads the blueprint, asks you about your project (type, stack, conventions), then creates AGENTS.md, .vscode/settings.json, prompt files, path-specific instructions, chat modes, directory structure, and walks you through CI and git setup.
-
-**Migrating an existing project?** Run:
-
-```text
-/adopt
-```
-
-The agent reads the blueprint, audits your project, presents a report showing what's already in place and what's missing, and you choose what to adopt.
-
-### Step 3: Start Working
-
-Once your project is set up, your daily workflow uses four prompt commands:
-
-```text
-/research [topic]     →  Understand the codebase
-/plan [feature]       →  Create an implementation plan
-/implement [plan]     →  Execute the plan phase by phase
-/validate [plan]      →  Verify everything works
-```
-
-That's it. Those four commands are 90% of your interaction with the methodology.
-
-## Command Cheat Sheet
-
-### Setup Commands
-
-| Command | What It Does | When to Use |
-|---------|-------------|-------------|
-| `/bootstrap` | Reads the copilot-rpi blueprint, asks about your project, creates AGENTS.md, settings, prompt files, instructions, chat modes, and full directory structure. | New projects. Run once at the start. |
-| `/adopt` | Reads the blueprint, audits the existing project, presents a gap report, then migrates what you approve. | Existing projects you want to bring up to standard. |
-| `/detach` | Inventories all copilot-rpi artifacts, previews what will be removed, asks for confirmation, then cleanly removes prompts, chat modes, instructions, AGENTS.md sections, and sync metadata. Preserves project config and work products. | When you want to stop using the RPI methodology and remove all blueprint artifacts. |
-
-### The Core Four
-
-| Command | What It Does | When to Use |
-|---------|-------------|-------------|
-| `/research [question]` | Searches the codebase systematically. Produces a research document at `docs/research/`. | Before any change. Understanding comes first. |
-| `/plan [feature]` | Creates a phased implementation plan with pseudocode, success criteria, and test requirements. Saves to `docs/plans/`. | After research is reviewed and approved. |
-| `/implement [plan path]` | Executes the plan one phase at a time. Stops after each phase for your approval. | After the plan is reviewed and approved. |
-| `/validate [plan path]` | Runs every automated check from the plan, verifies all phases are complete, produces a validation report. | After implementation is done. |
-
-### Supporting Commands
-
-| Command | What It Does | When to Use |
-|---------|-------------|-------------|
-| `/quality-review` | Reviews changed files for code reuse, quality, and efficiency. Finds issues and fixes them interactively. | After each implementation phase, or after a `/pre-launch` audit. |
-| `/describe-pr` | Generates a PR description from the current branch's diff and commit history. | Before opening or updating a PR. |
-| `/pre-launch` | 8-specialist deep-dive audit (Principal Architect, Staff FE/BE, Performance Engineer, DevOps/SRE Lead, Security Reviewer, QA/Reliability Lead, UX Lead). Produces a 16-section report with structured finding IDs and a READY/CONDITIONAL/NOT READY verdict. | Before any production release. |
-| `/remediate` | Parses the pre-launch report, creates GitHub issues for every finding, processes in 3 waves (Before launch / After launch / Later). Wave 1-2 spawn TDD agents in worktrees; Wave 3 files issues only. Merges sequentially, verifies CI, runs `/quality-review` twice. | After `/pre-launch` when findings exist. |
-| `/brainstorm` | Socratic, one-question-at-a-time intake that refines a vague or greenfield idea into a design brief at `docs/research/`, which `/plan` then consumes. Optional RPI pre-step, not a fifth phase. | Greenfield or vague work where the request is a goal, not a spec, and there is no existing code to `/research`. |
-| `/debug` | A disciplined root-cause procedure for novel bugs: reproduce, isolate, hypothesize, fix-root-cause, verify, plus stop-conditions. Routes known tool/git/CI failures to `patterns/`. | A non-obvious bug, a fix that didn't hold, or the same thing tried twice without progress. |
-| `/triage` | Discovers overnight agent reports via timestamp-based scanning, checks for agent failures in logs, queries GitHub Security & Quality Alerts (code scanning/CodeQL, Dependabot security, secret scanning), scans open Dependabot PRs (Rule #45), synthesizes findings (including `leanness-report.md`), proposes action plan, implements fixes, then auto-merges patch/minor Dependabot PRs with green CI. Public repos: reports stay local. Private repos: reports are committed alongside fixes. | Every morning. First command of the day for each project. |
-| `/status` | Quick 5-line project orientation: branch, last commit, working tree, CI status, open items. | Start of session. Quick check without starting a full task. |
-| `/update-docs` | Investigates 4 areas (changes, doc inventory, diagrams, version refs), then updates all documentation, Mermaid diagrams, version references, and inline code docs based on changes since last release. | After features/fixes are done, before releasing. |
-| `/explore-release` | Wave B of E2E Pro: diff-driven, fresh-context exploratory charters against a fixed release candidate. Every charter reports all eight maneuvers (repeat, recover, interrupt, second role, locale/viewport, copy-vs-outcome, downstream readback, should-this-exist) as PASS/FAIL/N-A. Blocks on any FAIL or skipped high-risk area. Feeds evidence to `/release`; never tags. | After the release candidate is fixed, before tagging. |
-| `/release` | Detects project type and branching strategy, bumps versions everywhere, generates CHANGELOG entry, creates release commit and tag, publishes GitHub release, advises on registry publish. | When ready to cut a new version. Run `/update-docs` first. |
-| `/fix-ci` | Self-healing CI: gets failure logs, spawns parallel fix agents per failure category, iterates until green or retry budget exhausted. | When CI is red. Automates the diagnose-fix-verify loop. |
-
-### Model Tiers at a Glance
-
-Each command runs on a model tier — frontier where reasoning matters, the cheap floor where the task is mechanical. Bind each tier to a concrete model on adoption and run the floor by default. See [methodology/cost-monitoring.md](methodology/cost-monitoring.md).
-
-| Tier | Commands | Why |
-|------|----------|-----|
-| **opus** (frontier) | `/research`, `/plan`, `/pre-launch`, `/explore-release` | Deep reasoning — a bad output amplifies downstream. |
-| **sonnet** (mid) | `/implement`, `/validate`, `/quality-review`, `/remediate`, `/fix-ci`, `/triage`, `/bootstrap`, `/adopt`, `/detach`, `/release`, `/update-docs`, `/update` | Executes against a reviewed plan. |
-| **haiku** (floor) | `/status`, `/describe-pr` | Mechanical read-and-summarize. |
-
-The recommended daily workflow:
-
-```text
-/triage -> fix all findings -> continue development
-```
-
-For multi-project orchestration, use `morning-triage.sh` to run `/triage` across all projects automatically.
-
-The recommended pre-release sequence:
-
-```text
-/pre-launch -> /remediate -> /update-docs -> /explore-release -> /release
-```
-
-`/pre-launch` + `/remediate` audit the code as written. `/explore-release` runs
-last, against the *fixed candidate*, and exercises the deployed thing's actual
-behavior. The two catch different classes of defect; neither substitutes for the
-other. See [Release Verification](#release-verification-e2e-pro).
-
-### Release Verification (E2E Pro)
-
-`templates/e2e-pro-playbook-template.md` is a copy-and-adapt blueprint that turns
-release verification into auditable evidence. It answers one question: did every
-*required* check actually run and pass against the exact artifact being tagged?
-
-The mandatory floor is **Wave A** — a release gate that cannot lie. Zero passing
-checks fails. A required check that skips or fails blocks the release, even when
-quarantined. Candidate identity is fixed and verified. The tag comes last. Wave A
-is cheap and mechanical; adopt it on every project.
-
-**Wave B** is `/explore-release`: diff-driven exploratory charters run in fresh
-contexts by agents that did not implement the change. Waves C-H (capability
-registry, constrained-combination engine, release-plan compiler, staging fidelity,
-model-based harnesses, TTL automation) are structural and expensive — adopt them by
-project risk, delete what doesn't apply, and record why.
-
-E2E Pro sits alongside the existing machinery rather than replacing it: `/release`
-keeps tagging authority, `/pre-launch` + `/remediate` stay the static audit, and
-`methodology/testing.md` still governs everyday test design.
-
-### Copilot-Specific Features
-
-| Feature | What It Does | When to Use |
-|---------|-------------|-------------|
-| **Chat modes** (`.github/chatmodes/`) | Specialized personas with behavioral constraints. RPI Research mode bakes in the documentarian rule. | Select at the start of a research or planning session. |
-| **Path-specific instructions** (`.github/instructions/`) | Auto-loaded rules based on which files are open. Test conventions fire when test files are in context. | Always active — no manual invocation needed. |
-| **`#codebase`** | Full-repository search in Copilot Chat. | During research to find relevant files. |
-| **`#file:path`** | Add a specific file to the chat context. | When you know which file the agent needs. |
-| **`copilot -p "prompt"`** | Headless CLI mode for background tasks and automation. | CI monitoring, scheduled agents, parallel research. |
-| **`@copilot` cloud agent** | Assign GitHub Issues to Copilot for async implementation. | After completing Research+Plan, delegate Implementation. |
-
-## How the Four Phases Actually Work
-
-### Phase 1: Research
-
-You type `/research how does authentication work in this app?` and the agent:
-
-1. Uses `#codebase` to find all relevant files — locating where auth code lives.
-2. Reads key files to understand how the authentication flow works.
-3. Searches for similar patterns elsewhere in the codebase.
-4. Synthesizes findings into a structured research document.
-5. Saves it to `docs/research/YYYY-MM-DD-auth-flow.md`.
-
-The critical rule here is **documentarian, not critic**. The research describes what exists — it doesn't suggest improvements or identify problems. This keeps the research factual and prevents the agent from jumping to solutions before understanding the problem.
-
-Note: /research is for projects that already have code. If you just bootstrapped a new project and have no code yet, skip /research and start with /plan — there's nothing to research. Once you have code from your first implementation, /research becomes your starting point for every subsequent task.
-
-**Your job:** Read the research document. If it's wrong or incomplete, throw it out and run `/research` again with more specific steering. Multiple passes are normal. Don't approve bad research — it poisons everything downstream.
-
-### Phase 2: Plan
-
-You type `/plan add rate limiting to the login endpoint` and the agent:
-
-1. Reads the research document.
-2. Explores the codebase for additional context.
-3. Asks you focused questions (only things the code can't answer).
-4. Proposes design options with trade-offs.
-5. Writes a phased implementation plan with pseudocode, file-by-file changes, and success criteria.
-6. Saves it to `docs/plans/` with separate files for each phase.
-
-**Your job:** Read the plan carefully. This is where your time has the highest leverage. A bad plan leads to hundreds of bad lines of code. Push back, ask questions, iterate until the plan is right.
-
-### Phase 3: Implement
-
-You type `/implement docs/plans/2026-02-21-rate-limiting.md` and the agent:
-
-1. Reads the plan.
-2. Starts with Phase 1 only.
-3. Implements the changes, self-reviews for plan compliance, runs all automated verification.
-4. Recommends running `/quality-review` for a second-pass review (code reuse, quality, efficiency).
-5. Updates the plan's checkboxes.
-6. **Stops and waits for your confirmation.**
-
-You review, approve, and it moves to Phase 2. One phase at a time. Never auto-proceeding. If the plan marks phases as `[batch-eligible]`, you can run them in parallel via `copilot -p` or `@copilot` issues.
-
-**Your job:** Confirm each phase. If something doesn't look right, say so.
-
-### Phase 4: Validate
-
-You type `/validate docs/plans/2026-02-21-rate-limiting.md` and the agent:
-
-1. Re-reads the plan.
-2. Runs every automated verification command.
-3. Checks that all marked-complete items are actually done.
-4. Thinks about edge cases.
-5. Produces a validation report.
-
-**Your job:** Review the report. Then you're done.
-
-## Key Concepts
-
-### Context Engineering
-
-The entire methodology is a context management strategy. Copilot has a fixed-size context window. Everything the agent needs to make a good decision must fit in that window. If the window fills up with noise, the agent's decisions degrade.
-
-RPI manages this by:
-
-- **Running each phase in its own Chat window.** Fresh context every time.
-- **Producing compact artifacts between phases.** A research doc is a compressed summary of hours of exploration.
-- **Using `#codebase` for focused searches.** Let the search engine do the heavy lifting instead of browsing files manually.
-- **Starting new conversations between unrelated tasks.** Context hygiene is key.
-- **Writing handoff documents proactively.** Don't wait for auto-compaction at 95% — write a handoff doc at 60%.
-
-### The Documentarian Rule
-
-During research, agents describe what IS — never what SHOULD BE. No improvement suggestions, no code critiques, no "this could be refactored." Just factual descriptions with file and line references.
-
-Use the **RPI Research** chat mode to enforce this structurally at the session level.
-
-### Error Prevention -- Three-Layer Progressive Disclosure
-
-The blueprint uses three layers to deliver operational knowledge without bloating every session:
-
-| Layer | Scope | Load Trigger | Location |
-|-------|-------|--------------|----------|
-| **AGENTS.md** | Universal, always-on | Every session | Project root |
-| **`.github/instructions/`** | Conditional on file types | When matching files are in context | `applyTo` globs |
-| **Reference catalogs** | On-demand debugging | Agent reads when needed | `patterns/` |
-
-The 55 operational rules (including 6 Copilot-specific rules covering prompt file frontmatter, `${input:var}` syntax, instruction file globs, CLI auth, auto-compaction, and chatmode directories) are organized by domain with scope/stack tags for easy scanning in `patterns/quick-reference.md`.
-
-Domain-specific rules (deployment safety, Supabase, testing) load automatically from `.github/instructions/` when relevant files are in context -- without bloating AGENTS.md.
-
-### Path-Specific Instructions
-
-Copilot's `applyTo` glob system is one of its strongest features. Rules defined in `.github/instructions/` fire automatically based on which files are open in context:
-
-- Test conventions activate when test files are open
-- API conventions activate when route files are open
-- Deployment safety rules activate when CI/deploy configs are open
-- Supabase rules activate when SQL/migration files are open
-- Migration rules activate when migration files are open
-
-This is progressive disclosure in action -- the agent gets domain-specific rules exactly when it needs them, without bloating AGENTS.md. The blueprint provides 5 instruction templates (tests, API, migrations, deployment-safety, supabase) that projects install selectively based on their stack.
-
-### The `@copilot` Cloud Agent
-
-A unique Copilot capability: assign a GitHub Issue to `@copilot` for async implementation. The workflow:
-
-1. Complete Research + Plan interactively in VS Code
-2. Create a GitHub Issue with the plan attached
-3. Assign `@copilot` to the issue
-4. The cloud agent creates a branch, implements, and opens a PR
-
-This lets you delegate well-specified implementation work and review the result asynchronously.
-
-### Pre-Launch Audit
-
-Before any production release, run `/pre-launch` to audit 8 specialist
-domains: Principal Architect, Staff FE, Staff BE, Performance Engineer,
-DevOps/SRE Lead, Security Reviewer, QA/Reliability Lead, and Product
-Designer/UX Lead. The audit produces a 16-section report with structured
-finding IDs and a verdict: READY, CONDITIONAL, or NOT READY.
-
-Run `/remediate` after to process findings in 3 waves: Wave 1 (Before
-launch -- blockers and high severity), Wave 2 (After launch -- medium
-severity), Wave 3 (Later/strategic -- issues filed, no auto-fix).
-
-## Project Structure After Setup
-
-After bootstrapping, your project will have:
+Review the research and plan closely; they carry decisions into later work.
+Keep them in versioned `docs/research/` and `docs/plans/`. A fresh conversation
+per phase can reduce context pressure, while a durable handoff carries the
+candidate, scope, decisions, findings and verification to the next session.
+An explicit all-phases request may continue through successive complete
+phase gates without asking for the same authorization again.
+
+## Install in a project
+
+Clone the blueprint and follow the [setup checklist](templates/setup-checklist.md).
+Render a package for the selected Copilot profile into an empty staging
+directory. Review the lifecycle `plan` before `apply`; run `check` afterward.
+The installer tracks owned bytes under `.rpi/copilot/` and preserves project
+guidance, customized files and unrelated `.rpi/manifest.json` data. For an old
+prompt-based installation, read [the v2 migration guide](docs/migrations/v2.md).
+
+Copilot CLI and VS Code Copilot Agent Host use project skills in
+`.github/skills/`, specialist roles in `.github/agents/`, and repository and
+scoped instructions. `vscode-local` generates prompt wrappers for the Local
+harness only. Check actual discovery in the selected client; a file on disk
+does not prove it was loaded. The [compatibility matrix](docs/compatibility.md)
+lists each profile and recovery path.
+
+## Run the four phases
+
+| Skill | Input and result |
+| --- | --- |
+| `/rpi-research` | Give a codebase question. It writes a factual, cited research artifact; it does not recommend a fix. |
+| `/rpi-plan` | Give the accepted research and intended change. It writes phased scope and measurable acceptance criteria. |
+| `/rpi-implement` | Give the approved plan path and authorized phases. Each phase goes through implementation, independent review, repair, simplify and the full local gate. |
+| `/rpi-validate` | Give the plan path. It checks completed work and actual test evidence against acceptance criteria. |
+
+The agent pauses at each phase boundary unless the request already authorized
+continuation. A continuation still requires that phase's review, verification
+and durable handoff. Use a new conversation when context grows heavy; the
+handoff must name the actual candidate, checks, decisions and next entry
+condition. Interactive skills inherit the model and effort selected in the
+current session. They do not bind a model tier.
+
+`rpi-brainstorm` helps refine a vague idea; `rpi-assess` evaluates options;
+`rpi-debug` finds a non-obvious root cause. `rpi-pre-launch`,
+`rpi-remediate`, `rpi-update-docs` and `rpi-release` form the release workflow.
+`rpi-quality-review` examines reuse, quality and efficiency. Setup and
+maintenance use `rpi-bootstrap`, `rpi-adopt`, `rpi-update` and `rpi-detach`.
+The canonical skill bodies and bundled resources are in `templates/skills/`.
+Native `/plan` and `/status` are client commands; use `rpi-plan` and
+`rpi-status` for the blueprint. The [methodology reading order](methodology/README.md)
+explains each contract in detail.
+
+## What happens in each phase
+
+### Research
+
+Ask `/rpi-research how does authentication work here?` in a repository with
+existing code. The agent searches for the relevant routes, callers, tests and
+historical decisions, reads the source, and writes a cited map to
+`docs/research/`. It describes behavior without proposing changes. In a truly
+empty project, begin with `/rpi-plan` because there is no implementation to
+research yet. Read the artifact and correct inaccurate or incomplete claims
+before planning.
+
+### Plan
+
+Give `/rpi-plan` the accepted research and desired outcome. The agent asks
+focused questions for decisions it cannot derive from code, weighs options,
+and writes a plan plus phase files under `docs/plans/`. Each phase names its
+scope, behavioral oracles, automated checks, manual observations and recovery
+route. Review the design and the checks before authorizing implementation;
+an ambiguous success criterion is a reason to revise the plan.
+
+### Implement
+
+Give `/rpi-implement` the approved plan path and authorized phases. Behavioral
+changes begin with a failing test. Each phase then uses an independent
+plan-compliance review, repairs confirmed findings, runs a quality/simplify
+pass and completes all required local checks. The agent records exact
+candidate and check evidence before a phase can be accepted. Independent
+work units may run in parallel within a phase when file ownership does not
+overlap, with one integration owner. The phases themselves remain sequential.
+
+### Validate
+
+Give `/rpi-validate` the plan path after implementation. The validator reads
+the approved criteria, diff and test evidence, checks that required commands
+actually ran against the candidate, and reports unmet conditions. A green
+wrapper, an old receipt or a test on another commit cannot establish success.
+
+## Other workflows
+
+| Skill | Use |
+| --- | --- |
+| `rpi-bootstrap`, `rpi-adopt`, `rpi-update`, `rpi-detach` | Plan and reconcile project installation while preserving owner files. |
+| `rpi-brainstorm`, `rpi-assess`, `rpi-tool-design` | Refine vague goals, evaluate alternatives or design agent-facing tools. |
+| `rpi-debug`, `rpi-fix-ci`, `rpi-quality-review` | Investigate defects, diagnose exact-commit CI failures or simplify changed code. |
+| `rpi-pre-launch`, `rpi-remediate` | Audit eight launch domains and disposition every confirmed finding. |
+| `rpi-update-docs`, `rpi-explore-release`, `rpi-release` | Prepare documentation, exploratory evidence and an authorized publication. |
+| `rpi-triage`, `rpi-status`, `rpi-describe-pr` | Read operational reports, orient a session or draft a change description. |
+| `process-errors` | Maintain the local error corpus; this is a Copilot RPI maintenance skill. |
+
+`rpi-describe-pr` drafts text from the actual diff and verification. It does
+not publish a PR by invocation. `rpi-triage` stops at a read-only briefing;
+later remediation needs authorized scope. `rpi-release` checks the requested
+version and release candidate before any tag or GitHub publication.
+
+## Instructions and authority
+
+The root `AGENTS.md` and `.github/copilot-instructions.md` carry short shared
+guidance. Files in `.github/instructions/` use `applyTo` globs for tests, APIs,
+migrations, deployment and selected stack rules. Research, planning and audit
+agents in `.github/agents/` declare their tool scopes; a read-only role reports
+findings to a parent that can write the authorized artifact. Verify discovery,
+resource loading and tool restrictions in the actual client.
+The blueprint provides 5 instruction templates for these scoped topics.
+The 55 operational rules in [the quick reference](patterns/quick-reference.md)
+are read when a task matches their scope.
+
+### Context and the documentarian rule
+
+Use source search and targeted reads instead of filling a chat with whole
+directories. Keep research, plans and handoffs concise enough for a fresh
+session to revalidate. Start a new conversation for unrelated work; when
+continuing a long task, preserve exact refs and evidence first. A prior
+handoff is context, not a substitute for inspecting the current checkout.
+
+The research role is deliberately descriptive. It records what the code does
+and where, including uncertainty, without judging the design or prescribing a
+fix. Use `rpi-assess` for an evaluation. The research agent declares only
+`read` and `search` tools and returns findings to its parent; verify its tool
+boundary in the selected native client. A prose instruction alone does not
+prove that a write was prevented.
+
+### Progressive disclosure
+
+| Layer | When to use it | Location |
+| --- | --- | --- |
+| Root guidance | Short project facts and universal rules for every task | `AGENTS.md` and `.github/copilot-instructions.md` |
+| Scoped guidance | Tests, API, migrations, deployment or selected stack paths | `.github/instructions/*.instructions.md` with `applyTo` |
+| Catalogs | Exact error or rule when relevant to a task | `patterns/agent-errors.md`, `patterns/quick-reference.md` |
+
+Review the actual `applyTo` glob against the target paths. A file on disk
+does not prove the chosen client loaded it. Keep project knowledge and local
+extensions during a blueprint update instead of replacing whole files.
+
+Publication, paid inference, cloud jobs and remote mutations follow the
+project's authority boundary. Local verification precedes an authorized
+integration push, then expected CI runs are checked against the exact pushed
+commit. Native hooks and the candidate receipt pre-push gate are separate
+opt-in controls. A configured hook is not proof that it ran. See
+[native policy](docs/native-policy.md).
+
+## Verify and recover
+
+The local blueprint gate is `bash scripts/verify-local.sh`. It stores a
+candidate-bound receipt in `.rpi/local/copilot/`. Failed, interrupted or stale
+receipts do not count as success. Native client tests are separately recorded
+in [tests/native](tests/native/README.md); static validation cannot establish
+CLI or VS Code behavior.
+
+If a lifecycle plan reports a conflict, preserve the owner bytes and inspect
+its source/base evidence. A stale plan needs a new preview. If apply stops
+mid-transaction, use its printed journal with `rollback`, then re-plan;
+rollback refuses to overwrite newer owner edits. [Migration commands](docs/migrations/v2.md)
+cover install, check, detach and recovery. The optional Local, hook, scheduler
+and cloud profiles each need their own qualification before support is claimed.
+
+## Pre-launch and release evidence
+
+`/rpi-pre-launch` covers architecture, frontend, backend, performance,
+operations, security, QA/reliability and UX. Its structured report identifies
+each finding and regression risk. `/rpi-remediate` validates that report,
+checks the proposed repair against the invariant it might break, and records
+resolved, evidenced false-positive or owner-reviewed architectural
+dispositions. External issues are created only when separately authorized.
+
+The pre-release sequence is `rpi-pre-launch`, `rpi-remediate`,
+`rpi-update-docs`, `rpi-explore-release`, then `rpi-release` on the
+fixed candidate. The [E2E Pro playbook](templates/e2e-pro-playbook-template.md)
+binds required checks to the exact artifact. Wave A fails if no required
+check ran, a required check skipped or failed, or the candidate changed.
+Wave B uses independent exploratory charters against that candidate; its
+eight maneuvers include repeat, recover, interrupt, second role,
+locale/viewport, copy versus outcome, downstream readback and whether a
+feature should exist. Structural Waves C-H are selected by project risk and
+recorded as applicable or not applicable. Tagging and publication follow the
+accepted evidence and the user's release authorization.
+
+## Project layout and adaptation
+
+A default CLI or Agent Host install may contain the following managed files.
+Optional examples, hooks and schedulers appear only when separately selected:
 
 ```text
 your-project/
-├── AGENTS.md                         # Cross-tool instruction file (~90 lines)
-├── .github/
-│   ├── copilot-instructions.md       # Copilot-specific addenda (optional)
-│   ├── prompts/                      # Prompt files (invoked with /)
-│   │   ├── brainstorm.prompt.md
-│   │   ├── research.prompt.md
-│   │   ├── plan.prompt.md
-│   │   ├── debug.prompt.md
-│   │   ├── implement.prompt.md
-│   │   ├── validate.prompt.md
-│   │   ├── describe-pr.prompt.md
-│   │   ├── pre-launch.prompt.md
-│   │   ├── remediate.prompt.md
-│   │   ├── triage.prompt.md
-│   │   ├── status.prompt.md
-│   │   ├── fix-ci.prompt.md
-│   │   ├── update-docs.prompt.md
-│   │   └── release.prompt.md
-│   ├── instructions/                 # Path-specific rules (auto-loaded by glob)
-│   │   ├── tests.instructions.md     # applyTo: **/*.test.*
-│   │   ├── api.instructions.md       # applyTo: **/routes/**, **/api/**
-│   │   ├── deployment-safety.instructions.md  # applyTo: .github/**, Dockerfile, etc.
-│   │   └── supabase.instructions.md  # applyTo: supabase/**, **/*.sql (if applicable)
-│   └── chatmodes/                    # Specialized personas
-│       ├── rpi-research.chatmode.md
-│       └── rpi-planner.chatmode.md
-├── .vscode/
-│   ├── settings.json                 # Copilot feature flags + model selection
-│   └── mcp.json                      # MCP server configuration (optional)
-├── docs/
-│   ├── research/                     # Research documents
-│   ├── plans/                        # Implementation plans
-│   └── decisions/                    # Architecture decision records
-└── ... your code ...
+  AGENTS.md
+  .github/copilot-instructions.md
+  .github/skills/rpi-*/SKILL.md
+  .github/agents/rpi-*.agent.md
+  .github/instructions/*.instructions.md
+  .rpi/copilot/manifest.json
+  .rpi/copilot/runtime/
+  docs/research/
+  docs/plans/
 ```
 
-## Tips for Getting the Most Out of It
+For a web application, inspect deployed routes, preview triggers and rollback.
+For a library, verify public API and package artifact. For a CLI, test the
+installed command and exit codes. For a monorepo, name package boundaries and
+shared consumers. Python projects need their own environment and database
+fixtures. Documentation projects need link and output checks. The
+[setup checklist](templates/setup-checklist.md) covers these adaptations.
 
-**Start every task with `/research` — except for greenfield projects with no code yet, where you start with `/plan`.** Once you have code, the research phase often reveals things you didn't expect.
+Use the [scheduled-job guide](methodology/scheduled-agents.md) only after the
+CLI runner has native qualification and the owner has selected a model,
+credentials and schedule. Cloud agent delegation is a separate hosted profile
+with its own setup and authority; it is not part of a local install.
 
-**Read your research and plans critically.** This is where your time has 10x leverage compared to reviewing code.
+## Working habits
 
-**Start a new Chat window liberally.** Switching tasks? New window. Finished a phase? New window. Context hygiene is the single biggest factor in output quality.
+- Read unfamiliar source before modifying it. A greenfield project with no
+  code can start with planning.
+- Challenge an inaccurate research document before it shapes a plan.
+- Keep the root guidance short and put domain rules in scoped instructions.
+- Start a fresh conversation for unrelated work and use a durable handoff
+  when a long task continues in a new session.
+- Record repeated errors in the catalog with their cause and repair, then
+  review whether a rule or deterministic check would prevent recurrence.
+- Verify user-visible outcomes and persisted state. A generated report,
+  accepted command or passing test is evidence only for what it actually
+  observed.
 
-**Use chat modes.** Select RPI Research mode for research sessions. The documentarian constraint works much better when enforced at the session level.
+## Reference map
 
-**Don't fight the phases.** The phased approach produces better results in less total time because you avoid rework cycles from misunderstood requirements.
+| Topic | Source |
+| --- | --- |
+| Philosophy and error amplification | [philosophy](methodology/philosophy.md) |
+| Context and handoffs | [context engineering](methodology/context-engineering.md) |
+| Phase procedure | [four phases](methodology/four-phases.md) |
+| Agent roles and bounded parallel work | [agent design](methodology/agent-design.md) |
+| Plan notation and test design | [pseudocode](methodology/pseudocode-notation.md), [testing](methodology/testing.md) |
+| CI ownership | [push accountability](methodology/push-accountability.md) |
+| Error and rule catalogs | [agent errors](patterns/agent-errors.md), [quick reference](patterns/quick-reference.md) |
+| Native profiles and controls | [compatibility](docs/compatibility.md), [native policy](docs/native-policy.md) |
 
-**Throw out bad research.** If the research document doesn't accurately describe the codebase, don't try to salvage it. Run `/research` again with better steering.
+The methodology adapts [HumanLayer's RPI and ACE-FCA work](https://humanlayer.dev/)
+to GitHub Copilot's repository skills, agents and instructions.
 
-**Invest in your AGENTS.md.** This file is the highest-leverage configuration point. Every session reads it. Craft every line manually.
+## Learn more
 
-**Use path-specific instructions for domain rules.** Don't put test conventions or API patterns in AGENTS.md — put them in `.github/instructions/` where they fire automatically.
+The catalog has 40 documented errors and 55 rules with scope/stack tags.
 
-**Log your errors and successes.** After 3 instances of the same pattern, promote it to a rule.
-
-## Advanced Setup
-
-### Scheduled Agents
-
-For production projects, set up agents that run on a schedule using `copilot -p "prompt"` invoked from cron/launchd. Ensure the CLI is pre-authenticated (`copilot auth`). See `methodology/scheduled-agents.md` for templates.
-
-### Adapting for Different Project Types
-
-The blueprint adapts to six project archetypes: web applications, libraries, CLI tools, monorepos, Python projects, and static sites. Each has specific adjustments for git workflow, CI configuration, testing strategy, and AGENTS.md content. The setup checklist walks you through the differences.
-
-## Where to Go Deeper
-
-| Topic | File | What You'll Learn |
-|-------|------|-------------------|
-| Core philosophy | `methodology/philosophy.md` | Error amplification, mental alignment, key lessons |
-| Context management | `methodology/context-engineering.md` | Compaction, progressive disclosure, configuration surfaces |
-| The four phases | `methodology/four-phases.md` | Detailed process for each phase, handoffs, failure recovery |
-| Agent design | `methodology/agent-design.md` | Research catalog, autonomy boundaries, parallel patterns |
-| Plan notation | `methodology/pseudocode-notation.md` | How to write and read implementation plans |
-| Testing approach | `methodology/testing.md` | TDD protocol, verification hierarchy |
-| CI ownership | `methodology/push-accountability.md` | Background CI monitoring, fix-and-repush |
-| Error patterns | `patterns/agent-errors.md` | 40 documented errors with symptoms and solutions |
-| Operational rules | `patterns/quick-reference.md` | 55 rules with scope/stack tags, organized by domain |
-| Deployment safety | `patterns/deployment-safety.md` | Resource efficiency and production deployment rules |
-| Instruction templates | `templates/github/instructions/` | 5 path-specific rule templates (tests, API, migrations, deployment, supabase) |
-| Release verification | `templates/e2e-pro-playbook-template.md` | E2E Pro playbook; Wave A gate + structural waves, `/explore-release` runs Wave B |
-| Worked examples | `examples/README.md` | Sample research docs, plans, logs, pseudocode |
-
-## Credits
-
-The RPI methodology is adapted from HumanLayer's opencode-rpi implementation and their ACE-FCA (Advanced Context Engineering for Coding Agents) framework, tailored for GitHub Copilot's native capabilities.
+- [Methodology](methodology/README.md): philosophy, context, testing, release and scheduled jobs.
+- [Examples](examples/README.md): research, plans and walkthroughs.
+- [Error patterns](patterns/agent-errors.md) and [55 operational rules](patterns/quick-reference.md).
+- [Upstream intake](docs/upstream-sync.md): pinned cc-rpi source and deliberate dispositions.

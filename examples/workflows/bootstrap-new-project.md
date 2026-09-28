@@ -1,251 +1,58 @@
-# Workflow: Bootstrapping a New Project
+# Workflow: start a new project
 
-A step-by-step walkthrough of setting up a new project from scratch using the copilot-rpi blueprint. This example uses a Node.js REST API, but the workflow is the same for any stack.
+This illustrative walkthrough uses a Node.js REST API. The commands describe
+the selected `agent-host` profile; native discovery still needs to be checked
+on the installed VS Code and Copilot versions.
 
----
+## Prepare the repository
 
-## Prerequisites
-
-- VS Code with GitHub Copilot extension installed
-- copilot-rpi cloned on your machine
-- `/bootstrap` and `/adopt` prompt files installed in `~/.github/prompts/` (see [GUIDE.md](../../GUIDE.md))
-
----
-
-## Step 1: Create the repo and open VS Code with Copilot
-
-```bash
-mkdir my-api && cd my-api
-git init
-code .
-```
-
-You now have an empty repo with VS Code open. Open a Copilot Chat window.
-
----
-
-## Step 2: Run /bootstrap
+Create and open a Git repository. Clone Copilot RPI separately and render a
+package for `agent-host` into an empty directory. Review and apply its lifecycle
+plan as shown in the [setup checklist](../../templates/setup-checklist.md).
+This installs canonical skills in `.github/skills/`, three optional specialist
+agents in `.github/agents/`, and selected scoped instructions. It does not
+activate hooks, schedulers, MCP servers or a cloud agent.
 
 ```text
-You: /bootstrap
+You: /rpi-bootstrap Set up this empty repository as a Node.js, Express and
+     TypeScript API. Use Jest and a conventional src/ directory.
 ```
 
-The agent reads the entire copilot-rpi blueprint (methodology, error patterns, operational rules, templates) and then asks you about your project:
+The agent inspects the project and asks only for decisions the repository
+cannot answer. It uses an ownership-aware plan for any further blueprint
+components, adds project-specific code and checks, and reports what it
+actually ran. Existing project guidance is preserved. For an established
+repository use `/rpi-adopt` and review the gap report first.
+
+## Plan the first feature
+
+An empty codebase can start at planning. Give the desired behavior and answer
+the consequential design questions:
 
 ```text
-Copilot: I've read the copilot-rpi blueprint. A few questions before I set things up:
-
-1. What type of project is this? (web app, library, CLI tool, monorepo, Python, static site)
-2. What's your stack? (e.g., Node.js + Express + TypeScript, Python + FastAPI)
-3. Any conventions I should know? (naming, folder structure preferences, test framework)
+You: /rpi-plan Create a todo API with CRUD endpoints, PostgreSQL storage and
+     input validation. Put the plan under docs/plans/.
 ```
+
+For this example, the owner chooses Prisma, no authentication yet, and
+`express-validator`. The resulting plan has three testable phases: database
+schema, CRUD endpoints, and error handling plus integration tests. Read and
+correct the plan before implementation.
+
+## Implement and validate
 
 ```text
-You: It's a web app. Node.js, Express, TypeScript. Jest for testing. Standard src/ folder structure.
+You: /rpi-implement docs/plans/2026-02-22-todo-api.md
+You: /rpi-validate docs/plans/2026-02-22-todo-api.md
 ```
 
-The agent then creates everything:
+Each authorized phase gets a failing behavioral test first, implementation,
+independent review, repair, simplify and the required local gate. The agent
+records exact candidate and check evidence in a durable handoff and pauses at
+the phase boundary unless continuation was already authorized. Validation
+compares the result with the approved plan. Example test counts and outcomes
+are deliberately omitted; use the actual project's output.
 
-```text
-Copilot: Setting up your project. Here's what I'm creating:
-
-- AGENTS.md — project configuration with all operational rules
-- .vscode/settings.json — permissions and tool configuration
-- .github/prompts/ — all 6 prompt files (research, plan, implement, validate, describe-pr, pre-launch)
-- .github/instructions/ — contextual instructions for Copilot
-- .github/chatmodes/ — custom chat modes for different workflows
-- package.json with TypeScript, Jest, ESLint, Prettier
-- tsconfig.json
-- .github/workflows/ci.yml
-- Pre-commit hooks via Husky + lint-staged
-- docs/ directory structure (research, plans, decisions)
-- src/ with a minimal Express server
-- Initial test setup
-
-Should I proceed?
-```
-
-```text
-You: Yes, go ahead.
-```
-
-The agent creates all files, installs dependencies, runs the initial typecheck and tests to verify everything works, then makes the initial commit.
-
-```text
-Copilot: Done. Your project is set up:
-
-- All checks pass (typecheck, lint, tests)
-- Initial commit created
-- 6 prompt files ready to use
-
-You can start with /research to explore any existing patterns,
-or /plan to design your first feature.
-```
-
----
-
-## Step 3: Your first feature — designing the API
-
-Now you want to add your first real feature. Since this is a fresh project, research is light — there's not much code to explore yet. You can go straight to planning:
-
-```text
-You: /plan create a REST API for managing a todo list with CRUD endpoints,
-     PostgreSQL storage, and input validation
-```
-
-The agent enters planning mode:
-
-```text
-Copilot: I'll design this feature. Let me explore what /bootstrap set up...
-
-[reads AGENTS.md, src/ structure, existing config]
-
-Before I write the plan, a few questions:
-
-1. Do you want an ORM (Prisma, TypeORM) or raw SQL queries?
-2. Authentication — skip for now or include from the start?
-3. Should I set up database migrations?
-```
-
-```text
-You: Prisma. No auth for now, we'll add it later. Yes on migrations.
-```
-
-The agent writes the plan:
-
-```text
-Copilot: Plan saved to docs/plans/2026-02-22-todo-api.md
-
-3 phases:
-- Phase 1: Database schema + Prisma setup + migrations
-- Phase 2: CRUD endpoints with input validation (zod)
-- Phase 3: Error handling middleware + integration tests
-
-Each phase has specific success criteria. Ready to review?
-```
-
-**This is where you stop and read the plan.** Open `docs/plans/2026-02-22-todo-api.md`, review the pseudocode for each phase, check the file changes, verify the success criteria make sense. This is your highest-leverage review — catching a wrong assumption here saves hours.
-
-```text
-You: Looks good. Phase 2 — use express-validator instead of zod, I prefer it
-     for Express projects. Otherwise approved.
-```
-
-```text
-Copilot: Updated the plan. express-validator replaces zod in Phase 2.
-```
-
----
-
-## Step 4: Implement phase by phase
-
-```text
-You: /implement docs/plans/2026-02-22-todo-api.md
-```
-
-The agent reads the plan and starts with Phase 1 only:
-
-```text
-Copilot: Starting Phase 1: Database schema + Prisma setup
-
-[installs prisma, creates schema, runs migration, writes seed script]
-[runs typecheck, lint, tests]
-
-Phase 1 complete. All checks pass:
-- Prisma schema created with Todo model
-- Migration applied successfully
-- Seed script works
-- TypeScript compiles
-- Tests pass (3 new tests for database connection and model)
-
-Ready for Phase 2?
-```
-
-You verify — maybe run the seed script yourself, check the migration looks right.
-
-```text
-You: Good, continue.
-```
-
-```text
-Copilot: Starting Phase 2: CRUD endpoints with input validation
-
-[creates routes, controllers, validation middleware]
-[runs typecheck, lint, tests]
-
-Phase 2 complete. All checks pass:
-- GET /todos, GET /todos/:id, POST /todos, PUT /todos/:id, DELETE /todos/:id
-- Input validation with express-validator
-- 12 new tests (endpoint + validation)
-
-Ready for Phase 3?
-```
-
-```text
-You: Continue.
-```
-
-```text
-Copilot: Starting Phase 3: Error handling + integration tests
-
-[creates error middleware, adds integration tests with supertest]
-[runs full test suite]
-
-Phase 3 complete. All checks pass:
-- Centralized error handling middleware
-- 8 integration tests covering happy paths and error cases
-- Full suite: 23 tests, all passing
-- TypeScript compiles, lint clean
-
-All phases complete.
-```
-
----
-
-## Step 5: Validate
-
-```text
-You: /validate docs/plans/2026-02-22-todo-api.md
-```
-
-```text
-Copilot: Running validation against the plan...
-
-- Phase 1: All success criteria met
-- Phase 2: All success criteria met
-- Phase 3: All success criteria met
-- TypeScript: No errors
-- Lint: Clean
-- Tests: 23/23 passing
-- No TODO/FIXME markers left in code
-
-Verdict: All plan objectives achieved. Ready for PR.
-```
-
----
-
-## Step 6: Create the PR
-
-```text
-You: /describe-pr
-```
-
-```text
-Copilot: PR description generated. Creating PR...
-
-> https://github.com/yourname/my-api/pull/1
-```
-
----
-
-## What just happened
-
-You went from an empty directory to a production-structured API in one session:
-
-1. `/bootstrap` — set up the entire project infrastructure in one command
-2. `/plan` — designed the feature with your input on key decisions
-3. `/implement` — built it phase by phase, with you approving each phase
-4. `/validate` — verified everything against the original plan
-5. `/describe-pr` — opened a PR with auto-generated description
-
-The agent did the heavy lifting. You made the strategic decisions (Prisma over TypeORM, express-validator over zod, no auth yet) and reviewed at the phase boundaries where your attention had the highest leverage.
+`/rpi-describe-pr` can draft a reviewable change description. Creating a PR
+or pushing to a remote is a separate authorized action after local integration
+and trigger inspection.

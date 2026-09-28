@@ -151,6 +151,128 @@ def read_json(path):
     return json.loads(path.read_text())
 
 
+def compare_future_source(lock_path, inventory_path, source_path, decisions_path=None, content_only=False):
+    """Report a future upstream delta without changing the pinned intake."""
+    source = source_path.resolve()
+    lock = read_json(lock_path)
+    inventory = read_json(inventory_path)
+    current = {item["id"]: item for item in lock["components"]}
+    if not content_only:
+        result = subprocess.run(
+            ["git", "-C", str(source), "rev-parse", "--show-toplevel", "HEAD"],
+            capture_output=True, text=True, check=False,
+        )
+        lines = result.stdout.splitlines()
+        if result.returncode or len(lines) != 2 or Path(lines[0]).resolve() != source or not re.fullmatch(r"[0-9a-f]{40}", lines[1]):
+            raise ValueError("future source must be a Git checkout root at a recorded SHA; use --content-only for an archive fixture")
+        source_sha = lines[1]
+        dirty = subprocess.run(
+            ["git", "-C", str(source), "status", "--porcelain", "--untracked-files=all"],
+            capture_output=True, text=True, check=False,
+        )
+        if dirty.returncode or dirty.stdout:
+            raise ValueError("future source checkout is dirty; commit or isolate the intended source SHA before comparing")
+    else:
+        source_sha = None
+    manifest = read_json(safe_file(source, "templates/distribution.json"))
+    live_items = manifest.get("components")
+    if not isinstance(live_items, list) or any(not isinstance(item, dict) or not isinstance(item.get("id"), str)
+                                              or not isinstance(item.get("source"), str) for item in live_items):
+        raise ValueError("future source has an invalid component manifest")
+    live = {item["id"]: item for item in live_items}
+    if len(live) != len(live_items):
+        raise ValueError("future source has duplicate component IDs")
+    changes = {}
+    if manifest.get("version") != lock["upstream"]["version"]:
+        changes["manifest:version"] = ("changed manifest version", "unmapped", digest(str(manifest.get("version")).encode()))
+    for identifier in sorted(current.keys() | live.keys()):
+        decision_id = f"component:{identifier}"
+        if identifier not in current:
+            actual_hash = component_hash(source, live[identifier]["source"])
+            changes[decision_id] = (f"new component {identifier}", "unmapped", actual_hash)
+        elif identifier not in live:
+            changes[decision_id] = (f"removed component {identifier}", current[identifier]["disposition"], current[identifier]["source_sha256"])
+        else:
+            item = live[identifier]
+            actual_hash = component_hash(source, item["source"])
+            if (item.get("kind") != current[identifier]["kind"]
+                    or item["source"] != current[identifier]["source"]
+                    or actual_hash != current[identifier]["source_sha256"]):
+                changes[decision_id] = (f"changed component {identifier}", current[identifier]["disposition"], actual_hash)
+    old_catalog = {item["id"]: item for item in lock["catalog"]}
+    new_catalog = catalog(source)
+    for identifier in sorted(old_catalog.keys() | new_catalog.keys()):
+        decision_id = f"catalog:{identifier}"
+        if identifier not in old_catalog:
+            changes[decision_id] = (f"new catalog {identifier}", "unmapped", new_catalog[identifier]["source_sha256"])
+        elif identifier not in new_catalog:
+            changes[decision_id] = (f"removed catalog {identifier}", old_catalog[identifier]["disposition"], old_catalog[identifier]["source_sha256"])
+        elif new_catalog[identifier]["source_sha256"] != old_catalog[identifier]["source_sha256"]:
+            changes[decision_id] = (f"changed catalog {identifier}", old_catalog[identifier]["disposition"], new_catalog[identifier]["source_sha256"])
+    expected_links = {item["path"]: item for item in inventory["links"]}
+    actual_links = {
+        path.relative_to(source).as_posix(): path.readlink().as_posix()
+        for path in (source / "templates").rglob("*") if path.is_symlink()
+    }
+    # Snapshot archives omit symbolic links and keep their targets in the inventory.
+    # A real Git checkout must contain them; a content-only archive may omit all.
+    if not content_only or actual_links:
+        for path in sorted(expected_links.keys() | actual_links.keys()):
+            old = expected_links.get(path)
+            new_target = actual_links.get(path)
+            old_target = None if old is None else old["target"]
+            if new_target == old_target:
+                continue
+            owner = next((item for item in current.values()
+                          if path == item["source"] or path.startswith(item["source"].rstrip("/") + "/")), None)
+            status = "unmapped" if owner is None else owner["disposition"]
+            change = "new" if old is None else "removed" if new_target is None else "changed"
+            changes[f"link:{path}"] = (f"{change} link {path}", status,
+                                         digest(str(new_target).encode()))
+    change_hash = digest(json.dumps(changes, sort_keys=True, separators=(",", ":")).encode())
+    if not changes:
+        if decisions_path is not None:
+            decisions = read_json(decisions_path)
+            if decisions != []:
+                raise ValueError("future intake has stale decisions but no upstream differences")
+        print("OK: no upstream differences; pinned intake unchanged")
+        return 0
+    print(f"future upstream SHA: {source_sha or 'content-only unverified'}; changes SHA256: {change_hash}")
+    decision_record = None if decisions_path is None else read_json(decisions_path)
+    if decision_record is None:
+        decisions = []
+    elif (not isinstance(decision_record, dict)
+          or decision_record.get("source_sha") != (source_sha or "content-only")
+          or decision_record.get("changes_sha256") != change_hash
+          or not isinstance(decision_record.get("decisions"), list)):
+        raise ValueError("decision source changed; record the exact upstream SHA and changes SHA256")
+    else:
+        decisions = decision_record["decisions"]
+    indexed = {}
+    for item in decisions:
+        if not isinstance(item, dict) or not isinstance(item.get("id"), str) or item["id"] in indexed:
+            raise ValueError("future intake decisions have an invalid or duplicate ID")
+        indexed[item["id"]] = item
+    for identifier, (description, status, _) in sorted(changes.items()):
+        print(f"{description}; current Copilot disposition: {status}; decision ID: {identifier}")
+    errors = []
+    for identifier in sorted(changes.keys() - indexed.keys()):
+        errors.append(f"missing future intake decision: {identifier}")
+    for identifier in sorted(indexed.keys() - changes.keys()):
+        errors.append(f"stale future intake decision: {identifier}")
+    for identifier in sorted(indexed.keys() & changes.keys()):
+        item = indexed[identifier]
+        if item.get("disposition") not in STATUSES or not isinstance(item.get("rationale"), str) or not item["rationale"].strip():
+            errors.append(f"invalid future intake decision: {identifier}")
+    if errors:
+        for error in errors:
+            print("BLOCKED: " + error)
+        print("FIX: record reviewed decisions for every reported difference and rerun --compare-source")
+        return 1
+    print(f"OK: {len(changes)} future upstream differences have reviewed decisions; source SHA: {source_sha or 'content-only unverified'}")
+    return 0
+
+
 def check(lock_path, inventory_path, source_path=None, content_only=False):
     errors = []
     lock = read_json(lock_path)
@@ -396,12 +518,21 @@ def main():
     parser.add_argument("--lock", type=Path, default=Path("upstream/cc-rpi.lock.json"))
     parser.add_argument("--inventory", type=Path, default=Path("upstream/cc-rpi.inventory.json"))
     parser.add_argument("--source", type=Path)
+    parser.add_argument("--compare-source", type=Path, help="Review a future upstream checkout without changing the pinned intake")
+    parser.add_argument("--decisions", type=Path, help="JSON decisions for every future upstream difference")
     parser.add_argument("--content-only", action="store_true", help="Compare archive fixture bytes without Git identity proof")
     parser.add_argument("--check", action="store_true", required=True)
     args = parser.parse_args()
     if args.content_only and args.source is None:
-        parser.error("--content-only requires --source")
+        if args.compare_source is None:
+            parser.error("--content-only requires --source or --compare-source")
+    if args.source and args.compare_source:
+        parser.error("--source and --compare-source cannot be combined")
+    if args.decisions and not args.compare_source:
+        parser.error("--decisions requires --compare-source")
     try:
+        if args.compare_source:
+            return compare_future_source(args.lock.resolve(), args.inventory.resolve(), args.compare_source, args.decisions, args.content_only)
         return check(args.lock.resolve(), args.inventory.resolve(), args.source, args.content_only)
     except (OSError, ValueError, KeyError, json.JSONDecodeError) as exc:
         print(f"BLOCKED: invalid intake input: {exc}")

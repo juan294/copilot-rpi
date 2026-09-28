@@ -198,11 +198,14 @@ Keep it minimal — most instructions belong in AGENTS.md (cross-tool) or path-s
 
 ## Parallel Work Patterns
 
-Copilot achieves parallelism through multiple independent processes and the `@copilot` cloud agent.
+Copilot can use independent local processes or an explicitly selected cloud
+agent. Each path needs its own client qualification and authority.
 
 ### Background `copilot -p` Processes
 
-The primary parallelism mechanism. Each process runs in its own terminal with its own context:
+For an authorized, qualified CLI, each process runs in its own terminal with
+its own context. Review tool permissions, model cost, the output paths and
+the bounded terminal condition before running a batch:
 
 ```bash
 # Parallel research — 3 terminals investigating different areas:
@@ -212,7 +215,10 @@ copilot -p "Research the API middleware chain. Write findings to docs/research/m
 wait
 ```
 
-**When to use:** Independent research tasks, parallel audits, batch migrations.
+**When to use:** Independent research tasks or parallel audits inside one
+authorized phase. A shell `wait` alone does not prove every child succeeded;
+capture each process status and read each artifact before synthesis. Do not
+use this pattern for a migration with shared mutable paths.
 
 ### Optional `@copilot` Cloud Agent
 
@@ -223,11 +229,11 @@ Cloud-agent issue delegation is an opt-in external profile. Use it only when the
 After each implementation phase, run a quality review pass. This is separate from self-review:
 
 - **Self-review** checks plan compliance — "did I follow the plan?"
-- **Quality review** (`/quality-review`) checks code reuse, quality, and efficiency — "is the code good?"
+- **Quality review** (`/rpi-quality-review`) checks code reuse, quality, and efficiency — "is the code good?"
 
 Plan compliance needs an independent reviewer, not only the implementation author. After repairing that review, run a separate simplify pass for reuse, quality and efficiency. A fresh context or qualified reviewer can supply independent review; missing reviewer evidence blocks acceptance.
 
-The `rpi-quality-review` skill reviews the `git diff` for three concerns: code reuse opportunities (existing utilities that could replace new code), code quality issues (redundant state, copy-paste, leaky abstractions), and efficiency problems (unnecessary work, missed concurrency, hot-path bloat). Unlike a full `/pre-launch` audit, this is scoped to changed files only.
+The `rpi-quality-review` skill reviews the `git diff` for three concerns: code reuse opportunities (existing utilities that could replace new code), code quality issues (redundant state, copy-paste, leaky abstractions), and efficiency problems (unnecessary work, missed concurrency, hot-path bloat). Unlike a full `/rpi-pre-launch` audit, this is scoped to changed files only.
 
 ### Batch-Eligible Independent Units
 
@@ -261,7 +267,7 @@ Each specialist:
 3. Categorizes by severity: launch-blocker | high | medium | low | strategic
 4. Tags by time horizon: Before launch | After launch | Later
 
-The report drives `/remediate` which processes findings in 3 waves:
+The report drives `/rpi-remediate` which processes findings in 3 waves:
 Wave 1 (Before launch), Wave 2 (After launch), Wave 3 (Later/strategic).
 Wave 3 strategic items receive a local disposition and owner review. Creating GitHub issues requires separate authorization.
 

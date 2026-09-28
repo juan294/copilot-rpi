@@ -1,495 +1,196 @@
-# Scheduled Agents
+# Scheduled Copilot jobs
 
-Scheduled agents run outside of interactive sessions on a recurring schedule. They perform maintenance, audits, and health checks automatically -- catching issues before humans or interactive agents encounter them.
+Scheduled jobs are optional. The blueprint ships a bounded, report-only
+Copilot runner for `update` and `triage` discovery. Package installation does
+not authenticate a CLI, select a paid model, install a scheduler or start
+inference. Activate a schedule only after the selected client, model, target,
+credentials, permissions and cost are reviewed. See [native policy](../docs/native-policy.md).
 
-## Architecture
+## Architecture and scope
+
+The scheduler starts a local process; it does not grant the process new
+authority. A run checks client/version/flags, obtains a project lock, asks
+Copilot for read-only discovery, and atomically writes a report only after a
+successful bounded response. A human or an explicitly authorized later task
+reviews that report. Failed runs preserve the last good report as historical
+data and report current failure separately.
 
 ```text
-┌─────────────────────┐
-│  OS Scheduler        │  cron (Linux) / launchd (macOS)
-│  (fires on schedule) │  Catches up after sleep/shutdown
-└────────┬────────────┘
-         │ spawns
-         ▼
-┌─────────────────────┐     ┌──────────────────────┐
-│  Agent Shell Script  │────▶│  Copilot CLI (headless) │
-│  (bash)              │     │  copilot -p "prompt"    │
-└────────┬────────────┘     └──────────┬─────────────┘
-         │                             │ writes
-         ▼                             ▼
-┌─────────────────────┐     ┌──────────────────────┐
-│  docs/agents/        │     │  docs/agents/          │
-│  agent-report.md     │     │  shared-context.md     │
-│  (individual report) │     │  (cross-agent intel)   │
-└─────────────────────┘     └──────────────────────┘
+cron or launchd -> rpi-automation.py -> bounded Copilot CLI -> local report
+                                              | failure -> diagnostic only
+                                              | success -> last-good copy
 ```
 
-**Key idea:** Each agent is a standalone bash script that invokes the Copilot CLI in headless mode (`copilot -p "prompt"`). Agents write markdown reports to disk. An optional admin panel reads those reports and displays health status.
+The available jobs are `update` (inspect local blueprint drift and prepare a
+reviewable report) and `triage` (discover operational reports and findings).
+Neither job applies a lifecycle plan, edits product files, pushes, creates an
+issue or publishes a release. A completed report is an input to the
+interactive `rpi-update` or `rpi-triage` workflow, not proof that remediation
+occurred.
 
-## Report Lifecycle
+## Runner contract
 
-Agent reports are internal operational tools. Their commit policy is conditional on repo visibility (Rule #42):
-
-1. **Agents write reports to `docs/agents/`** on disk during overnight runs.
-2. **Reports accumulate historically** -- never deleted, always available for review.
-3. **Commit policy depends on repo visibility:**
-   - **Public repos:** `docs/agents/`, `logs/`, and `scripts/agents/` are gitignored. Reports stay local; only code fixes are committed.
-   - **Private repos:** all three directories are tracked. Triage commits reports alongside code fixes as historical artifacts.
-4. **Triage discovers reports via timestamps** (Rule #43), not git status. A `.last-triage` marker file in `docs/agents/` tracks which reports have been processed -- this is independent of whether reports are committed.
-
-The rationale:
-
-- Public repositories must never expose operational details (security audit findings, internal metrics, agent status).
-- Private repositories benefit from a committed audit trail of what agents found and when.
-- Historical reports remain on disk indefinitely for the operator to review either way.
-- Triage works identically regardless of git tracking -- no git status dependency.
-
-### Detecting repo visibility
-
-At setup time and during triage, check visibility with:
+The rendered package contains `.rpi/copilot/runtime/rpi-automation.py`.
+`schedule-preview` prints a cron line and launchd `ProgramArguments`; it
+changes no scheduler state. `run` checks the Copilot executable and supported
+flags, invokes `copilot -p` with read-only tool scope, limits wall-clock time,
+and saves a sanitized report and last-good copy only after success. The
+runner uses a project-local lock to avoid overlapping runs. Missing auth,
+denied tools, unsupported flags, malformed output and timeouts are failures
+with a repair hint; they cannot be counted as a successful report.
 
 ```bash
-gh repo view --json visibility --jq '.visibility'
-# Returns: PUBLIC | PRIVATE | INTERNAL
+python3 "$package_dir/.rpi/copilot/runtime/rpi-automation.py" schedule-preview \
+  --job update --project "$project_dir" --model "$selected_model"
 ```
 
-Treat `PUBLIC` as "gitignore the operational directories." Treat `PRIVATE` and `INTERNAL` as "track them." If `gh` is unavailable or the repo has no remote, default to gitignoring (fail-safe -- never leak by accident).
+The model is an explicit owner selection for reproducibility. `COPILOT_MODEL`
+can supply it to a qualified job. The interactive RPI skills continue to
+inherit the active session's model and effort. The runner is not a route for
+unattended code edits, pushes, issue creation or cloud delegation.
 
-### `.gitignore` entries (public repos only)
-
-For public repos, add to `.gitignore`:
-
-```gitignore
-# Agent operational output (gitignored on public repos; tracked on private repos)
-docs/agents/
-logs/
-scripts/agents/
-```
-
-For private repos, omit these entries -- the directories are tracked normally.
-
-## Agent Shell Script Template
-
-Each agent script sources `agent-utils.sh` for environment setup, logging, shared context, and CLI preflight. The `# SCHEDULE:` comment is read by `install-agents.sh` to auto-generate launchd plists.
+An explicit run can select a report inside the project. Use this only after
+the native programmatic fixture and inference authority are satisfied:
 
 ```bash
-#!/bin/bash
-# scripts/agents/my-agent.sh
-# SCHEDULE: daily 06:00
-
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-source "${SCRIPT_DIR}/lib/agent-utils.sh"
-
-AGENT_KEY="my_agent"
-REPORT_FILE="${AGENTS_DIR}/my-agent-report.md"
-LOG_FILE="${LOGS_DIR}/my-agent-$(date '+%Y-%m-%d').log"
-
-preflight_claude
-log_info "=== My Agent starting ==="
-
-SHARED_CONTEXT=$(read_shared_context "${AGENT_KEY}")
-
-PROMPT="You are the my-agent scheduled agent for this project.
-[Define agent-specific responsibilities here]
-
-## Context from Other Agents
-${SHARED_CONTEXT}
-
-Write your report. Include a shared context block:
-SHARED_CONTEXT_START
-## My Agent -- $(date '+%Y-%m-%d')
-- **Status**: GREEN / YELLOW / RED
-- Key findings
-SHARED_CONTEXT_END"
-
-cd "${PROJECT_DIR}"
-"${CLAUDE_BIN}" -p "${PROMPT}" \
-  --allowedTools "Read,Glob,Grep,Bash(npm run *),Bash(pnpm run *)" \
-  --output-format text \
-  > "${REPORT_FILE}" 2>>"${LOG_FILE}" || {
-    log_error "CLI execution failed. Check ${LOG_FILE}"
-    exit 1
-  }
-
-log_info "Report written to ${REPORT_FILE}"
-extract_and_write_shared_context "${AGENT_KEY}" "${REPORT_FILE}"
-log_info "=== My Agent complete ==="
+python3 "$package_dir/.rpi/copilot/runtime/rpi-automation.py" run \
+  --job triage --project "$project_dir" --model "$selected_model" \
+  --report "$project_dir/docs/agents/triage-report.md" --timeout 900
 ```
 
-### Key Design Choices
-
-- **`agent-utils.sh`** -- Shared utilities handle environment setup (fd limits, PATH, launchd compatibility), logging, shared context read/write/prune, and CLI preflight checks.
-- **`# SCHEDULE:` comment** -- Declares the agent's schedule. `install-agents.sh` reads this to auto-generate launchd plists. Supports `daily HH:MM` and `weekly DAY HH:MM`.
-- **`preflight_claude`** -- Verifies the CLI binary exists and auth works before attempting the main task. Fails fast with a clear error message.
-- **Shared context** -- Agents read other agents' findings before starting (via `read_shared_context`), building on each other's intelligence. After finishing, `extract_and_write_shared_context` appends their findings.
-- **`SHARED_CONTEXT_START` / `SHARED_CONTEXT_END`** -- Delimiters in the prompt that the agent's output must include. `extract_and_write_shared_context` parses this block and appends it to `shared-context.md`.
-
-## Scheduling
-
-### macOS (launchd) -- Plist Reference
-
-The following plist template is provided for reference. In practice, use `install-agents.sh` (see Automated Installation below) to generate these automatically.
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>Label</key>
-  <string>com.project.agent.my-agent</string>
-  <key>ProgramArguments</key>
-  <array>
-    <string>/bin/bash</string>
-    <string>-c</string>
-    <string>exec /bin/bash /absolute/path/to/project/scripts/agents/my-agent.sh</string>
-  </array>
-  <key>StartCalendarInterval</key>
-  <dict>
-    <key>Hour</key>
-    <integer>6</integer>
-    <key>Minute</key>
-    <integer>0</integer>
-  </dict>
-  <key>HardResourceLimits</key>
-  <dict>
-    <key>NumberOfFiles</key>
-    <integer>122880</integer>
-  </dict>
-  <key>SoftResourceLimits</key>
-  <dict>
-    <key>NumberOfFiles</key>
-    <integer>122880</integer>
-  </dict>
-  <key>EnvironmentVariables</key>
-  <dict>
-    <key>HOME</key>
-    <string>/Users/YOUR_USERNAME</string>
-    <key>TERM</key>
-    <string>xterm-256color</string>
-    <key>PATH</key>
-    <string>/usr/local/bin:/opt/homebrew/bin:/Users/YOUR_USERNAME/.local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
-  </dict>
-  <key>StandardOutPath</key>
-  <string>/absolute/path/to/project/logs/my-agent.log</string>
-  <key>StandardErrorPath</key>
-  <string>/absolute/path/to/project/logs/my-agent.error.log</string>
-</dict>
-</plist>
-```
-
-### macOS (launchd) -- Automated Installation
-
-The `install-agents.sh` script (in `templates/scripts/agents/`) auto-discovers agent scripts and generates launchd plists. It reads the `# SCHEDULE:` comment from each script.
-
-```bash
-bash scripts/agents/install-agents.sh            # Install all agents
-bash scripts/agents/install-agents.sh --status    # Check status
-bash scripts/agents/install-agents.sh --unload    # Uninstall all
-```
-
-### macOS (launchd) -- Manual Installation (Fallback)
-
-```bash
-# Install:
-cp com.project.agent.my-agent.plist ~/Library/LaunchAgents/
-launchctl load ~/Library/LaunchAgents/com.project.agent.my-agent.plist
-
-# Test (don't rely on terminal execution -- it masks launchd issues):
-launchctl start com.project.agent.my-agent
-
-# Uninstall:
-launchctl unload ~/Library/LaunchAgents/com.project.agent.my-agent.plist
-```
-
-#### macOS launchd Gotchas
-
-launchd provides a minimal execution environment that breaks CLI tools in several ways. All fixes must be applied together -- any single missing fix causes silent failure. See [Error #18](../patterns/agent-errors.md#error-18-agent-cli-crashes-with-unexpected-when-plist-runs-script-directly) for full details.
-
-**1. File descriptor limit (hard cap 256).** launchd sets a hard limit of 256 open files. Many CLI tools need far more for Node.js runtimes and network connections. `ulimit -n` in the script cannot raise above the hard limit -- the fix must be in the plist via `HardResourceLimits` and `SoftResourceLimits` (shown in the plist template above).
-
-**2. Missing environment variables.** launchd doesn't source shell profiles (`~/.zshrc`, `~/.bash_profile`). PATH is minimal (`/usr/bin:/bin:/usr/sbin:/sbin`), HOME may be unset, TERM is absent. The fix is `EnvironmentVariables` in the plist (shown above), supplemented by fallback exports in the script.
-
-**3. No interactive authentication.** CLI tools' default auth flows may open a browser or require a TTY. Under launchd there's no TTY and no browser. Fix: pre-authenticate from an interactive terminal before scheduling. The script should verify auth works before attempting the main task.
-
-**4. ProgramArguments must use `/bin/bash -c exec`.** When launchd directly executes a script located inside a project directory (via shebang), the CLI may crash with unexpected errors. The fix is to use `/bin/bash -c "exec /bin/bash /path/to/script.sh"` in ProgramArguments (shown in the plist template above). This changes the process context so the CLI doesn't misidentify the project root from the initial process arguments.
-
-**Testing:** Always test with `launchctl start <label>`, never by running the script from a terminal. Terminal execution has full env vars, high fd limits, and interactive auth -- it masks all four problems.
-
-### Linux (cron)
-
-```bash
-# Run daily at 6:00 AM:
-0 6 * * * /absolute/path/to/project/scripts/agents/my-agent.sh >> /absolute/path/to/project/logs/my-agent.log 2>&1
-```
-
-## Common Agent Types
-
-| Agent | Schedule | Focus |
-|-------|----------|-------|
-| **Test health** | Daily | Run full test suite, check for flaky tests (run 3x), report coverage |
-| **Security audit** | Weekly | Dependency vulnerabilities, secret scanning, license compliance |
-| **Code quality** | Daily | Lint, dead code, TODO/FIXME count, TypeScript strict violations |
-| **Dependency health** | Weekly | Outdated packages, version conflicts, lockfile integrity |
-| **Performance check** | Weekly | Bundle sizes, build times, regression detection |
-| **Documentation sync** | Weekly | Stale docs, undocumented public APIs, broken links |
-| **Cost report** | Weekly | AI spend per workflow and per outcome where attribution exists; mark unavailable values unmeasured (see [cost-monitoring.md](cost-monitoring.md)) |
-
-## Concrete Agent Prompts
-
-### Test Health Agent
-
-```bash
-PROMPT="You are the test-health scheduled agent.
-
-Run the full test suite 3 times to detect flaky tests:
-1. Run: pnpm run test --reporter json 2>&1
-2. Record which tests pass/fail on each run
-3. Flag any test that fails on at least 1 of 3 runs as FLAKY
-4. Report: total tests, pass rate, flaky tests (with file:line), coverage if available
-
-Write your report to docs/agents/test-health-report.md with sections:
-- Summary (1 line: GREEN/YELLOW/RED + pass rate)
-- Flaky Tests (file:line + failure message for each)
-- Failed Tests (consistently failing)
-- Coverage Changes (if measurable)
-
-Append to shared-context.md:
-- Overall status
-- Any flaky tests that other agents should know about"
-```
-
-### Security Audit Agent
-
-```bash
-PROMPT="You are the security-audit scheduled agent.
-
-Perform these checks:
-1. Run: pnpm audit --json 2>&1 (or npm audit / pip audit)
-2. Search for hardcoded secrets: grep for API keys, tokens, passwords in source files
-3. Check .env.example against actual env var usage -- flag undocumented vars
-4. Check for injection vectors: unsanitized user input in SQL, shell commands, HTML
-5. Verify CORS configuration if applicable
-
-Write your report to docs/agents/security-audit-report.md with sections:
-- Summary (1 line: GREEN/YELLOW/RED + critical count)
-- Dependency Vulnerabilities (severity, package, recommendation)
-- Hardcoded Secrets (file:line -- DO NOT include the actual secret)
-- Injection Risks (file:line + type)
-- Configuration Issues
-
-Append to shared-context.md:
-- Critical vulnerabilities count
-- Any findings that affect other agents' domains"
-```
-
-### Code Quality Agent
-
-```bash
-PROMPT="You are the code-quality scheduled agent.
-
-Perform these checks:
-1. Run: pnpm run lint --format json 2>&1
-2. Run: pnpm run typecheck 2>&1
-3. Search for TODO/FIXME/HACK comments and count by category
-4. Identify dead code: exported functions with zero import references
-5. Check for files over 500 lines (complexity indicator)
-
-Write your report to docs/agents/code-quality-report.md with sections:
-- Summary (1 line: GREEN/YELLOW/RED + issue count)
-- Lint Issues (count by rule, top 5 most frequent)
-- Type Errors (count + file:line for each)
-- Technical Debt (TODO/FIXME/HACK counts + examples)
-- Large Files (path + line count)
-- Dead Code Candidates (exported but never imported)
-
-Append to shared-context.md:
-- Issue counts by category
-- New issues since last run (if previous report exists)"
-```
-
-### Dependency Health Agent
-
-```bash
-PROMPT="You are the dependency-health scheduled agent.
-
-Perform these checks:
-1. Check for outdated packages: pnpm outdated --format json 2>&1
-2. Identify major version bumps available (breaking changes)
-3. Verify lockfile integrity: pnpm install --frozen-lockfile 2>&1
-4. Check for duplicate packages in the dependency tree
-5. Flag packages with no recent updates (>2 years, possible abandonment)
-
-Write your report to docs/agents/dependency-health-report.md with sections:
-- Summary (1 line: GREEN/YELLOW/RED + outdated count)
-- Critical Updates (security patches, major versions behind)
-- Outdated Packages (name, current, latest, type of update)
-- Lockfile Status (clean or issues found)
-- Abandoned Packages (no updates in 2+ years)
-
-Append to shared-context.md:
-- Packages needing urgent updates
-- Any dependency conflicts that affect other agents"
-```
-
-### Cost Report Agent
-
-Run this optional agent only after owner authorization and runner qualification. The owner may record a concrete model for reproducibility; installation does not choose a paid model or start inference.
-
-```bash
-PROMPT="You are the cost-report scheduled agent. You turn raw AI usage data into
-cost-per-outcome numbers so the team can tell which workflows pay back.
-
-Perform these checks:
-1. Pull this period's AI usage export (provider-specific: Copilot premium-request
-   counts, or the API usage/billing export). If no export is reachable, write a
-   YELLOW report saying so and stop -- do not guess numbers.
-2. Attribute spend to workflows where possible: map runs to /research, /plan,
-   /implement, /triage, /fix-ci, etc. (e.g. by branch, session label, or commit trailer).
-3. Compute cost-per-outcome: total spend / PRs merged this period, and average
-   cost per run for each recurring workflow.
-4. Compare observed spend across owner-selected models only when the provider export supports attribution; otherwise mark it unmeasured.
-5. Compare each workflow's per-run cost to the previous report; flag any that grew.
-
-Write your report to docs/agents/cost-report.md with sections:
-- Summary (1 line: GREEN/YELLOW/RED + measured spend and attribution limits)
-- Cost Per Outcome (cost per merged PR; trend vs last period)
-- Per-Workflow Cost (workflow, runs, avg cost/run, delta vs last period)
-- Cost Drift (a workflow trending above its measured historical cost, where comparable)
-- Recommendations (review observed costs or revise the workflow where evidence supports it)
-
-Append to shared-context.md:
-- Measured spend and attribution limits for the period
-- Any workflow with measured cost drift"
-```
-
-## Resilience Patterns
-
-### Failure Recovery
-
-Scheduled agents should be resilient to common failure modes:
-
-```bash
-# Retry logic for the Copilot CLI call
-MAX_RETRIES=2
-RETRY_COUNT=0
-
-while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-  if copilot -p "$PROMPT" > "$REPORT_FILE" 2>&1; then
-    break
-  fi
-  RETRY_COUNT=$((RETRY_COUNT + 1))
-  echo "[$(date)] Attempt $RETRY_COUNT failed. Retrying..."
-  sleep 10
-done
-
-if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
-  echo "[$(date)] $AGENT_NAME FAILED after $MAX_RETRIES attempts" >> "$REPORT_FILE"
-fi
-```
-
-### Checkpoint and Resume
-
-Multi-step headless runs (nightly triage, blueprint sync, release agents) die
-mid-flight on transient `Not logged in`, API 500, or 529 overload errors. Without
-a checkpoint, the next attempt restarts from scratch — re-doing committed work and
-sometimes never finishing. Write a step marker after each major phase so a retry
-resumes where it left off:
-
-```bash
-CKPT="${TMPDIR:-/tmp}/${AGENT_NAME}.checkpoint"
-done_step() { grep -qxF "$1" "$CKPT" 2>/dev/null; }
-mark_step() { echo "$1" >> "$CKPT"; }
-
-# Each phase is guarded by its checkpoint, so a resumed run skips finished work.
-done_step "discover" || { run_discovery && mark_step "discover"; }
-done_step "fix"      || { run_fixes     && mark_step "fix"; }
-done_step "merge"    || { run_merges    && mark_step "merge"; }
-
-# Clear the checkpoint only on a fully successful run.
-rm -f "$CKPT"
-```
-
-Pair this with the retry loop above: the retry handles a flaky single `copilot -p`
-call; the checkpoint handles a session that dies between phases. Commands that
-already support phase resume (for example `/remediate wave=N`) follow this same
-shape.
-
-### WIP Limits
-
-For agents that produce work items requiring human review (like research or planning agents), enforce a WIP limit to prevent accumulating more unreviewed work than humans can handle:
-
-```bash
-# Check how many items are pending review before starting new work
-PENDING_COUNT=$(ls docs/agents/pending-review/ 2>/dev/null | wc -l)
-WIP_LIMIT=5
-
-if [ "$PENDING_COUNT" -ge "$WIP_LIMIT" ]; then
-  echo "[$(date)] WIP limit reached ($PENDING_COUNT/$WIP_LIMIT). Skipping run."
-  exit 0
-fi
-```
-
-### Stagger Schedules
-
-Don't run multiple agents at the same time. If they write to the same shared context file, they can conflict. Stagger by at least 15 minutes:
-
-| Agent | Schedule |
-|-------|----------|
-| Test health | Daily 6:00 AM |
-| Code quality | Daily 6:15 AM |
-| Security audit | Weekly Monday 6:30 AM |
-| Dependency health | Weekly Monday 6:45 AM |
-
-## Shared Context System
-
-The shared context file (`docs/agents/shared-context.md`) is a cross-agent intelligence workspace. Every scheduled agent:
-
-1. **Reads** it before starting -- to build on other agents' findings
-2. **Writes** to it after finishing -- to share discoveries
-
-### Format
-
-```markdown
-<!-- ENTRY:START agent=agent-name timestamp=2024-01-15T06:00:00Z -->
-## Agent Name -- 2024-01-15
-- **Status**: GREEN / YELLOW / RED
-- Key findings (bullet points)
-- Metrics (numbers, percentages)
-
-**Cross-agent recommendations:**
-- [Other Agent]: specific actionable recommendation
-<!-- ENTRY:END -->
-```
-
-### Rules
-
-1. **Maximum 3 entries per agent type.** Oldest entry is removed when a new one is added.
-2. **Cross-agent recommendations are mandatory.** If findings affect another agent's domain, say so explicitly.
-3. **Be specific.** "Security looks fine" is useless. "No injection vectors found -- all user input escaped via `sanitize()`" is useful.
-
-## Morning Triage
-
-After scheduled agents finish their overnight runs, use `/triage` to process all reports:
-
-1. Discovers new reports via `.last-triage` marker timestamps (not git status)
-2. Checks `logs/` for agent failures (a missing report might mean a crashed agent)
-3. Scans open Dependabot PRs (Rule #45) and classifies them by update type and CI status
-4. Reads all reports and shared-context.md
-5. Synthesizes findings and drafts an action plan
-6. Records findings and proposed dispositions; implementation needs its own authorized scope
-7. Preserves reports according to repository visibility and ownership
-8. Reviews Dependabot PRs read-only; merge, rebase, and repair need separate authority
-9. Touches `.last-triage` marker to record which reports have been processed
-10. Updates shared-context.md with triage results
-
-For multi-project orchestration, the `morning-triage.sh` script template (in `templates/scripts/`) runs `/triage` across all configured projects sequentially, producing a cross-project summary.
-
-## Prerequisites
-
-- Copilot CLI installed and authenticated (`copilot --version`)
-- Non-interactive auth configured: run `copilot auth` from an interactive terminal (required for launchd/cron -- interactive auth flows won't work without a browser/TTY)
-- macOS launchd: plist must include `HardResourceLimits`/`SoftResourceLimits` with `NumberOfFiles: 122880`, `EnvironmentVariables` with HOME, TERM, PATH, and `ProgramArguments` must use `/bin/bash -c "exec /bin/bash <script>"` format (see plist template above and [Error #18](../patterns/agent-errors.md#error-18-agent-cli-crashes-with-unexpected-when-plist-runs-script-directly))
-- Project dependencies installed (agents may run test/build commands)
-- `docs/agents/` directory exists in the project
-- `logs/` directory exists for output capture
-- `docs/agents/`, `logs/`, and `scripts/agents/` gitignored on public repos; tracked on private repos (Rule #42)
+The CLI uses an available read tool and limits the run to 1-3,600 seconds.
+The selected report path must remain inside the project. It is replaced only
+after a successful result; the `.last-good` neighbor preserves that result.
+The lock under `.rpi/local/copilot/locks/` prevents overlapping runs. Inspect
+the exit code, timestamp, report and last-good copy before calling a job
+healthy.
+
+## Qualification before activation
+
+1. Record the Copilot CLI version, relevant `--help` flags, selected model,
+   target repository and sanitized environment. Verify noninteractive
+   authentication without copying credentials into an artifact.
+2. Run the native programmatic fixture in an isolated repository with a
+   disposable Copilot home and restricted tools. Its allowed report case must
+   write only the permitted report. Its denied-write case must leave the
+   prohibited path unchanged. Inspect exit status and disk state.
+3. Review `schedule-preview` output. Use absolute paths and a dedicated
+   report location under the target. Test the actual cron or launchd
+   environment after explicit activation; an interactive terminal success
+   does not prove a scheduled run can authenticate.
+4. Monitor the first run's exit, report timestamp and last-good behavior.
+   Missing or failed jobs remain degraded until a later successful observed
+   run. Do not infer health from a saved old report.
+
+See [native fixture instructions](../tests/native/README.md). Client access
+or paid inference that has not been authorized remains an explicit
+qualification blocker.
+
+## Report lifecycle
+
+Operational reports can contain security findings or internal metrics.
+Default to local ignored `docs/agents/` and `.rpi/local/copilot/` storage for
+public projects. Determine actual repository visibility with
+`gh repo view --json visibility --jq .visibility` when an authenticated remote
+is available. A missing CLI, remote or visibility result defaults to private
+operational storage. A private project may version curated reports under its
+own policy. Do not commit logs, raw credentials or security details to a
+public repository. Keep the source report, its timestamp, the tested candidate
+and a readback of any claimed outcome. Mark unavailable metrics unmeasured.
+
+`rpi-triage` scans every relevant report and failure, existing GitHub alerts
+and Dependabot PRs, then stops at a read-only briefing. Its bundled
+`rpi-triage-state.py` combines file hashes, timestamps and prior dispositions;
+the `.last-triage` timestamp alone cannot prove a report was processed. A
+failed or unprocessed report stays eligible for the next scan. Partial scans
+do not advance the global marker. Later remediation or publication needs its
+own authorized scope. See the skill's
+[checkpoint contract](../templates/skills/rpi-triage/references/triage-state.md).
+
+When a project chooses to archive reports, keep runs distinguishable by date
+and candidate. Retain the current runner's last-good file as a recovery aid,
+but never present it as today's result after a failure.
+
+## Which reports to schedule
+
+| Report | Useful inputs | Boundary |
+| --- | --- | --- |
+| Test health | Exact test command, repeated failures and measured coverage | A passing wrapper or stale receipt does not establish current coverage. |
+| Security | Dependency audit, source locations, configuration checks | Redact secret values; remote alert queries need actual access and outcome. |
+| Code quality | Lint/typecheck output, file sizes, dead-code candidates | A candidate is a finding to verify, not an automatic deletion. |
+| Dependency health | Lockfile and available update data | Do not install, merge or publish updates from a report-only run. |
+| Performance | Measured build, route or bundle baseline | Mark absent or incomparable measurements unmeasured. |
+| Documentation | Changed public APIs and broken internal links | Suggest changes; do not rewrite owner docs unattended. |
+| Cost | Provider usage export and attributable completed outcomes | Do not infer spend from request counts when billing attribution is absent. |
+
+The shipped `update` and `triage` jobs have bounded discovery prompts. Other
+report types in this table are design patterns for a separately reviewed job;
+they are not implemented runner choices. The owner chooses a schedule based on
+report value, time and inference cost.
+
+## Scheduling and environment
+
+`schedule-preview` prints a cron example and launchd arguments for the
+selected `update` or `triage` job. Inspect the project path, model, executable,
+environment and report location before copying either form to a scheduler.
+Cron and launchd have a smaller environment than an interactive terminal;
+PATH, home, authentication and selected model must be present for the job.
+Test the actual scheduler after activation and inspect its logs and report.
+An interactive command succeeding does not establish scheduled health.
+
+The repository also contains legacy-compatible shell wrappers and a macOS
+`templates/scripts/agents/install-agents.sh` helper. These are not part of
+the rendered direct-install package. That helper discovers only scripts
+marked `# RPI_AUTOMATION_MODE: report-only` with a valid `# SCHEDULE:` line.
+Its default is preview; `--activate` explicitly registers launchd jobs,
+`--status` inspects them and `--unload` removes only registrations it owns.
+It refuses to replace an unowned plist or a symlinked scheduler path. Review
+the preview and selected model before activation. A registered plist is not
+proof that the process authenticated or produced a fresh report.
+
+Run jobs at staggered times when they share a project, report directory or
+external rate limit. Bound the number of unreviewed reports; pause new jobs
+when the owner's review queue grows beyond its capacity. The runner's local
+lock handles the same job in one project, while the schedule design handles
+cross-job resource contention.
+
+## Shared context and handoff
+
+`templates/scripts/agents/lib/agent-utils.sh` has optional helpers for a
+`docs/agents/shared-context.md` file. A report can include
+`SHARED_CONTEXT_START` and `SHARED_CONTEXT_END` delimiters; the helper
+extracts that block, timestamps it, and keeps the latest three entries for
+that agent. Read only relevant entries and keep them free of secrets. This
+compatibility helper is separate from the Python runner's report output;
+the runner does not automatically update shared context.
+
+The next interactive `rpi-triage` or `rpi-update` pass reads the actual report,
+failed-run logs, project state and prior handoff. It records each finding's
+disposition and a candidate-bound outcome. A summary copied from another
+agent is context, not verification.
+
+## Recovery
+
+- **CLI or authentication missing:** install or authenticate through the
+  supported client path, then rerun the isolated native fixture before a
+  schedule is activated.
+- **Unsupported flag or model:** compare actual `copilot --help` and the
+  owner's model choice; update the runner contract only with tests and a new
+  qualification result.
+- **Timeout or lock:** inspect the current process and lock ownership. The
+  runner limits runtime to 3,600 seconds. Preserve a live owner's lock and
+  do not run a second job over it.
+- **Failure after a previous success:** retain the last-good report as
+  historical data and disclose the current failed state. Repair, then rerun.
+- **Unreviewed backlog:** pause the schedule or reduce its frequency until
+  reports have owners and dispositions. Avoid producing repeated findings
+  that nobody can assess.
+- **Interrupted multi-step follow-up:** persist a handoff after each completed
+  local step and re-read current state before resuming. Do not retry an
+  external mutation or skip a failed local gate merely because a checkpoint
+  names an earlier completed step.
+
+The legacy `templates/scripts/agents/` shell wrappers and
+`install-agents.sh` have a preview-first compatibility path. Review their
+actual `--help` and installed client behavior before using them. The direct
+Python runner is the package's stable entry point for this release candidate.

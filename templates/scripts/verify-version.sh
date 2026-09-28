@@ -118,6 +118,11 @@ for manifest in package.json templates/distribution.json vsc-extension-quickstar
   fi
 done
 
+if [[ -f pyproject.toml ]]; then
+  check_version "pyproject.toml" '^version = "[0-9]+\.[0-9]+\.[0-9]+"' "Python project version" 1
+  DECLARED=$((DECLARED + 1))
+fi
+
 if grep -qE 'shields\.io/badge/Version-[0-9]+\.[0-9]+\.[0-9]+' README.md 2>/dev/null; then
   check_version "README.md" 'Version[-: ]+v?[0-9]+\.[0-9]+\.[0-9]+|releases/tag/v[0-9]+\.[0-9]+\.[0-9]+' "Version badge" 3
   DECLARED=$((DECLARED + 1))

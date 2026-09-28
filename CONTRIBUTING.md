@@ -22,7 +22,7 @@ Thank you for your interest in contributing! This project improves through commu
 
 - **New error patterns** — If you've encountered a recurring agent mistake not in `patterns/agent-errors.md`, document it with the symptom, root cause, correct approach, and what to avoid.
 - **Methodology improvements** — Refinements to the RPI workflow based on real-world usage.
-- **Template enhancements** — Better defaults, missing configuration surfaces, or improved prompt files.
+- **Template enhancements** — Better defaults, missing Copilot surfaces, or improved canonical skills and resources.
 - **Documentation fixes** — Typos, unclear wording, broken links.
 
 ### Writing Guidelines
@@ -46,12 +46,19 @@ Rules that state an environment fact or an exact command are NOT retirement cand
 
 Retirement procedure:
 
-1. Validate the ground — confirm one of the four above applies, stated in one sentence.
-2. Find every inbound reference — `patterns/quick-reference.md`, `patterns/agent-errors.md`, `templates/prompts/`, `.github/prompts/`, `templates/github/instructions/`, `templates/github/chatmodes/`, `methodology/`, `AGENTS.md`, and `GUIDE.md`. **Blocking condition:** if any inbound reference remains, stop and fix the references before continuing.
+1. Validate the ground — confirm one of the three above applies, stated in one sentence.
+2. Find every inbound reference — `patterns/quick-reference.md`, `patterns/agent-errors.md`, `templates/skills/`, `templates/github/`, `.github/skills/`, `.github/agents/`, `.github/instructions/`, selected Local prompt wrappers, `methodology/`, `AGENTS.md`, and `GUIDE.md`. **Blocking condition:** if an active inbound reference remains, stop and fix it before continuing.
 3. Write the ledger entry below: number, release, ground, replacement.
 4. The number is permanently retired and never reused.
 
 Every release runs a retirement review — "what came out this cycle" is asked every time, even when the answer is "nothing."
+
+Review upstream changes through [the pinned intake procedure](docs/upstream-sync.md).
+Keep Copilot catalog IDs stable even when an upstream cc-rpi item has the same
+meaning. Treat skill resources, renderer manifests and lifecycle tests as one
+contract when changing distribution. Run `bash scripts/verify-local.sh` on the
+final candidate; client discovery and hook behavior need separate native
+evidence before a support claim.
 
 #### Retirement Ledger
 

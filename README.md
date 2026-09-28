@@ -1,152 +1,82 @@
-# copilot-rpi — GitHub Copilot Reference & Project Intelligence
+# copilot-rpi: RPI blueprint for GitHub Copilot
 
 [![CI](https://github.com/juan294/copilot-rpi/actions/workflows/markdown-lint.yml/badge.svg)](https://github.com/juan294/copilot-rpi/actions/workflows/markdown-lint.yml)
 [![GitHub Release](https://img.shields.io/github/v/release/juan294/copilot-rpi)](https://github.com/juan294/copilot-rpi/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Status: Active](https://img.shields.io/badge/Status-Active-brightgreen.svg)](https://github.com/juan294/copilot-rpi)
-[![GitHub Copilot](https://img.shields.io/badge/Built%20for-GitHub%20Copilot-blue.svg)](https://docs.github.com/en/copilot)
 
-![Chapa Badge](https://chapa.thecreativetoken.com/u/juan294/badge.svg)
+Copilot RPI is a standalone, repository-installed blueprint for Research,
+Plan, Implement and Validate. It provides 22 canonical RPI skills plus one
+local maintenance skill, three
+specialist agents, five scoped instruction templates, an ownership-aware
+installer, and catalogs of 40 known agent errors and 55 operational rules.
+The source lives in `templates/`; rendered files are installed in a target
+repository. Native client qualification is recorded separately from static
+validation in [compatibility](docs/compatibility.md).
 
-A blueprint repository for setting up and running projects with [GitHub Copilot](https://docs.github.com/en/copilot). Contains the RPI (Research-Plan-Implement) methodology, a catalog of known agent errors, and operational rules learned from hundreds of real sessions.
+## Start with a reviewed install
 
----
-
-## Requirements
-
-- [GitHub Copilot](https://docs.github.com/en/copilot) with agent mode enabled in VS Code
-- Git
-- (Optional) [Copilot CLI](https://docs.github.com/en/copilot/using-github-copilot/using-github-copilot-in-the-command-line) for headless mode and scheduled agents
-
-## Quick Start
-
-Clone the repository:
+Requirements: Git and Python 3.11+ for the standalone installer, plus the
+selected GitHub Copilot client. Clone this repository and choose `cli` for
+Copilot CLI, `agent-host` for VS Code Copilot Agent Host, or `vscode-local` for
+the optional Local compatibility profile. The package renders into an empty
+staging directory. The lifecycle engine then previews and applies changes to
+your project; it preserves unknown and customized files.
 
 ```bash
 git clone https://github.com/juan294/copilot-rpi.git
+python3 "$source_dir/templates/scripts/rpi-distribution.py" render \
+  --source "$source_dir" --profile cli --target "$package_dir"
+python3 "$package_dir/.rpi/copilot/runtime/rpi-distribution.py" plan \
+  --package "$package_dir" --target "$project_dir" --profile cli \
+  --output "$plan_file"
 ```
 
-Then tell Copilot in your target project:
+Set `source_dir`, `package_dir`, `project_dir` and `plan_file` to real absolute
+paths. Review the plan's source, actions, capabilities and ownership conflicts
+before applying it. Continue with the exact apply/check commands in the
+[setup checklist](templates/setup-checklist.md). Existing v1 installations
+should follow the [migration guide](docs/migrations/v2.md); do not remove
+legacy prompts by filename.
 
-> Go read the copilot-rpi repository and set up this project following all the best practices. Read the quick reference, error catalog, and methodology, then configure AGENTS.md, prompt files, and instructions for this project.
+## What the package installs
 
-## Guide
+| Surface | Purpose |
+| --- | --- |
+| `.github/skills/rpi-*/SKILL.md` and bundled resources | Canonical workflows for CLI and Agent Host |
+| `.github/agents/*.agent.md` | Research, planning and audit roles with scoped tools |
+| `AGENTS.md`, `.github/copilot-instructions.md` | Short repository guidance |
+| `.github/instructions/*.instructions.md` | Rules selected by path and task |
+| `.github/prompts/rpi-*.prompt.md` | Thin wrappers only in the `vscode-local` profile |
+| `.rpi/copilot/` | Per-project ownership manifest and standalone runtime |
 
-New here? Read **[GUIDE.md](GUIDE.md)** — a human-readable walkthrough of the philosophy, the workflow, and every command. It covers everything you need to know without diving into every file.
+Use `/rpi-research`, `/rpi-plan`, `/rpi-implement` and `/rpi-validate` in a
+qualified client. Native `/plan` and `/status` are distinct commands. The
+[guide](GUIDE.md) explains the workflow; [methodology](methodology/README.md)
+contains the full process. [Examples](examples/README.md) show its artifacts.
 
-## What's Inside
+The package does not activate hooks, schedulers, MCP servers, cloud jobs or
+global Copilot settings. Optional controls and their proof requirements are
+documented in [native policy](docs/native-policy.md). Maintainers use the
+[upstream intake procedure](docs/upstream-sync.md) to review cc-rpi changes
+without creating a runtime dependency on cc-rpi.
 
-### Methodology (`methodology/`)
+## Develop and verify this blueprint
 
-The full Research-Plan-Implement pattern adapted for GitHub Copilot, based on HumanLayer's opencode-rpi and ACE-FCA framework. Organized by topic (10 files, in reading order):
+Install repository development dependencies with `uv sync --locked` and
+`npm ci`, then run `bash scripts/verify-local.sh`. The gate runs sequential
+tests, schema and generated-output checks, ShellCheck, Markdown lint, offline
+upstream provenance and link validation. It writes a candidate-bound receipt
+under ignored `.rpi/local/copilot/`. A static pass does not prove a Copilot
+client discovered or enforced a rule. See [native qualification](tests/native/README.md)
+for the separate client procedures.
 
-- **Philosophy** — Core tenets, error amplification principle, mental alignment
-- **Context Engineering** — Compaction, context quality, Copilot configuration surfaces (7 config files)
-- **Four Phases** — Research, Plan, Implement, Validate with detailed processes
-- **Agent Design** — Documentarian rule, research catalog, quality review pattern, batch-eligible parallelism, autonomy principles
-- **Pseudocode Notation** — Compact notation for writing implementation plans
-- **Testing** — Automated-first verification hierarchy, TDD protocol
-- **Push Accountability** — Post-push CI ownership, background polling, fix-and-repush cycle
-- **CI & Guardrails** — Pre-commit hooks, CI workflows, development guardrails
-- **Scheduled Agents** — Recurring quality agents on cron/launchd via `copilot -p`
-- **Error & Success Logging** — Framework for systematic improvement
+## Contribute
 
-### Known Error Patterns (`patterns/`)
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before changing workflow contracts,
+catalog IDs or distribution behavior. [CHANGELOG.md](CHANGELOG.md) records
+released changes and the proposed breaking migration in Unreleased. Security
+reports follow [SECURITY.md](SECURITY.md). The project uses the [MIT license](LICENSE).
 
-A catalog of 39 recurring agent errors documented from real sessions. Each entry includes the symptom, root cause, correct approach, and what to avoid:
-
-- Git operations (pre-commit hooks, push rejections, worktrees)
-- GitHub CLI (`gh` field names, CI status checking)
-- Node.js/TypeScript (ESM shebangs, Buffer vs string)
-- CI & workflow (push-and-forget, skipping TDD, suggesting manual steps)
-- **Copilot-specific** (missing frontmatter, `${input:var}` syntax, instruction globs, chatmode directory, CLI auth)
-
-### Examples (`examples/`)
-
-Sample documents illustrating the methodology in practice — a research document, implementation plan with phase files, error/success log entries, pseudocode notation examples, and end-to-end workflow walkthroughs.
-
-### Templates (`templates/`)
-
-Ready-to-use starting points for new projects:
-
-- **AGENTS.md template** — Cross-tool instruction file with all operational rules
-- **VS Code settings template** — `.vscode/settings.json` for Copilot configuration
-- **MCP config template** — `.vscode/mcp.json` for external tool access
-- **Setup checklist** — Step-by-step guide including prompt files, instructions, chatmodes, CI, and hooks
-- **Prompt files** — `/bootstrap`, `/adopt`, `/research`, `/plan`, `/implement`, `/validate`, `/quality-review`, `/describe-pr`, `/pre-launch`, `/remediate`, `/explore-release`, `/triage`, `/status`, `/fix-ci`
-- **E2E Pro playbook** — Release-verification template that proves every required check ran and passed against the exact artifact being tagged
-- **Path-specific instructions** — Auto-loaded rules for tests, APIs, migrations, deployment safety, and Supabase
-- **Chat modes** — RPI Research (documentarian), RPI Planner (interactive planning), RPI Auditor (validation)
-
-## Copilot-Specific Features
-
-This blueprint takes advantage of capabilities unique to GitHub Copilot:
-
-| Feature | How It's Used |
-|---------|--------------|
-| **`.github/prompts/*.prompt.md`** | RPI workflow commands invoked with `/` in chat |
-| **`.github/instructions/*.instructions.md`** | Domain rules auto-loaded by file glob (`applyTo`) |
-| **`.github/chatmodes/*.chatmode.md`** | Behavioral constraints (documentarian rule) enforced at session level |
-| **`copilot -p "prompt"`** | Headless CLI for scheduled agents and parallel research |
-| **`@copilot` cloud agent** | Async implementation via GitHub Issues |
-| **`#codebase` / `#file:`** | Context references in chat |
-
-## Relationship to cc-rpi
-
-This repository is the GitHub Copilot counterpart to [cc-rpi](https://github.com/juan294/cc-rpi) (Claude Code). Both share the same RPI methodology and philosophy — ~60% of the content is identical. The differences are in tool-specific configuration:
-
-| | cc-rpi | copilot-rpi |
-|--|--------|-------------|
-| **Primary tool** | Claude Code | GitHub Copilot |
-| **Instruction file** | `CLAUDE.md` | `AGENTS.md` (cross-tool) |
-| **Commands** | `.claude/commands/*.md` | `.github/prompts/*.prompt.md` |
-| **Domain rules** | `.claude/skills/` | `.github/instructions/*.instructions.md` |
-| **Personas** | (per-prompt injection) | `.github/chatmodes/*.chatmode.md` |
-| **Settings** | `.claude/settings.json` | `.vscode/settings.json` + `.vscode/mcp.json` |
-| **Parallelism** | Task tool + Agent Teams | `copilot -p` + `@copilot` cloud agent |
-| **Headless mode** | `claude -p` | `copilot -p` |
-
-## Harness Scope
-
-**Principle: one harness per blueprint.** copilot-rpi is authored for
-GitHub Copilot and maintained for a single author syncing downstream
-projects. Every additional harness is ongoing sync surface --
-parallel prompt trees, parallel wrappers, extra work on every
-blueprint bump -- so by default new harness support lives outside
-this repo.
-
-**AGENTS.md is the shared cross-tool layer.** Both copilot-rpi and
-[cc-rpi][] ship an `AGENTS.md` because it is a widely adopted
-cross-agent markdown convention that multiple tools read natively.
-The compatibility cost is low -- a single file with no parallel
-command tree.
-
-For Claude Code or other harnesses, use [cc-rpi][] or a sibling
-project rather than layering on top of copilot-rpi.
-
-[cc-rpi]: https://github.com/juan294/cc-rpi
-
-## Adding New Patterns
-
-When you discover a new recurring error or best practice:
-
-1. Add it to `patterns/agent-errors.md` (detailed entry with symptom/root cause/solution)
-2. Add a one-liner to `patterns/quick-reference.md`
-3. Keep entries generic — no project-specific references
-
-## Contributing
-
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on submitting changes, adding error patterns, and writing style.
-
-This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md).
-
-For security issues, see [SECURITY.md](SECURITY.md). For a history of changes, see [CHANGELOG.md](CHANGELOG.md).
-
-## Credits
-
-- [HumanLayer](https://humanlayer.dev/) — ACE-FCA framework and opencode-rpi implementation
-- Adapted for GitHub Copilot's native capabilities (AGENTS.md, prompt files, path-specific instructions, chat modes)
-
-## License
-
-[MIT](LICENSE)
+The methodology originated in [HumanLayer's RPI and ACE-FCA work](https://humanlayer.dev/).
+Copilot RPI adapts it to GitHub Copilot while tracking reviewed cc-rpi source
+in an explicit local lock.

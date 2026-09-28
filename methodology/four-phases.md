@@ -5,25 +5,25 @@
 ```text
 User
  │
- ├── /research  ─────► Research Session
- │                       ├── #codebase search (find WHERE)
+ ├── /rpi-research  ─────► Research Session
+ │                       ├── Repository search (find WHERE)
  │                       ├── File reads and analysis (understand HOW)
  │                       ├── Pattern search (find EXAMPLES)
  │                       ├── Docs search (find historical docs)
- │                       └── Background copilot -p (parallel research)
+ │                       └── Bounded independent research when authorized
  │
- ├── /plan  ──────────► Planning Session
+ ├── /rpi-plan  ──────────► Planning Session
  │                       ├── Research-informed discovery
  │                       └── Interactive Q&A with user
  │
- ├── /implement  ─────► Implementation Session
+ ├── /rpi-implement  ─────► Implementation Session
  │                       ├── Phase-by-phase execution
- │                       └── Terminal verification (#tool:terminal)
+ │                       └── Sequential local verification
  │
- ├── /validate  ──────► Validation Session
+ ├── /rpi-validate  ──────► Validation Session
  │                       └── Plan verification + test runs
  │
- └── /describe-pr  ───► PR Description Generator
+ └── /rpi-describe-pr  ───► PR Description Generator
 ```
 
 **Key architectural decisions:**
@@ -31,20 +31,22 @@ User
 - **Fresh session per phase** pattern: Each phase runs in a clean Chat window with focused context.
 - **Read-only research**: Research-phase work uses only read and search capabilities — no file modifications.
 - **Separation of concerns**: Finding *where* things are and understanding *how* they work are different cognitive tasks. Don't mix them.
-- **Phase gates**: Implementation stops between phases. Validation is a separate explicit step.
+- **Phase gates**: Implementation pauses between phases unless all-phase
+  continuation was already authorized. Each phase still gets its full gate.
+  Validation is a separate explicit step.
 
 ### Mapping to GitHub Copilot
 
 | Concept | GitHub Copilot Equivalent |
 |---------|--------------------------|
 | Canonical workflow definitions | Project skills in `.github/skills/`; optional legacy Local prompt wrappers are compatibility output |
-| Codebase exploration | `#codebase` reference in chat + `#file:path` for specific files |
-| Background research | `copilot -p "prompt"` in a separate terminal |
-| Parallel investigation | Multiple `copilot -p` processes running simultaneously |
+| Codebase exploration | Repository search and source reads; the chosen harness may expose extra context tools |
+| Background research | A bounded read-only assignment on a qualified client, with explicit inference authorization |
+| Parallel investigation | Independent assignments with distinct files, resource limits and one integration owner |
 | Todo tracking | Markdown checklists in plan files (no built-in task tool) |
 | Thoughts directory | Any project-local docs directory (e.g., `docs/`, `plans/`) |
 | Role profiles | Custom agents in `.github/agents/`; legacy chatmodes are optional Local compatibility output |
-| Terminal commands | `#tool:terminal` reference in agent mode |
+| Terminal commands | Use the selected harness's available terminal tool and inspect actual results |
 
 ---
 
@@ -132,7 +134,7 @@ When resuming from a handoff, the agent should classify the situation before act
 
 **Purpose:** Build a complete, accurate map of the codebase as it exists today.
 
-**Applicability:** This phase requires an existing codebase. For greenfield projects with no code yet, skip directly to Phase 2 (Plan). Once the first implementation phase produces code, /research becomes the starting point for every subsequent task.
+**Applicability:** This phase requires an existing codebase. For greenfield projects with no code yet, skip directly to Phase 2 (Plan). Once the first implementation phase produces code, /rpi-research becomes the starting point for every subsequent task.
 
 **Process:**
 
@@ -316,7 +318,7 @@ reviewer looked at. Before implementing it:
   invariant for a non-functional metric (perf, bundle size, build time), STOP and
   escalate — that trade is a human decision, not an autonomous one.
 
-This is the implement-phase guard against Error #40 (Rule #55). `/remediate`
+This is the implement-phase guard against Error #40 (Rule #55). `/rpi-remediate`
 encodes it as a per-finding gate; the same discipline applies any time you
 implement someone else's prescription.
 

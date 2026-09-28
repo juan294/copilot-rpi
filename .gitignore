@@ -35,6 +35,8 @@ docs/agents/
 logs/
 scripts/agents/
 .rpi/local/
+# Lifecycle ownership records bind to this checkout's absolute target path.
+.rpi/copilot/
 
 # Internal working docs
 docs/research/

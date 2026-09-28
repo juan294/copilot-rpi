@@ -6,6 +6,41 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+Proposed Copilot RPI 2.0 migration. Release and native profile qualification
+remain subject to the final candidate gates.
+
+### Added
+
+- Pinned cc-rpi source intake with an offline component and catalog
+  disposition check. Canonical RPI skills retain bundled workflow resources.
+- Copilot CLI, VS Code Agent Host and optional VS Code Local render profiles;
+  repository skills, specialist agents, scoped instructions and Local prompt
+  wrappers are selected by profile.
+- Standalone ownership-aware plan, apply, check, rollback and detach commands.
+  An installation manifest and recovery journal preserve adopter changes.
+- Candidate-bound local verification receipts, findings disposition checks,
+  opt-in pre-tool and Git pre-push adapters, and bounded Copilot scheduled-job
+  runner. Native hook and scheduled inference activation remain separate.
+- Compatibility, migration, native policy and upstream intake guides.
+
+### Changed
+
+- Canonical workflows move from prompt files to `.github/skills/` for the CLI
+  and Agent Host profiles. The Local profile retains thin prompt wrappers.
+  Existing prompt and chatmode files are migrated only when their ownership is
+  proven by the lifecycle plan.
+- Interactive workflows inherit the session model and effort. Scheduled jobs
+  require a selected model and do not start during installation.
+- Local release verification runs a sequential portable gate and records the
+  tested candidate. Native CLI and VS Code results are separate evidence.
+
+### Migration
+
+- Render a package for one selected profile, review a lifecycle plan, apply it,
+  and run `check`. Follow [the v2 guide](docs/migrations/v2.md) for conflicts,
+  legacy ownership and rollback. Historical v1 no-hooks statements below
+  describe those releases; optional v2 hooks need native qualification.
+
 ## [1.18.0] - 2026-07-29
 
 Catch-up sync porting the generic, Copilot-applicable parts of cc-rpi v1.25.0

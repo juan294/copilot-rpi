@@ -6,39 +6,33 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
-  invariants:
-    name: Repo invariants
+  portable:
+    name: Portable local gate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          # verify-version.sh check 2 greps tracked files; the default shallow
-          # clone is enough for that, but CHANGELOG parsing needs the file, not
-          # the history. Full history costs little here and avoids surprises.
           fetch-depth: 0
 
-      # Each script prints BLOCKED / WHY / FIX with a runnable fix command, so a
-      # failure here tells you what to do rather than only that something broke.
-      # Run sequentially -- a failing earlier check should not be masked.
-      - name: Verify error and rule counts
-        run: bash templates/scripts/verify-counts.sh
+      - uses: astral-sh/setup-uv@v9
+        with:
+          version: "0.12.19"
 
-      - name: Verify version strings
-        run: bash templates/scripts/verify-version.sh
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24.21.0"
+          cache: npm
 
-      - name: Verify Copilot surface contract
-        run: bash templates/scripts/verify-prompts.sh
-
-  shellcheck:
-    name: Shellcheck
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Run shellcheck on shipped scripts
+      - name: Install locked test dependencies
         run: |
-          shellcheck --severity=warning \
-            templates/scripts/*.sh \
-            templates/scripts/agents/*.sh \
-            templates/scripts/agents/lib/*.sh
+          uv sync --locked
+          npm ci
+          command -v shellcheck
+          shellcheck --version
+
+      - name: Verify complete portable candidate
+        run: bash scripts/verify-local.sh

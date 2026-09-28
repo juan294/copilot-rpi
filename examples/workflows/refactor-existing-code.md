@@ -6,7 +6,10 @@ A step-by-step walkthrough of refactoring existing code using the full RPI cycle
 
 ## The scenario
 
-Your API has grown. Authentication logic is spread across three places: an auth middleware, inline checks in route handlers, and a utility file with token helpers. You want to consolidate everything into a clean auth service. This is the kind of change where "just start refactoring" leads to broken imports, missed edge cases, and hours of debugging.
+Your API has grown. Authentication logic is spread across three places: an auth
+middleware, inline checks in route handlers, and a utility file with token
+helpers. You want to consolidate it into a service. This transcript is
+illustrative; its paths and test results are example data.
 
 ---
 
@@ -15,7 +18,7 @@ Your API has grown. Authentication logic is spread across three places: an auth 
 Refactoring is where research matters most. You need a complete map of what exists before moving anything. Open a Copilot Chat window:
 
 ```text
-You: /research map all authentication and authorization logic in the codebase.
+You: /rpi-research map all authentication and authorization logic in the codebase.
      I want to know every file that handles auth, what each one does, how they
      connect, and where the boundaries are unclear.
 ```
@@ -73,7 +76,7 @@ You: This is really useful. I didn't know about the refresh token bug.
 New Chat window. Clean context:
 
 ```text
-You: /plan refactor all auth logic into a dedicated AuthService.
+You: /rpi-plan refactor all auth logic into a dedicated AuthService.
      Research at docs/research/2026-02-22-auth-landscape.md.
      Also fix the refresh token bug and the inconsistent 401/403 responses
      found during research.
@@ -137,7 +140,7 @@ that wraps AuthService.checkRole(). Cleaner route definitions.
 New Chat window:
 
 ```text
-You: /implement docs/plans/2026-02-22-auth-refactor.md
+You: /rpi-implement docs/plans/2026-02-22-auth-refactor.md
 ```
 
 ```text
@@ -221,7 +224,7 @@ All phases complete.
 ## Step 4: Validate
 
 ```text
-You: /validate docs/plans/2026-02-22-auth-refactor.md
+You: /rpi-validate docs/plans/2026-02-22-auth-refactor.md
 ```
 
 ```text
@@ -244,14 +247,14 @@ Verdict: All plan objectives achieved.
 
 ---
 
-## Step 5: PR
+## Step 5: Prepare the change description
 
 ```text
-You: /describe-pr
+You: /rpi-describe-pr
 ```
 
 ```text
-Copilot: PR created > https://github.com/yourname/my-api/pull/15
+Copilot: PR description drafted. No remote action taken yet.
 ```
 
 ---

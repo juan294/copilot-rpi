@@ -20,3 +20,4 @@ jobs:
           globs: |
             **/*.md
             !node_modules/**
+            !upstream/snapshots/**

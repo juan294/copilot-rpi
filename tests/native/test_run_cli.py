@@ -1,0 +1,177 @@
+"""Native probe contract with a fake external Copilot executable."""
+
+import json
+import importlib.util
+import os
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+import time
+from types import SimpleNamespace
+import unittest
+from unittest import mock
+
+
+ROOT = Path(__file__).resolve().parents[2]
+RUNNER = ROOT / "tests/native/run_cli.py"
+FAKE = ROOT / "tests/native/fixtures/fake_copilot.py"
+SPEC = importlib.util.spec_from_file_location("native_runner", RUNNER)
+native = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(native)
+
+
+class NativeRunnerTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.directory = Path(self.temp.name)
+        self.evidence = self.directory / "evidence"
+
+    def receipt(self, profile="cli-programmatic"):
+        return json.loads((self.evidence / f"{profile}-receipt.json").read_text())
+
+    def invoke(self, profile="cli-programmatic", *, mode="ok", timeout=15, extra_env=None):
+        env = dict(os.environ, COPILOT_BIN=str(FAKE), COPILOT_MODEL="fixture-model",
+                   RPI_NATIVE_FAKE_MODE=mode, RPI_NATIVE_EVIDENCE_DIR=str(self.evidence))
+        if extra_env:
+            env.update(extra_env)
+        return subprocess.run(
+            [sys.executable, str(RUNNER), "--profile", profile,
+             "--timeout-seconds", str(timeout)], cwd=ROOT, env=env,
+            capture_output=True, text=True, timeout=40,
+        )
+
+    def test_programmatic_positive_and_denied_write_record_disk_and_remote(self):
+        result = self.invoke()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        receipt = self.receipt()
+        self.assertEqual(receipt["status"], "passed")
+        self.assertEqual(receipt["profile"], "cli-programmatic")
+        self.assertEqual(receipt["client_version"], "fake-copilot 1.2.3")
+        self.assertTrue(receipt["checks"]["allowed_report"])
+        self.assertTrue(receipt["checks"]["denied_write_unchanged"])
+        self.assertTrue(receipt["checks"]["native_write_denial_event"])
+        self.assertTrue(receipt["checks"]["denied_write_report_observed"])
+        denied = next(command for command in receipt["commands"] if command["label"] == "denied write")
+        self.assertEqual(denied["exit"], 0)
+        self.assertIn("permission.requested", denied["stdout"])
+        self.assertIn("permission.completed", denied["stdout"])
+        self.assertTrue(receipt["checks"]["remote_unchanged"])
+        self.assertTrue(receipt["checks"]["blueprint_candidate_unchanged"])
+        self.assertEqual(receipt["blueprint_candidate"], receipt["blueprint_candidate_after"])
+        self.assertEqual(len(receipt["blueprint_candidate"]["sha256"]), 64)
+        self.assertEqual(receipt["commands"][0]["argv"], [str(FAKE), "--version"])
+        runner_calls = receipt["runner_copilot_argv"]
+        self.assertEqual([call for call in runner_calls if call == ["--version"]], [["--version"]])
+        self.assertTrue(any("-p" in call and "--available-tools=read" in call
+                            and "--allow-tool=read" in call for call in runner_calls))
+        self.assertNotIn("fixture-secret-value", json.dumps(receipt))
+
+    def test_cli_profile_uses_explicit_skill_and_read_only_tools(self):
+        result = self.invoke("cli")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        receipt = self.receipt("cli")
+        self.assertEqual(receipt["status"], "passed")
+        self.assertTrue(receipt["checks"]["skill_invoked"])
+        self.assertTrue(receipt["checks"]["missing_skill_negative"])
+        self.assertTrue(receipt["checks"]["product_unchanged"])
+        self.assertTrue(receipt["checks"]["remote_unchanged"])
+        prompt_command = next(command["argv"] for command in receipt["commands"]
+                              if command["label"] == "cli skill")
+        self.assertIn("/rpi-research", " ".join(prompt_command))
+        self.assertNotIn(receipt["fixture"]["marker"], " ".join(prompt_command))
+        self.assertIn("--available-tools=read", prompt_command)
+
+    def test_prompt_echo_cannot_pass_skill_loading(self):
+        result = self.invoke("cli", mode="prompt-echo")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(self.receipt("cli")["status"], "blocked")
+
+    def test_prose_refusal_without_native_event_is_inconclusive(self):
+        result = self.invoke(mode="prose-denial")
+        self.assertNotEqual(result.returncode, 0)
+        receipt = self.receipt()
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertFalse(receipt["checks"]["native_write_denial_event"])
+        self.assertIn("denial event", receipt["recovery"])
+
+    def test_unlinked_permission_completion_is_inconclusive(self):
+        result = self.invoke(mode="mismatched-event")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse(self.receipt()["checks"]["native_write_denial_event"])
+
+    def test_denial_without_native_report_is_inconclusive(self):
+        result = self.invoke(mode="no-denial-report")
+        self.assertNotEqual(result.returncode, 0)
+        receipt = self.receipt()
+        self.assertTrue(receipt["checks"]["native_write_denial_event"])
+        self.assertFalse(receipt["checks"]["denied_write_report_observed"])
+
+    def test_source_candidate_change_during_probe_blocks_pass(self):
+        receipt = {"checks": {}, "commands": []}
+        with mock.patch.object(native, "source_identity", side_effect=[
+            {"sha256": "before"}, {"sha256": "after"},
+        ]), mock.patch.dict(os.environ, {"COPILOT_BIN": str(FAKE),
+                                     "RPI_NATIVE_FAKE_MODE": "ok"}):
+            with self.assertRaisesRegex(native.ProbeBlocked, "candidate"):
+                native.probe(SimpleNamespace(profile="cli", timeout_seconds=15), receipt)
+
+    def test_profile_receipts_survive_sequential_runs(self):
+        self.assertEqual(self.invoke("cli").returncode, 0)
+        cli_bytes = (self.evidence / "cli-receipt.json").read_bytes()
+        self.assertEqual(self.invoke("cli-programmatic").returncode, 0)
+        self.assertEqual((self.evidence / "cli-receipt.json").read_bytes(), cli_bytes)
+        self.assertEqual(self.receipt("cli-programmatic")["profile"], "cli-programmatic")
+
+    def test_preflight_rejects_unsupported_flags_before_inference(self):
+        result = self.invoke(mode="old-help")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("unsupported", result.stderr.lower())
+        receipt = self.receipt()
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertEqual([command["argv"][1] for command in receipt["commands"]],
+                         ["--version", "--help"])
+
+    def test_missing_auth_is_a_blocker_without_report_success(self):
+        result = self.invoke(mode="missing-auth", extra_env={"COPILOT_GITHUB_TOKEN": "force-missing-auth"})
+        self.assertNotEqual(result.returncode, 0)
+        receipt = self.receipt()
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertFalse(receipt["checks"].get("allowed_report", False))
+        self.assertIn("auth", receipt["recovery"].lower())
+
+    def test_denied_write_side_effect_blocks_even_if_cli_reports_success(self):
+        result = self.invoke(mode="write-anyway")
+        self.assertNotEqual(result.returncode, 0)
+        receipt = self.receipt()
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertFalse(receipt["checks"]["denied_write_unchanged"])
+
+    def test_wall_timeout_is_bounded_and_recorded(self):
+        start = time.monotonic()
+        result = self.invoke("cli", mode="sleep", timeout=1)
+        self.assertLess(time.monotonic() - start, 5)
+        self.assertNotEqual(result.returncode, 0)
+        receipt = self.receipt("cli")
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("timeout", receipt["recovery"].lower())
+
+    def test_secret_values_never_enter_receipt_or_output(self):
+        result = self.invoke(extra_env={"COPILOT_GITHUB_TOKEN": "fixture-secret-value"},
+                             mode="echo-secret")
+        self.assertNotIn("fixture-secret-value", result.stdout + result.stderr)
+        self.assertNotIn("fixture-secret-value", (self.evidence / "cli-programmatic-receipt.json").read_text())
+
+    def test_unrelated_environment_is_not_given_to_copilot(self):
+        result = self.invoke("cli", mode="env-check",
+                             extra_env={"UNRELATED_SECRET": "private-value"})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        receipt = self.receipt("cli")
+        skill_output = next(command["stdout"] for command in receipt["commands"]
+                            if command["label"] == "cli skill")
+        self.assertIn("unrelated_present=false", skill_output)
+
+
+if __name__ == "__main__":
+    unittest.main()
