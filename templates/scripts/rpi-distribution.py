@@ -439,7 +439,11 @@ def render(root, manifest, profile, target, include_examples=False):
     record = render_record(manifest, profile, outputs, roots, preserve_ids)
     runtime = {}
     if target != root:
-        for name in ("rpi-distribution.py", "rpi-lifecycle.py", "rpi-config.py"):
+        for name in (
+            "rpi-distribution.py", "rpi-lifecycle.py", "rpi-config.py",
+            "rpi-candidate.py", "rpi-verify.py", "validate-findings.py",
+            "rpi-hook.py", "rpi-prepush.py", "rpi-automation.py",
+        ):
             relative = f".rpi/copilot/runtime/{name}"
             if name == "rpi-distribution.py":
                 runtime[relative] = (

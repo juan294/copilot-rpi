@@ -1,318 +1,240 @@
 #!/usr/bin/env bash
-# templates/scripts/agents/install-agents.sh
-#
-# Install/uninstall scheduled agents into macOS launchd.
-#
-# Auto-discovers agent scripts in scripts/agents/*.sh and generates
-# launchd plists for each one. Schedule is read from a comment in
-# each script:
-#
-#   # SCHEDULE: daily 03:00
-#   # SCHEDULE: weekly monday 06:30
-#
-# Scripts without a SCHEDULE comment are skipped.
-#
-# Usage:
-#   bash scripts/agents/install-agents.sh             # Install all agents
-#   bash scripts/agents/install-agents.sh --unload     # Unload and remove all
-#   bash scripts/agents/install-agents.sh --status     # Show agent status
-#   bash scripts/agents/install-agents.sh --list       # List discoverable agents
-#
-# Prerequisites:
-#   - macOS with launchd
-#   - Claude CLI installed (claude setup-token for non-interactive auth)
-#   - Agent scripts in scripts/agents/*.sh with SCHEDULE comments
-
+# Preview or explicitly register report-only project agents with macOS launchd.
+# Agent files need `# SCHEDULE: daily HH:MM` (or weekly DAY HH:MM) and
+# `# RPI_AUTOMATION_MODE: report-only`. No inference or scheduler action occurs
+# during the default preview.
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-PROJECT_NAME="$(basename "${PROJECT_DIR}")"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+PROJECT_NAME="$(basename "$PROJECT_DIR" | tr -cd '[:alnum:]-')"
 LAUNCH_AGENTS_DIR="${HOME}/Library/LaunchAgents"
 SYSTEM_LOGS_DIR="${HOME}/Library/Logs/${PROJECT_NAME}"
-
-# Plist label prefix — all agents for this project share it
 LABEL_PREFIX="com.${PROJECT_NAME}"
+OWNER_MARKER='Managed by Copilot RPI installer'
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-# Parse "# SCHEDULE: daily 03:00" or "# SCHEDULE: weekly monday 06:30"
-# Returns: type hour minute [weekday]
+# Print weekday, hour and minute. Return nonzero for invalid schedules.
 parse_schedule() {
-  local script="$1"
-  local schedule_line
-  schedule_line=$(grep -m1 '^# SCHEDULE:' "$script" 2>/dev/null || true)
-
-  if [ -z "$schedule_line" ]; then
+  local line="$1" kind day clock hour minute weekday
+  read -r kind day clock <<< "${line#\# SCHEDULE: }"
+  if [ "$kind" = daily ]; then
+    clock="$day"
+    weekday='-'
+  elif [ "$kind" = weekly ]; then
+    case "$day" in
+      sunday|sun) weekday=0 ;; monday|mon) weekday=1 ;;
+      tuesday|tue) weekday=2 ;; wednesday|wed) weekday=3 ;;
+      thursday|thu) weekday=4 ;; friday|fri) weekday=5 ;;
+      saturday|sat) weekday=6 ;; *) return 1 ;;
+    esac
+  else
     return 1
   fi
-
-  # Strip "# SCHEDULE: " prefix
-  local schedule="${schedule_line#\# SCHEDULE: }"
-
-  local type hour minute weekday
-  type=$(echo "$schedule" | awk '{print tolower($1)}')
-  local time_str
-
-  case "$type" in
-    daily)
-      time_str=$(echo "$schedule" | awk '{print $2}')
-      hour=$(echo "$time_str" | cut -d: -f1 | sed 's/^0//')
-      minute=$(echo "$time_str" | cut -d: -f2 | sed 's/^0//')
-      echo "daily $hour $minute"
-      ;;
-    weekly)
-      local day_name
-      day_name=$(echo "$schedule" | awk '{print tolower($2)}')
-      time_str=$(echo "$schedule" | awk '{print $3}')
-      hour=$(echo "$time_str" | cut -d: -f1 | sed 's/^0//')
-      minute=$(echo "$time_str" | cut -d: -f2 | sed 's/^0//')
-      case "$day_name" in
-        sunday|sun)    weekday=0 ;;
-        monday|mon)    weekday=1 ;;
-        tuesday|tue)   weekday=2 ;;
-        wednesday|wed) weekday=3 ;;
-        thursday|thu)  weekday=4 ;;
-        friday|fri)    weekday=5 ;;
-        saturday|sat)  weekday=6 ;;
-        *) echo "Unknown day: $day_name" >&2; return 1 ;;
-      esac
-      echo "weekly $hour $minute $weekday"
-      ;;
-    *)
-      echo "Unknown schedule type: $type" >&2
-      return 1
-      ;;
-  esac
+  [[ "$clock" =~ ^[0-9][0-9]:[0-9][0-9]$ ]] || return 1
+  hour=$((10#${clock%:*}))
+  minute=$((10#${clock#*:}))
+  [ "$hour" -lt 24 ] && [ "$minute" -lt 60 ] || return 1
+  printf '%s %s %s\n' "$weekday" "$hour" "$minute"
 }
 
-# Generate a launchd plist for an agent script
-generate_plist() {
-  local script_path="$1"
-  local agent_name="$2"
-  local label="${LABEL_PREFIX}.${agent_name}"
-  local schedule
-  schedule=$(parse_schedule "$script_path") || return 1
-
-  local type hour minute weekday
-  type=$(echo "$schedule" | awk '{print $1}')
-  hour=$(echo "$schedule" | awk '{print $2}')
-  minute=$(echo "$schedule" | awk '{print $3}')
-  weekday=$(echo "$schedule" | awk '{print $4}')
-
-  local calendar_interval
-  if [ "$type" = "weekly" ] && [ -n "$weekday" ]; then
-    calendar_interval="    <key>Weekday</key>
-    <integer>${weekday}</integer>
-    <key>Hour</key>
-    <integer>${hour}</integer>
-    <key>Minute</key>
-    <integer>${minute}</integer>"
-  else
-    calendar_interval="    <key>Hour</key>
-    <integer>${hour}</integer>
-    <key>Minute</key>
-    <integer>${minute}</integer>"
-  fi
-
-  cat <<PLIST
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-  <key>Label</key>
-  <string>${label}</string>
-
-  <key>ProgramArguments</key>
-  <array>
-    <string>/bin/bash</string>
-    <string>-c</string>
-    <string>exec /bin/bash ${script_path}</string>
-  </array>
-
-  <key>StartCalendarInterval</key>
-  <dict>
-${calendar_interval}
-  </dict>
-
-  <key>StandardOutPath</key>
-  <string>${SYSTEM_LOGS_DIR}/${agent_name}.log</string>
-
-  <key>StandardErrorPath</key>
-  <string>${SYSTEM_LOGS_DIR}/${agent_name}.error.log</string>
-
-  <key>HardResourceLimits</key>
-  <dict>
-    <key>NumberOfFiles</key>
-    <integer>122880</integer>
-  </dict>
-
-  <key>SoftResourceLimits</key>
-  <dict>
-    <key>NumberOfFiles</key>
-    <integer>122880</integer>
-  </dict>
-
-  <key>EnvironmentVariables</key>
-  <dict>
-    <key>HOME</key>
-    <string>${HOME}</string>
-    <key>TERM</key>
-    <string>xterm-256color</string>
-    <key>PATH</key>
-    <string>/opt/homebrew/bin:/usr/local/bin:${HOME}/.local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
-  </dict>
-</dict>
-</plist>
-PLIST
-}
-
-# Discover all agent scripts with SCHEDULE comments
+# Discover only explicitly marked report-only agents. Legacy or unmarked
+# scripts are not silently installed under a new permission model.
 discover_agents() {
-  for script in "${SCRIPT_DIR}"/*.sh; do
+  local script name schedule
+  for script in "$SCRIPT_DIR"/*.sh; do
     [ -f "$script" ] || continue
-    local basename
-    basename=$(basename "$script" .sh)
-    # Skip this installer script and the morning-triage orchestrator
-    [ "$basename" = "install-agents" ] && continue
-    # Check for SCHEDULE comment
-    if grep -q '^# SCHEDULE:' "$script" 2>/dev/null; then
-      echo "${basename}|${script}"
-    fi
+    name="$(basename "$script" .sh)"
+    [ "$name" = install-agents ] && continue
+    grep -Fqx '# RPI_AUTOMATION_MODE: report-only' "$script" || continue
+    schedule="$(grep -m1 '^# SCHEDULE:' "$script" || true)"
+    [ -n "$schedule" ] || continue
+    printf '%s|%s|%s\n' "$name" "$script" "$schedule"
   done
 }
 
-# ---------------------------------------------------------------------------
-# Commands
-# ---------------------------------------------------------------------------
-
-cmd_install() {
-  echo "Installing ${PROJECT_NAME} scheduled agents..."
-  echo "Project: ${PROJECT_DIR}"
-  echo ""
-
-  mkdir -p "${LAUNCH_AGENTS_DIR}"
-  mkdir -p "${SYSTEM_LOGS_DIR}"
-  mkdir -p "${PROJECT_DIR}/logs"
-  mkdir -p "${PROJECT_DIR}/docs/agents"
-
-  local count=0
-  while IFS='|' read -r agent_name script_path; do
-    local label="${LABEL_PREFIX}.${agent_name}"
-    local target="${LAUNCH_AGENTS_DIR}/${label}.plist"
-
-    # Unload if already loaded
-    if [ -f "${target}" ]; then
-      launchctl bootout "gui/$(id -u)/${label}" 2>/dev/null || true
-    fi
-
-    # Generate and install plist
-    generate_plist "${script_path}" "${agent_name}" > "${target}"
-    launchctl bootstrap "gui/$(id -u)" "${target}"
-    local schedule
-    schedule=$(parse_schedule "${script_path}")
-    echo "  Installed ${agent_name} (${schedule})"
-    count=$((count + 1))
-  done < <(discover_agents)
-
-  if [ "$count" -eq 0 ]; then
-    echo "  No agent scripts with SCHEDULE comments found."
-    echo "  Add '# SCHEDULE: daily HH:MM' to your scripts."
-    exit 0
-  fi
-
-  echo ""
-  echo "${count} agent(s) installed. Verify with:"
-  echo "  launchctl list | grep ${LABEL_PREFIX}"
-  echo ""
-  echo "To trigger an agent manually:"
-  echo "  launchctl start ${LABEL_PREFIX}.<agent-name>"
-  echo ""
-  echo "To uninstall all:"
-  echo "  bash ${SCRIPT_DIR}/install-agents.sh --unload"
+render_plist() {
+  local name="$1" script="$2" weekday="$3" hour="$4" minute="$5" target="$6"
+  python3 - "$LABEL_PREFIX.$name" "$script" "$SYSTEM_LOGS_DIR" "$weekday" "$hour" "$minute" "${COPILOT_MODEL}" "${COPILOT_BIN}" "${COPILOT_RPI_PATH:-}" "$target" <<'PY'
+import os
+import plistlib
+import secrets
+import sys
+label, script, logs, weekday, hour, minute, model, binary, blueprint, target = sys.argv[1:]
+interval = {'Hour': int(hour), 'Minute': int(minute)}
+if weekday != '-':
+    interval['Weekday'] = int(weekday)
+env = {'HOME': os.environ['HOME'],
+       'PATH': os.environ.get('PATH', '/usr/bin:/bin'),
+       'COPILOT_MODEL': model, 'COPILOT_BIN': binary}
+if blueprint:
+    env['COPILOT_RPI_PATH'] = blueprint
+value = {'Label': label, 'ProgramArguments': ['/bin/bash', script],
+         'StartCalendarInterval': interval,
+         'StandardOutPath': f'{logs}/{label.rsplit(".", 1)[-1]}.log',
+         'StandardErrorPath': f'{logs}/{label.rsplit(".", 1)[-1]}.error.log',
+         'EnvironmentVariables': env}
+output = plistlib.dumps(value).decode()
+output = output.replace('<plist version="1.0">', '<!-- Managed by Copilot RPI installer -->\n<plist version="1.0">').encode()
+name = os.path.basename(target)
+if os.path.abspath(os.path.dirname(target)) != os.path.abspath(os.path.join(os.environ['HOME'], 'Library', 'LaunchAgents')):
+    raise ValueError('plist target is outside the owned LaunchAgents directory')
+home = os.open(os.environ['HOME'], os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+try:
+    library = os.open('Library', os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
+                      dir_fd=home)
+finally:
+    os.close(home)
+try:
+    directory = os.open('LaunchAgents', os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
+                        dir_fd=library)
+finally:
+    os.close(library)
+temporary = f'.copilot-rpi-{secrets.token_hex(12)}.tmp'
+try:
+    descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                         0o600, dir_fd=directory)
+    with os.fdopen(descriptor, 'wb') as stream:
+        stream.write(output)
+        stream.flush()
+        os.fsync(stream.fileno())
+    # link fails if even a dangling target symlink appeared after preflight.
+    os.link(temporary, name, src_dir_fd=directory, dst_dir_fd=directory,
+            follow_symlinks=False)
+finally:
+    try:
+        os.unlink(temporary, dir_fd=directory)
+    except FileNotFoundError:
+        pass
+    os.fsync(directory)
+    os.close(directory)
+PY
 }
 
-cmd_unload() {
-  echo "Unloading ${PROJECT_NAME} agents..."
+preview() {
+  local name script schedule parsed weekday hour minute count=0
+  echo "Preview only: $PROJECT_DIR"
+  while IFS='|' read -r name script schedule; do
+    parsed="$(parse_schedule "$schedule")" || {
+      echo "BLOCKED: invalid schedule in $script" >&2
+      return 2
+    }
+    read -r weekday hour minute <<< "$parsed"
+    echo "$LABEL_PREFIX.$name: $schedule -> /bin/bash $script"
+    count=$((count + 1))
+  done < <(discover_agents)
+  echo "$count report-only job(s). No plist was written or loaded."
+  echo "Review the preview, then use --activate to register these jobs."
+}
 
-  local count=0
-  for plist in "${LAUNCH_AGENTS_DIR}/${LABEL_PREFIX}."*.plist; do
-    [ -f "$plist" ] || continue
-    local label
-    label=$(basename "$plist" .plist)
-    launchctl bootout "gui/$(id -u)/${label}" 2>/dev/null || true
-    rm -f "$plist"
-    echo "  Removed ${label}"
+activate() {
+  [ -n "${COPILOT_MODEL:-}" ] || {
+    echo 'BLOCKED: set COPILOT_MODEL for scheduled runs' >&2
+    return 2
+  }
+  # shellcheck source=templates/scripts/agents/lib/agent-utils.sh
+  source "$SCRIPT_DIR/lib/agent-utils.sh"
+  preflight_copilot || return 2
+  COPILOT_BIN="$(command -v "$COPILOT_BIN")"
+  command -v launchctl >/dev/null || {
+    echo 'BLOCKED: launchctl is required for --activate' >&2
+    return 2
+  }
+  local name script schedule target parsed weekday hour minute count=0
+  # Validate the entire selection and ownership before any registration.
+  while IFS='|' read -r name script schedule; do
+    parse_schedule "$schedule" >/dev/null || {
+      echo "BLOCKED: invalid schedule in $script" >&2
+      return 2
+    }
+    target="$LAUNCH_AGENTS_DIR/$LABEL_PREFIX.$name.plist"
+    if [ -L "$target" ] || { [ -e "$target" ] && ! grep -Fq "$OWNER_MARKER" "$target"; }; then
+      echo "BLOCKED: unowned launchd registration at $target; preserve and review it" >&2
+      return 2
+    fi
+  done < <(discover_agents)
+  local parent
+  for parent in "$HOME/Library" "$LAUNCH_AGENTS_DIR" "$HOME/Library/Logs" "$SYSTEM_LOGS_DIR"; do
+    if [ -L "$parent" ]; then
+      echo "BLOCKED: symlinked scheduler directory $parent; preserve and review it" >&2
+      return 2
+    fi
+  done
+  mkdir -p "$LAUNCH_AGENTS_DIR" "$SYSTEM_LOGS_DIR"
+  for parent in "$HOME/Library" "$LAUNCH_AGENTS_DIR" "$HOME/Library/Logs" "$SYSTEM_LOGS_DIR"; do
+    if [ -L "$parent" ]; then
+      echo "BLOCKED: scheduler directory changed to symlink $parent" >&2
+      return 2
+    fi
+  done
+  while IFS='|' read -r name script schedule; do
+    target="$LAUNCH_AGENTS_DIR/$LABEL_PREFIX.$name.plist"
+    if [ -e "$target" ] || [ -L "$target" ]; then
+      echo "PRESERVED: already registered $target; unload explicitly before replacing"
+      continue
+    fi
+    parsed="$(parse_schedule "$schedule")"
+    read -r weekday hour minute <<< "$parsed"
+    render_plist "$name" "$script" "$weekday" "$hour" "$minute" "$target" || {
+      echo "BLOCKED: could not create exclusive plist $target; inspect concurrent or unowned files" >&2
+      return 2
+    }
+    if ! launchctl bootstrap "gui/$(id -u)" "$target"; then
+      echo "FAILED: launchctl bootstrap $target; owned plist preserved for inspection" >&2
+      return 1
+    fi
+    echo "ACTIVATED: $LABEL_PREFIX.$name"
+    count=$((count + 1))
+  done < <(discover_agents)
+  echo "$count new job(s) activated. Authentication and model access are checked at run time."
+}
+
+unload() {
+  local plist label count=0
+  for plist in "$LAUNCH_AGENTS_DIR/$LABEL_PREFIX."*.plist; do
+    [ -e "$plist" ] || [ -L "$plist" ] || continue
+    if [ -L "$plist" ]; then
+      echo "PRESERVED: symlinked $plist"
+      continue
+    fi
+    if ! grep -Fq "$OWNER_MARKER" "$plist"; then
+      echo "PRESERVED: unowned $plist"
+      continue
+    fi
+    label="$(basename "$plist" .plist)"
+    launchctl bootout "gui/$(id -u)/$label" || {
+      echo "FAILED: bootout $label; plist preserved" >&2
+      return 1
+    }
+    rm "$plist"
+    echo "REMOVED: $label"
     count=$((count + 1))
   done
-
-  if [ "$count" -eq 0 ]; then
-    echo "  No agents found for ${PROJECT_NAME}."
-  else
-    echo "${count} agent(s) removed."
-  fi
+  echo "$count owned job(s) removed."
 }
 
-cmd_status() {
-  echo "${PROJECT_NAME} scheduled agents:"
-  echo ""
-
-  local found=false
-  while IFS='|' read -r agent_name script_path; do
-    local label="${LABEL_PREFIX}.${agent_name}"
-    local schedule
-    schedule=$(parse_schedule "${script_path}")
-    local status="NOT LOADED"
-    if launchctl list "${label}" >/dev/null 2>&1; then
-      local exit_code
-      exit_code=$(launchctl list "${label}" 2>/dev/null | grep '"LastExitStatus"' | grep -o '[0-9]*' || echo "?")
-      status="LOADED (last exit: ${exit_code})"
+status() {
+  local name script schedule target label
+  while IFS='|' read -r name script schedule; do
+    label="$LABEL_PREFIX.$name"
+    target="$LAUNCH_AGENTS_DIR/$label.plist"
+    if [ ! -e "$target" ] && [ ! -L "$target" ]; then
+      echo "$label: NOT REGISTERED"
+    elif [ -L "$target" ] || ! grep -Fq "$OWNER_MARKER" "$target"; then
+      echo "$label: UNOWNED REGISTRATION (preserved)"
+    elif command -v launchctl >/dev/null && launchctl list "$label" >/dev/null 2>&1; then
+      echo "$label: LOADED"
+    else
+      echo "$label: REGISTERED, NOT LOADED"
     fi
-    printf "  %-25s %-20s %s\n" "${agent_name}" "${schedule}" "${status}"
-    found=true
-  done < <(discover_agents)
-
-  if [ "$found" = false ]; then
-    echo "  No agent scripts with SCHEDULE comments found."
-  fi
-}
-
-cmd_list() {
-  echo "Discoverable agents in ${SCRIPT_DIR}:"
-  echo ""
-  while IFS='|' read -r agent_name script_path; do
-    local schedule
-    schedule=$(parse_schedule "${script_path}")
-    printf "  %-25s %s\n" "${agent_name}" "${schedule}"
   done < <(discover_agents)
 }
-
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
 
 case "${1:-}" in
-  --unload|--remove|--uninstall)
-    cmd_unload
-    ;;
-  --status)
-    cmd_status
-    ;;
-  --list)
-    cmd_list
-    ;;
-  --help|-h)
-    echo "Usage: $(basename "$0") [--unload|--status|--list|--help]"
-    echo ""
-    echo "  (no args)   Install/reload all scheduled agents"
-    echo "  --unload    Unload and remove all agents"
-    echo "  --status    Show agent load status and last exit codes"
-    echo "  --list      List discoverable agent scripts"
-    echo "  --help      Show this help"
-    ;;
-  *)
-    cmd_install
-    ;;
+  ''|--preview) preview ;;
+  --activate) activate ;;
+  --unload) unload ;;
+  --status) status ;;
+  --list) preview ;;
+  --help|-h) echo 'Usage: install-agents.sh [--preview|--activate|--unload|--status|--list]' ;;
+  *) echo "BLOCKED: unknown option $1" >&2; exit 2 ;;
 esac

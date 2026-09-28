@@ -312,7 +312,21 @@ Generate a remediation report at `docs/agents/remediation-report.md`:
 
 Apply the durable handoff contract in the report, including base/current state,
 check/candidate identity, every finding's disposition, deviations, risks and next
-entry conditions. Present the summary to the user.
+entry conditions. Record the final finding decisions as a JSON list with one
+object per report Finding-ID. Each object contains `id`, `disposition` and
+nonempty `evidence`. Use `resolved` for a verified repair, `rejected` for a
+finding rejected with evidence, or `architectural_exception` for an explicitly
+reviewed strategic decision. An architectural exception also needs a nonempty
+`owner_review` value. Preserve any other open follow-ups in the report and do not
+claim that remediation is complete while a finding lacks a final disposition.
+Validate the decision record against the original report before presenting it:
+
+```bash
+python3 <resolved-skill-directory>/scripts/validate-findings.py <report-path> --dispositions <decisions-json>
+```
+
+A nonzero result blocks remediation completion; repair the record or continue
+the authorized finding work. Present the summary to the user after this gate.
 
 ## Rules
 

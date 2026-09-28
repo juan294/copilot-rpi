@@ -208,7 +208,20 @@ class LifecycleTest(unittest.TestCase):
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         runtime = rendered / ".rpi/copilot/runtime/rpi-distribution.py"
         self.assertTrue(runtime.is_file())
-        self.assertTrue((rendered / ".rpi/copilot/runtime/rpi-lifecycle.py").is_file())
+        for name in (
+            "rpi-lifecycle.py", "rpi-config.py", "rpi-candidate.py",
+            "rpi-verify.py", "validate-findings.py", "rpi-hook.py",
+            "rpi-prepush.py", "rpi-automation.py",
+        ):
+            self.assertTrue((rendered / ".rpi/copilot/runtime" / name).is_file(), name)
+        automation = rendered / ".rpi/copilot/runtime/rpi-automation.py"
+        preview = subprocess.run(
+            [sys.executable, "-S", str(automation), "schedule-preview", "--job", "triage",
+             "--project", str(self.target)], capture_output=True, text=True,
+        )
+        self.assertEqual(preview.returncode, 0, preview.stdout + preview.stderr)
+        self.assertIn(str(automation.resolve()), preview.stdout)
+        self.assertNotIn("morning-triage.sh", preview.stdout)
         standalone_plan = self.root / "standalone-plan.json"
         result = subprocess.run([sys.executable, "-S", str(runtime), "plan", "--package", str(rendered),
                                  "--target", str(self.target), "--profile", "cli", "--output", str(standalone_plan)],

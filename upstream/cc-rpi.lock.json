@@ -148,7 +148,7 @@
       "disposition": "adapted",
       "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1.",
       "destination": "templates/skills/rpi-remediate",
-      "destination_sha256": "2947f6bc5618515169ea8cf500be0b63333ab2fd141b0dcfff2154b24799b09d",
+      "destination_sha256": "c273ca321cfdb9f585202609d6b9f8d2dc805c77577fb59414cc9bee9b6e5d6c",
       "adaptation_note": "Copilot skill metadata, explicit local authority and native path wording while retaining the portable workflow contract."
     },
     {
@@ -497,33 +497,33 @@
       "kind": "resource",
       "source": "templates/scripts/rpi-candidate.py",
       "source_sha256": "d9b423274ad75770274fea52926a67595876386c21af2bbe2e27e42a1c46743f",
-      "disposition": "deferred",
-      "rationale": "Portable resource or lifecycle algorithm awaits the phase that adapts it for Copilot.",
-      "destination": null,
-      "destination_sha256": null,
-      "adaptation_note": null
+      "disposition": "adapted",
+      "rationale": "Pinned portable control is adapted for the Copilot Phase 4 runtime.",
+      "destination": "templates/scripts/rpi-candidate.py",
+      "destination_sha256": "90a2db5d7b58a3c41449b128930bca0fb1dd263a2292cda26140a0739c2dae96",
+      "adaptation_note": "Copilot candidate identity records source and rendered state before local verification."
     },
     {
       "id": "resource:policy-engine",
       "kind": "resource",
       "source": "templates/scripts/rpi-policy.py",
       "source_sha256": "8eb9dbd2f7dd5ee5bce57c2e508ebd4d5a191bd43a183ecb1b6dd8dee6c029f5",
-      "disposition": "deferred",
-      "rationale": "Portable resource or lifecycle algorithm awaits the phase that adapts it for Copilot.",
-      "destination": null,
-      "destination_sha256": null,
-      "adaptation_note": null
+      "disposition": "adapted",
+      "rationale": "Pinned portable control is adapted for the Copilot Phase 4 runtime.",
+      "destination": "templates/scripts/rpi-hook.py",
+      "destination_sha256": "825126920ab810f256efa0fd73045584b95214bd07c2e89434fcced027b5a38f",
+      "adaptation_note": "Copilot native hook policy uses preview-only activation and fail-closed local checks."
     },
     {
       "id": "resource:prepush-gate",
       "kind": "resource",
       "source": "templates/scripts/rpi-prepush.py",
       "source_sha256": "8815e263e5d5f01ba4dc19e461fcdb47578701f277bc76594a3523a6d3464915",
-      "disposition": "deferred",
-      "rationale": "Portable resource or lifecycle algorithm awaits the phase that adapts it for Copilot.",
-      "destination": null,
-      "destination_sha256": null,
-      "adaptation_note": null
+      "disposition": "adapted",
+      "rationale": "Pinned portable control is adapted for the Copilot Phase 4 runtime.",
+      "destination": "templates/scripts/rpi-prepush.py",
+      "destination_sha256": "0a6df1ad9396b8983fe310702d72fcfc975fcec7bfc233088aa8ba1cda543907",
+      "adaptation_note": "Copilot opt-in pre-push receipt gate validates the tested candidate."
     },
     {
       "id": "resource:diagnostics",
@@ -596,11 +596,11 @@
       "kind": "resource",
       "source": "templates/scripts/rpi-verify.py",
       "source_sha256": "8e7073db4a3757dff6bfd045719132cab75fbfdc8247e665528e680b06237925",
-      "disposition": "deferred",
-      "rationale": "Portable resource or lifecycle algorithm awaits the phase that adapts it for Copilot.",
-      "destination": null,
-      "destination_sha256": null,
-      "adaptation_note": null
+      "disposition": "adapted",
+      "rationale": "Pinned portable control is adapted for the Copilot Phase 4 runtime.",
+      "destination": "templates/scripts/rpi-verify.py",
+      "destination_sha256": "9cb527802406d36e4e53f4d0933f0873a39797a108eccfd1611db1785c6a8774",
+      "adaptation_note": "Copilot local verification writes a candidate-bound receipt."
     },
     {
       "id": "resource:distribution-engine",
@@ -610,7 +610,7 @@
       "disposition": "adapted",
       "rationale": "Pinned upstream distribution contract has a Copilot-owned Phase 2 implementation.",
       "destination": "templates/scripts/rpi-distribution.py",
-      "destination_sha256": "4b9d2a566e4edd4558f0ae8c9f759b98eded5f5b95f7e1358d567d10547de694",
+      "destination_sha256": "2f4d343a9abc894a7aff5e6a70658c97d3f379928b8cf8ace791d35b83caa6b8",
       "adaptation_note": "Path safety, manifest validation, resource accounting and deterministic rendering adapted to Copilot profiles and metadata."
     },
     {
@@ -758,7 +758,7 @@
     {
       "id": "error:7",
       "source": "patterns/agent-errors.md",
-      "title": "`execSync(...).trim is not a function` — Buffer vs string",
+      "title": "`execSync(...).trim is not a function` \u2014 Buffer vs string",
       "source_sha256": "d0b93d9b89d940a0538a2101b5d06e52331c676728262b67f78ef379e568937f",
       "disposition": "adopted",
       "rationale": "Meaning carried in Copilot error #5; permanent Copilot numbering and native wording take precedence.",
@@ -821,7 +821,7 @@
     {
       "id": "error:12",
       "source": "patterns/agent-errors.md",
-      "title": "Push and forget — CI breaks silently",
+      "title": "Push and forget \u2014 CI breaks silently",
       "source_sha256": "68a9a3db2d9a78a0eeabc55019ba431b31338d1258c9daf911950a2780c8e6e4",
       "disposition": "adapted",
       "rationale": "Meaning carried in Copilot error #9; permanent Copilot numbering and native wording take precedence.",
@@ -834,7 +834,7 @@
     {
       "id": "error:13",
       "source": "patterns/agent-errors.md",
-      "title": "Skipping TDD — writing implementation before tests",
+      "title": "Skipping TDD \u2014 writing implementation before tests",
       "source_sha256": "a8ace28b84fc22ee5bf8acd7c0eb53c8063357c77b3b79a4b598f69bc5cf54f6",
       "disposition": "adopted",
       "rationale": "Meaning carried in Copilot error #10; permanent Copilot numbering and native wording take precedence.",
@@ -884,10 +884,10 @@
     {
       "id": "error:17",
       "source": "patterns/agent-errors.md",
-      "title": "jq syntax error — shell escaping corrupts filter expressions",
+      "title": "jq syntax error \u2014 shell escaping corrupts filter expressions",
       "source_sha256": "fdae12976926e59a14f781eb6473161b2286087eaafd5eb8da6e5e46092e1b25",
       "disposition": "deferred",
-      "rationale": "Upstream case \"jq syntax error — shell escaping corrupts filter expressions\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
+      "rationale": "Upstream case \"jq syntax error \u2014 shell escaping corrupts filter expressions\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
       "destination": null,
       "destination_sha256": null,
       "copilot_ids": []
@@ -917,10 +917,10 @@
     {
       "id": "error:20",
       "source": "patterns/agent-errors.md",
-      "title": "`gh release create --body` — wrong flag name",
+      "title": "`gh release create --body` \u2014 wrong flag name",
       "source_sha256": "eac487b99ba24b312f4a566a807a0e7c5d7a9c487db878a4cd5fabb1d4ab74a0",
       "disposition": "deferred",
-      "rationale": "Upstream case \"`gh release create --body` — wrong flag name\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
+      "rationale": "Upstream case \"`gh release create --body` \u2014 wrong flag name\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
       "destination": null,
       "destination_sha256": null,
       "copilot_ids": []
@@ -928,10 +928,10 @@
     {
       "id": "error:21",
       "source": "patterns/agent-errors.md",
-      "title": "`pip3 install` fails on macOS — externally-managed-environment",
+      "title": "`pip3 install` fails on macOS \u2014 externally-managed-environment",
       "source_sha256": "3c719f528c93b342e7417777806175edde5fbd1cc23ab83911a442ecf2923064",
       "disposition": "deferred",
-      "rationale": "Upstream case \"`pip3 install` fails on macOS — externally-managed-environment\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
+      "rationale": "Upstream case \"`pip3 install` fails on macOS \u2014 externally-managed-environment\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
       "destination": null,
       "destination_sha256": null,
       "copilot_ids": []
@@ -939,10 +939,10 @@
     {
       "id": "error:22",
       "source": "patterns/agent-errors.md",
-      "title": "`rm` fails on stale file list — agent doesn't re-read directory",
+      "title": "`rm` fails on stale file list \u2014 agent doesn't re-read directory",
       "source_sha256": "164d72456bf70c2667983a12f5264b49ec076f95325262bcb05adfcb34b74fa4",
       "disposition": "deferred",
-      "rationale": "Upstream case \"`rm` fails on stale file list — agent doesn't re-read directory\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
+      "rationale": "Upstream case \"`rm` fails on stale file list \u2014 agent doesn't re-read directory\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
       "destination": null,
       "destination_sha256": null,
       "copilot_ids": []
@@ -950,10 +950,10 @@
     {
       "id": "error:23",
       "source": "patterns/agent-errors.md",
-      "title": "`gh` command fails — agent fabricates repo/resource names",
+      "title": "`gh` command fails \u2014 agent fabricates repo/resource names",
       "source_sha256": "153500442e2146c57d43e8a7b34a8aaa31a2f2ec73ea2f600c43bf37e3661f8a",
       "disposition": "deferred",
-      "rationale": "Upstream case \"`gh` command fails — agent fabricates repo/resource names\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
+      "rationale": "Upstream case \"`gh` command fails \u2014 agent fabricates repo/resource names\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
       "destination": null,
       "destination_sha256": null,
       "copilot_ids": []
@@ -972,10 +972,10 @@
     {
       "id": "error:25",
       "source": "patterns/agent-errors.md",
-      "title": "`git push` or `git pull --rebase` fails — no upstream tracking for branch",
+      "title": "`git push` or `git pull --rebase` fails \u2014 no upstream tracking for branch",
       "source_sha256": "a94cf48dbf1b7035f9175c82439d00eee7331af0a637a47c42a5d9d2b393bf15",
       "disposition": "deferred",
-      "rationale": "Upstream case \"`git push` or `git pull --rebase` fails — no upstream tracking for branch\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
+      "rationale": "Upstream case \"`git push` or `git pull --rebase` fails \u2014 no upstream tracking for branch\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
       "destination": null,
       "destination_sha256": null,
       "copilot_ids": []
@@ -983,10 +983,10 @@
     {
       "id": "error:26",
       "source": "patterns/agent-errors.md",
-      "title": "Complex shell regex fails in zsh — special characters parsed differently",
+      "title": "Complex shell regex fails in zsh \u2014 special characters parsed differently",
       "source_sha256": "ca20e624854b46d2e699c84c235f6b1383a79123f8bab4be4542a929cf76a16e",
       "disposition": "deferred",
-      "rationale": "Upstream case \"Complex shell regex fails in zsh — special characters parsed differently\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
+      "rationale": "Upstream case \"Complex shell regex fails in zsh \u2014 special characters parsed differently\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
       "destination": null,
       "destination_sha256": null,
       "copilot_ids": []
@@ -1016,10 +1016,10 @@
     {
       "id": "error:29",
       "source": "patterns/agent-errors.md",
-      "title": "`uv sync` fails — auto-selected Python version too new for packages",
+      "title": "`uv sync` fails \u2014 auto-selected Python version too new for packages",
       "source_sha256": "3088369e949ff9de2abbec96dabd03e083b74ad9234c7e5702177f7a56eb3045",
       "disposition": "deferred",
-      "rationale": "Upstream case \"`uv sync` fails — auto-selected Python version too new for packages\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
+      "rationale": "Upstream case \"`uv sync` fails \u2014 auto-selected Python version too new for packages\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
       "destination": null,
       "destination_sha256": null,
       "copilot_ids": []
@@ -1049,10 +1049,10 @@
     {
       "id": "error:32",
       "source": "patterns/agent-errors.md",
-      "title": "`gh pr merge` fails — wrong merge method, branch not up-to-date, or auto-merge disabled",
+      "title": "`gh pr merge` fails \u2014 wrong merge method, branch not up-to-date, or auto-merge disabled",
       "source_sha256": "0183002125b55b25028b33702e9e6f2828f58763d304bd684a113ca55a5fa5fe",
       "disposition": "deferred",
-      "rationale": "Upstream case \"`gh pr merge` fails — wrong merge method, branch not up-to-date, or auto-merge disabled\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
+      "rationale": "Upstream case \"`gh pr merge` fails \u2014 wrong merge method, branch not up-to-date, or auto-merge disabled\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
       "destination": null,
       "destination_sha256": null,
       "copilot_ids": []
@@ -1060,7 +1060,7 @@
     {
       "id": "error:33",
       "source": "patterns/agent-errors.md",
-      "title": "`git pull --rebase` fails — unstaged changes in working tree",
+      "title": "`git pull --rebase` fails \u2014 unstaged changes in working tree",
       "source_sha256": "9ae1549f8b13ee1ee677a45f5d3469667285c8323ca93ad8c76b7a18854b3b1f",
       "disposition": "adopted",
       "rationale": "Meaning carried in Copilot error #19; permanent Copilot numbering and native wording take precedence.",
@@ -1073,10 +1073,10 @@
     {
       "id": "error:34",
       "source": "patterns/agent-errors.md",
-      "title": "WebFetch returns 403 — agent retries same blocked domain",
+      "title": "WebFetch returns 403 \u2014 agent retries same blocked domain",
       "source_sha256": "8b85877192ea75dc9213aacb63dc812bd66b80e852d4bca8a4bcfa8281f2b8e0",
       "disposition": "deferred",
-      "rationale": "Upstream case \"WebFetch returns 403 — agent retries same blocked domain\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
+      "rationale": "Upstream case \"WebFetch returns 403 \u2014 agent retries same blocked domain\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
       "destination": null,
       "destination_sha256": null,
       "copilot_ids": []
@@ -1084,10 +1084,10 @@
     {
       "id": "error:35",
       "source": "patterns/agent-errors.md",
-      "title": "`gh pr checks` exit code 0 with pending checks — misread as \"all passed\"",
+      "title": "`gh pr checks` exit code 0 with pending checks \u2014 misread as \"all passed\"",
       "source_sha256": "54ccc520457b3c5e6c8ef69d954b2cc99df4e24a1d433c0037e82d3f384b5054",
       "disposition": "deferred",
-      "rationale": "Upstream case \"`gh pr checks` exit code 0 with pending checks — misread as \"all passed\"\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
+      "rationale": "Upstream case \"`gh pr checks` exit code 0 with pending checks \u2014 misread as \"all passed\"\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
       "destination": null,
       "destination_sha256": null,
       "copilot_ids": []
@@ -1141,10 +1141,10 @@
     {
       "id": "error:40",
       "source": "patterns/agent-errors.md",
-      "title": "Agent uses `python3` instead of `uv run python` — bypasses venv",
+      "title": "Agent uses `python3` instead of `uv run python` \u2014 bypasses venv",
       "source_sha256": "bb71a3243f948b3cd323a9edc2e016487f16ac10025be0bf7995be50d802933c",
       "disposition": "deferred",
-      "rationale": "Upstream case \"Agent uses `python3` instead of `uv run python` — bypasses venv\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
+      "rationale": "Upstream case \"Agent uses `python3` instead of `uv run python` \u2014 bypasses venv\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
       "destination": null,
       "destination_sha256": null,
       "copilot_ids": []
@@ -1152,10 +1152,10 @@
     {
       "id": "error:41",
       "source": "patterns/agent-errors.md",
-      "title": "Over-escaping `!=` as `\\!=` in inline Python — SyntaxError",
+      "title": "Over-escaping `!=` as `\\!=` in inline Python \u2014 SyntaxError",
       "source_sha256": "77aeedf4446bce0f234a57e69fac4f627e04e183d76826ff88355c90513d3ffb",
       "disposition": "deferred",
-      "rationale": "Upstream case \"Over-escaping `!=` as `\\!=` in inline Python — SyntaxError\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
+      "rationale": "Upstream case \"Over-escaping `!=` as `\\!=` in inline Python \u2014 SyntaxError\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
       "destination": null,
       "destination_sha256": null,
       "copilot_ids": []
@@ -1163,10 +1163,10 @@
     {
       "id": "error:42",
       "source": "patterns/agent-errors.md",
-      "title": "Python script fails — package-relative imports without `-m` flag",
+      "title": "Python script fails \u2014 package-relative imports without `-m` flag",
       "source_sha256": "86e7be6334a72291363fcaa95186763b98dd9fb7498063039c4971b2099489cf",
       "disposition": "deferred",
-      "rationale": "Upstream case \"Python script fails — package-relative imports without `-m` flag\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
+      "rationale": "Upstream case \"Python script fails \u2014 package-relative imports without `-m` flag\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
       "destination": null,
       "destination_sha256": null,
       "copilot_ids": []
@@ -1174,10 +1174,10 @@
     {
       "id": "error:43",
       "source": "patterns/agent-errors.md",
-      "title": "Agent indexes JSON list with string key — TypeError",
+      "title": "Agent indexes JSON list with string key \u2014 TypeError",
       "source_sha256": "8e229a9c7c5eb93d184a0d370d64c78f9d1b8eefb120d580ee4b2ef343312055",
       "disposition": "deferred",
-      "rationale": "Upstream case \"Agent indexes JSON list with string key — TypeError\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
+      "rationale": "Upstream case \"Agent indexes JSON list with string key \u2014 TypeError\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID.",
       "destination": null,
       "destination_sha256": null,
       "copilot_ids": []
@@ -1185,7 +1185,7 @@
     {
       "id": "error:44",
       "source": "patterns/agent-errors.md",
-      "title": "`git push --tags` pushes ALL local tags — old tags cause push failure",
+      "title": "`git push --tags` pushes ALL local tags \u2014 old tags cause push failure",
       "source_sha256": "fd87c0f45a5ff6ed4570b727408044b8b001680c7335822400e83200792baa41",
       "disposition": "adopted",
       "rationale": "Meaning carried in Copilot error #20; permanent Copilot numbering and native wording take precedence.",
@@ -1198,7 +1198,7 @@
     {
       "id": "error:45",
       "source": "patterns/agent-errors.md",
-      "title": "Agent fabricates filesystem paths — \"No such file or directory\"",
+      "title": "Agent fabricates filesystem paths \u2014 \"No such file or directory\"",
       "source_sha256": "1446acd96d368885f2ddea44495ab79d0a98d1a1657c068145adef5e658f2441",
       "disposition": "adopted",
       "rationale": "Meaning carried in Copilot error #21; permanent Copilot numbering and native wording take precedence.",

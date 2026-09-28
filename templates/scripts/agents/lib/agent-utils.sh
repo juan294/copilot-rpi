@@ -1,99 +1,38 @@
 #!/usr/bin/env bash
-# templates/scripts/agents/lib/agent-utils.sh
-#
-# Shared utilities for scheduled agents.
-# Source this from each agent script: source "${SCRIPT_DIR}/lib/agent-utils.sh"
-#
-# Provides:
-#   - Environment setup (fd limits, PATH, launchd compatibility)
-#   - Logging helpers (log_info, log_warn, log_error)
-#   - Shared context read/write/prune
-#   - Claude CLI preflight checks
-#
-# Expects the sourcing script to set SCRIPT_DIR before sourcing:
-#   SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-#   source "${SCRIPT_DIR}/lib/agent-utils.sh"
-
+# Shared report context and non-inference Copilot CLI preflight for opt-in agents.
+# Sourcing scripts set SCRIPT_DIR to their own directory first.
 set -euo pipefail
 
-# ---------------------------------------------------------------------------
-# Project root — two levels up from scripts/agents/
-# ---------------------------------------------------------------------------
 PROJECT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-# shellcheck disable=SC2034  # part of this library's public surface -- sourcing
-# scripts (install-agents.sh, per-project agent scripts) read PROJECT_NAME to
-# build launchd labels and log paths. Unused *here* by design.
+# shellcheck disable=SC2034 # Public variables consumed by sourcing agent scripts.
 PROJECT_NAME="$(basename "${PROJECT_DIR}")"
-
-# ---------------------------------------------------------------------------
-# File descriptor limit
-# launchd enforces a hard cap of 256 by default. Claude CLI needs 100K+.
-# The plist must set HardResourceLimits/SoftResourceLimits — ulimit alone
-# can't exceed the hard limit. This raises it as high as the OS allows,
-# with a fallback for environments where the full raise isn't possible.
-# ---------------------------------------------------------------------------
-ulimit -n 2147483646 2>/dev/null || ulimit -n 122880 2>/dev/null || ulimit -n 10240 2>/dev/null || true
-FD_LIMIT=$(ulimit -n)
-if [ "$FD_LIMIT" -lt 10000 ]; then
-  echo "[$(date)] FATAL: File descriptor limit too low ($FD_LIMIT)."
-  echo "  Fix: Add HardResourceLimits/SoftResourceLimits to your .plist"
-  exit 1
-fi
-
-# ---------------------------------------------------------------------------
-# Prevent nested Claude session errors
-# If this script is triggered from inside an active Claude Code session
-# (e.g., manual testing), the CLAUDECODE env var causes conflicts.
-# Under launchd this is a no-op.
-# ---------------------------------------------------------------------------
-unset CLAUDECODE 2>/dev/null || true
-
-# ---------------------------------------------------------------------------
-# Environment setup (required for launchd)
-# launchd provides a minimal env — no PATH, no TERM, possibly no HOME.
-# These are no-ops in a normal terminal but critical under launchd.
-# ---------------------------------------------------------------------------
-export HOME="${HOME:-$(eval echo ~"$(whoami)")}"
-export TERM="${TERM:-xterm-256color}"
-export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
-
-# ---------------------------------------------------------------------------
-# Directories
-# ---------------------------------------------------------------------------
+# shellcheck disable=SC2034 # Public variable consumed by sourcing agent scripts.
 LOGS_DIR="${PROJECT_DIR}/logs"
 AGENTS_DIR="${PROJECT_DIR}/docs/agents"
 SHARED_CONTEXT_FILE="${AGENTS_DIR}/shared-context.md"
-CLAUDE_BIN="${CLAUDE_BIN:-$HOME/.local/bin/claude}"
-
-mkdir -p "${LOGS_DIR}"
-mkdir -p "${AGENTS_DIR}"
-
-# ---------------------------------------------------------------------------
-# Logging
-# ---------------------------------------------------------------------------
+COPILOT_BIN="${COPILOT_BIN:-copilot}"
 
 log_info()  { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [INFO]  $*"; }
 log_warn()  { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [WARN]  $*" >&2; }
 log_error() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [ERROR] $*" >&2; }
 
-# ---------------------------------------------------------------------------
-# Claude CLI preflight
-# ---------------------------------------------------------------------------
-
-# Verify Claude CLI is available and authenticated.
-# Under launchd, there's no TTY for OAuth — must use `claude setup-token`.
-preflight_claude() {
-  if [ ! -x "$CLAUDE_BIN" ]; then
-    log_error "Claude binary not found at $CLAUDE_BIN"
-    log_error "Set CLAUDE_BIN or install Claude CLI"
-    exit 1
-  fi
-
-  if ! "$CLAUDE_BIN" -p "echo ok" --output-format text >/dev/null 2>&1; then
-    log_error "Claude CLI auth failed in non-interactive mode."
-    log_error "Fix: Run 'claude setup-token' from an interactive terminal."
-    exit 1
-  fi
+# Check executable and supported flags only. Authentication and model access are
+# reported by the bounded run; preflight never spends inference or edits files.
+preflight_copilot() {
+  local binary help
+  binary=$(command -v "$COPILOT_BIN") || {
+    log_error "Copilot CLI missing; install it or set COPILOT_BIN"
+    return 1
+  }
+  "$binary" --version >/dev/null || return 1
+  help=$("$binary" --help) || return 1
+  local flag
+  for flag in --prompt --silent --no-ask-user --available-tools --allow-tool --model --no-remote; do
+    if [[ "$help" != *"$flag"* ]]; then
+      log_error "Copilot CLI missing $flag; update the CLI"
+      return 1
+    fi
+  done
 }
 
 # ---------------------------------------------------------------------------

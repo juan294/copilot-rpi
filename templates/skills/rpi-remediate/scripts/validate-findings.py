@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""validate-findings.py — enforce the pre-launch Output Contract.
+"""Enforce the pre-launch finding and disposition contract.
+
+Adapted from pinned cc-rpi 2.1.0 at
+upstream/snapshots/templates/scripts/validate-findings.py
+(aa3ea57fb26ae2e1e167acada4b769e073a417f4).
 
 The pre-launch report declares a finding format (Finding-ID grammar + required
 fields) that /remediate parses. Today that contract is prose: a malformed finding
@@ -15,6 +19,7 @@ Stdlib only. Spec: pre-launch.md "Output Contract", remediate.md "Parser contrac
 """
 
 import argparse
+import json
 import os
 import re
 import sys
@@ -124,6 +129,35 @@ def validate_file(path):
         return validate_text(fh.read())
 
 
+def validate_dispositions(report_text, dispositions):
+    """Require one evidenced disposition for every valid report finding."""
+    errors = validate_text(report_text)
+    if not isinstance(dispositions, list):
+        return errors + [("dispositions", "findings must be an object list")]
+    identifiers = {block.first_token for block in parse_blocks(report_text)
+                   if is_finding_candidate(block) and ID_VALID.fullmatch(block.first_token)}
+    seen = set()
+    for item in dispositions:
+        if not isinstance(item, dict):
+            errors.append(("dispositions", "finding disposition must be an object"))
+            continue
+        identifier = item.get("id")
+        if not isinstance(identifier, str) or not ID_VALID.fullmatch(identifier) or identifier in seen:
+            errors.append(("dispositions", "invalid or duplicate disposition Finding-ID"))
+            continue
+        seen.add(identifier)
+        if item.get("disposition") not in ("resolved", "rejected", "architectural_exception"):
+            errors.append((identifier, "unresolved finding"))
+        if not isinstance(item.get("evidence"), str) or not item["evidence"].strip():
+            errors.append((identifier, "disposition evidence is required"))
+        if item.get("disposition") == "architectural_exception" and (
+                not isinstance(item.get("owner_review"), str) or not item["owner_review"].strip()):
+            errors.append((identifier, "architectural exception requires owner_review"))
+    if seen != identifiers:
+        errors.append(("dispositions", "finding disposition gap: report IDs and dispositions differ"))
+    return errors
+
+
 # --- bundled fixtures for --self-test -------------------------------------
 
 VALID_FIXTURE = """## 5. Backend
@@ -225,6 +259,7 @@ def main():
     parser.add_argument("report", nargs="?", help="path to the pre-launch report")
     parser.add_argument("--self-test", action="store_true",
                         help="run bundled fixtures and exit")
+    parser.add_argument("--dispositions", help="JSON list of evidenced finding dispositions")
     args = parser.parse_args()
 
     if args.self_test:
@@ -236,7 +271,18 @@ def main():
         print(f"ERROR: report not found: {args.report}", file=sys.stderr)
         sys.exit(2)
 
-    errors = validate_file(args.report)
+    try:
+        with open(args.report, encoding="utf-8") as handle:
+            report_text = handle.read()
+        if args.dispositions:
+            with open(args.dispositions, encoding="utf-8") as handle:
+                dispositions = json.load(handle)
+            errors = validate_dispositions(report_text, dispositions)
+        else:
+            errors = validate_text(report_text)
+    except (OSError, json.JSONDecodeError) as error:
+        print(f"BLOCKED / WHY: invalid finding input: {error} / FIX: repair the report or dispositions JSON and rerun", file=sys.stderr)
+        sys.exit(1)
     if errors:
         print(f"CONTRACT VIOLATION: {len(errors)} issue(s) in {args.report}",
               file=sys.stderr)

@@ -227,7 +227,7 @@
     {
       "path": ".github/skills/rpi-remediate/SKILL.md",
       "component": "skill:rpi-remediate",
-      "sha256": "49a218c7f8ff73a5c594676e06b31665103d438d6de9984fe23a46cab0c57d8d"
+      "sha256": "63c42c50128fc4aa6b686811c9e0a76d1195da44ae31016f7419c28fff138ec7"
     },
     {
       "path": ".github/skills/rpi-remediate/references/dispatch.md",
@@ -247,7 +247,7 @@
     {
       "path": ".github/skills/rpi-remediate/scripts/validate-findings.py",
       "component": "skill:rpi-remediate",
-      "sha256": "da9a4705c92c59f8284a936012f18d1bbedb7bc9fa591725a6435fc1a97f90c5"
+      "sha256": "e1ae9f340c3f9f9b4fabcc04c3f1d1d6144f59d27c1cb21a7740974492f989df"
     },
     {
       "path": ".github/skills/rpi-research/SKILL.md",
