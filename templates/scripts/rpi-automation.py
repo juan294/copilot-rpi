@@ -187,7 +187,8 @@ def run_job(*, job, project, blueprint, report, binary, model, timeout, environ=
         argv = [binary, "-p", prompt, "-s", "--no-ask-user", "--available-tools=read",
                 "--allow-tool=read", f"--model={model.strip()}", "--no-remote",
                 "--no-remote-export", "--no-auto-update"]
-        secrets = [key for key in ("COPILOT_PROVIDER_API_KEY", "GH_TOKEN") if env.get(key)]
+        secrets = [key for key in ("COPILOT_GITHUB_TOKEN", "GH_TOKEN", "GITHUB_TOKEN",
+                                   "COPILOT_PROVIDER_API_KEY") if env.get(key)]
         if secrets:
             argv.append(f"--secret-env-vars={','.join(secrets)}")
         try:

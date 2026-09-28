@@ -178,6 +178,15 @@ print('Ready plan: inspect reports. No changes made.')
         self.assertNotIn("secret-token-123", self.report.read_text())
         self.assertIn("[REDACTED]", self.report.read_text())
 
+    def test_all_forwarded_credentials_are_hidden_from_copilot_tools(self):
+        credentials = {name: f"secret-{name}" for name in (
+            "COPILOT_GITHUB_TOKEN", "GH_TOKEN", "GITHUB_TOKEN", "COPILOT_PROVIDER_API_KEY")}
+        self.assertEqual(self.run_job(env=credentials), 0)
+        argv = json.loads(self.capture.read_text())["argv"]
+        self.assertIn("--secret-env-vars=" + ",".join(credentials), argv)
+        for value in credentials.values():
+            self.assertNotIn(value, json.dumps(argv))
+
     def test_scheduler_preview_has_no_side_effects(self):
         proc = subprocess.run([sys.executable, str(RUNNER), "schedule-preview", "--job", "triage",
                                "--project", str(self.project)], capture_output=True, text=True)
