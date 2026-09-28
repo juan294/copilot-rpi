@@ -10,17 +10,17 @@ request. Keep project intelligence, custom settings and user work products.
 
 Read [the lifecycle contract](references/lifecycle-contract.md) completely.
 Resolve the installed package/source and target project from actual metadata and
-the request; do not assume the current directory is the intended target. Use the
-ownership-aware engine's explicit source/target plan/apply interface. Skill
-invocation or tool visibility does not grant extra authority.
+the request; do not assume the current directory is the intended target. Use
+the engine commands in the lifecycle contract with explicit package and target
+paths. Skill invocation or tool visibility does not grant extra authority.
 
 ## Inventory and review
 
-1. Read the project's manifest/baselines, legacy evidence and current registrations.
-   If no owned installation exists, report nothing to detach; preserve unknown
+1. Read `.rpi/copilot/manifest.json`, its baselines, legacy evidence and
+   current registrations. If no owned installation exists, report nothing to detach; preserve unknown
    candidates. Native plugin removal and shared user lifecycle removal are separate
    scopes; project detach cannot remove them.
-2. Generate the engine's explicit `detach` plan for the target. Classify owned
+2. Run `detach --package --target --output` and review the removal plan. Classify owned
    unchanged files, owned edited files, managed blocks/settings keys, unknown
    content and user work products. Record exactly what is removed and retained.
 3. Present the concrete diff and recovery location. Use the detach authorization
@@ -30,8 +30,9 @@ invocation or tool visibility does not grant extra authority.
 
 ## Apply and preserve
 
-1. Apply the reviewed engine plan transactionally after baseline/precondition
-   verification. Retain edited or unknown files and explain the disposition.
+1. Run `apply --plan` for the unchanged reviewed removal plan after
+   baseline/precondition verification. Retain edited or unknown files and
+   explain the disposition.
 2. Preserve AGENTS.md and scoped Copilot instruction files; remove only their
    proven-owned unchanged blocks while keeping user additions.
 3. Remove only individually owned unchanged settings/hook registrations. Keep
@@ -46,8 +47,9 @@ invocation or tool visibility does not grant extra authority.
 
 ## Completion
 
-Verify remaining user files/settings and native registrations, removed managed
-components, instruction integrity and recovery availability. Commit only the
+Run `check --package --target`; verify remaining user files/settings and native
+registrations, removed managed components, instruction integrity and recovery
+availability. Commit only the
 reviewed local detach changes atomically where appropriate. Report removed and
 retained files/blocks/keys, conflicts, recovery location and commit identity.
 Do not claim complete detachment when conflicts remain. A repeated detach should

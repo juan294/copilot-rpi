@@ -10,14 +10,14 @@ Support interactive and unattended execution without guessing ownership.
 
 Read [the lifecycle contract](references/lifecycle-contract.md) completely.
 Resolve the installed package/source and target project from actual metadata and
-the request; do not assume the current directory is the intended target. Use the
-ownership-aware engine's explicit source/target plan/apply interface. Skill
-invocation or tool visibility does not grant extra authority.
+the request; do not assume the current directory is the intended target. Use
+the engine commands in the lifecycle contract with explicit package and target
+paths. Skill invocation or tool visibility does not grant extra authority.
 
 ## Inspect and plan
 
-1. Read `.rpi/manifest.json`, recoverable baselines and source receipt. For legacy
-   adoption, inspect `.github/copilot-rpi-sync.json` and known v1 candidates without
+1. Read `.rpi/copilot/manifest.json`, recoverable baselines and source receipt.
+   For legacy adoption, inspect `.github/copilot-rpi-sync.json` and known v1 candidates without
    treating matching filenames as ownership. If no adoption evidence exists,
    report that fact and use `rpi-adopt` only if authorized.
 2. Confirm the local source identity, installed revision and selected components.
@@ -26,14 +26,15 @@ invocation or tool visibility does not grant extra authority.
 3. Compare installed bytes with both baseline and selected upstream bytes even
    when the upstream revision is unchanged. Detect missing or damaged installed
    files and resources; do not declare an unchanged revision healthy by itself.
-4. Read changed rules/workflow knowledge as needed. Generate the engine's explicit
-   `update` plan and inspect per-file/block/key dispositions: unchanged, new,
+4. Read changed rules/workflow knowledge as needed. Run
+   `plan --package --target --profile --output` and inspect per-file/block/key
+   dispositions: unchanged, new,
    upstream-only, local-only, merged, conflict, missing/damaged and retained.
 
 ## Apply safely
 
-Apply the safe reviewed plan within existing authorization. Unattended runs may
-apply safe owned updates, but preserve conflicts and return a diagnostic rather
+Run `apply --plan` for the unchanged reviewed plan within existing authorization.
+Unattended runs may apply safe owned updates, but preserve conflicts and return a diagnostic rather
 than prompting indefinitely or overwriting. Preserve:
 
 - Project identity, stack, command choices and deployment/branch semantics.
@@ -51,7 +52,7 @@ journal and recovery path for resume/rollback.
 
 ## Verify and report
 
-Run engine diagnostics plus applicable local gates. Confirm selected resources,
+Run `check --package --target` plus applicable local gates. Confirm selected resources,
 unique registration routes/scopes, rule maps, instruction budgets and preserved
 custom content. Report conflicts/damage explicitly; missing evidence is not success.
 

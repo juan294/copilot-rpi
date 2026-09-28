@@ -16,7 +16,7 @@
       "disposition": "adapted",
       "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1.",
       "destination": "templates/skills/rpi-adopt",
-      "destination_sha256": "a9ac7a6ab330b5d6869c3f188ad124f9777366e4871f8fc72fe376f3f326f008",
+      "destination_sha256": "3724c5c41a97935cc217c5afc5d1bcb8f7bec1d8ad37f1cec1f877579e6ace37",
       "adaptation_note": "Copilot project skill location and explicit adopter lifecycle authority."
     },
     {
@@ -49,7 +49,7 @@
       "disposition": "adapted",
       "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1.",
       "destination": "templates/skills/rpi-bootstrap",
-      "destination_sha256": "38381c63a1c45c7b1b482f143b75020df79a56ec101d9bbf003c187f76c653f6",
+      "destination_sha256": "e4dd1c05a44cb919fe45b210850b24cf152eaedf0d54d65ffc5d4e3bb9c49ab5",
       "adaptation_note": "Copilot project skill location and explicit bootstrap lifecycle authority."
     },
     {
@@ -71,7 +71,7 @@
       "disposition": "adapted",
       "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1.",
       "destination": "templates/skills/rpi-detach",
-      "destination_sha256": "dd689973edd952525375851465025db0224d69e8c76c9ef4fd2aa0a9034c2ca2",
+      "destination_sha256": "fbc9ca59629971f9f090bbe5b0709628d0a340f42b7a8f895c7f76dc6d0c8b79",
       "adaptation_note": "Copilot project skill location and owner-preserving detach contract."
     },
     {
@@ -203,7 +203,7 @@
       "disposition": "adapted",
       "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1.",
       "destination": "templates/skills/rpi-update",
-      "destination_sha256": "5242e9bfc738a376055a89a711d297e7c9c181c9a3f2de433cb1af5b9249609b",
+      "destination_sha256": "21d31c6f392f45f493e397934cf08ea05f1c8c5ebc035cb80990e55c0918b0ca",
       "adaptation_note": "Copilot project skill location and owner-preserving update contract."
     },
     {
@@ -610,7 +610,7 @@
       "disposition": "adapted",
       "rationale": "Pinned upstream distribution contract has a Copilot-owned Phase 2 implementation.",
       "destination": "templates/scripts/rpi-distribution.py",
-      "destination_sha256": "a20a96e5719780ea3657707d1703143f745004acecb5dc14784b13d88ff46266",
+      "destination_sha256": "4b9d2a566e4edd4558f0ae8c9f759b98eded5f5b95f7e1358d567d10547de694",
       "adaptation_note": "Path safety, manifest validation, resource accounting and deterministic rendering adapted to Copilot profiles and metadata."
     },
     {
@@ -618,22 +618,22 @@
       "kind": "resource",
       "source": "templates/scripts/rpi-lifecycle.py",
       "source_sha256": "9bf4c821becb0fe344d33e0d7d8bfa270ba235beca5b9fe2dd1ce0652d578da2",
-      "disposition": "deferred",
-      "rationale": "Portable resource or lifecycle algorithm awaits the phase that adapts it for Copilot.",
-      "destination": null,
-      "destination_sha256": null,
-      "adaptation_note": null
+      "disposition": "adapted",
+      "rationale": "Pinned upstream lifecycle and configuration algorithms are adapted for the Copilot project-local ownership engine.",
+      "destination": "templates/scripts/rpi-lifecycle.py",
+      "destination_sha256": "118938943f34515619ce855d6a9c026c5c539243ab65b4d769a7e35dc074036f",
+      "adaptation_note": "Adapted for verified standalone Copilot render packages, namespaced ownership and recovery, exact historical-byte migration, safe state validation and JSONC field reconciliation."
     },
     {
       "id": "resource:configuration-engine",
       "kind": "resource",
       "source": "templates/scripts/rpi-config.py",
       "source_sha256": "51f5ec49a680c5d772f0b9c223e3d0e83d76e1e9ea3d881a82e08b179709817a",
-      "disposition": "deferred",
-      "rationale": "Portable resource or lifecycle algorithm awaits the phase that adapts it for Copilot.",
-      "destination": null,
-      "destination_sha256": null,
-      "adaptation_note": null
+      "disposition": "adapted",
+      "rationale": "Pinned upstream lifecycle and configuration algorithms are adapted for the Copilot project-local ownership engine.",
+      "destination": "templates/scripts/rpi-config.py",
+      "destination_sha256": "00fa7bb74b714a8ba7dfd4c19c0e2feda9e418eecfd481b784576b8921b721bc",
+      "adaptation_note": "Adapted for verified standalone Copilot render packages, namespaced ownership and recovery, exact historical-byte migration, safe state validation and JSONC field reconciliation."
     },
     {
       "id": "resource:package-engine",

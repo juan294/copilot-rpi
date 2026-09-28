@@ -1,291 +1,144 @@
 # New Project Setup Checklist
 
-Use this when setting up a new project to follow copilot-rpi best practices.
+Use this when setting up a project with the Copilot RPI blueprint. Resolve the
+local package and target from actual paths. Review an ownership-aware plan before
+changing the target.
 
-## README Header
+## Project facts
 
-- [ ] Structure the project README with a standard header:
-  1. `# Project Name — Tagline`
-  2. GitHub badges (CI, Security Scan, Secret Scanning, stack versions, and optionally license if open source)
-  3. One-line project description
-  4. Horizontal divider (`---`)
-  5. Rest of the README content below the divider
-- [ ] Adjust badge URLs to match the project's GitHub owner/repo
-- [ ] Add or remove stack badges as relevant
+- [ ] Record the project's name, purpose, stack, package manager, integration
+  branch, release target, test commands, deployment triggers and owners.
+- [ ] Inspect existing `AGENTS.md`, `.github/`, `.vscode/`, settings and legacy
+  `.github/copilot-rpi-sync.json`. A matching name does not prove ownership.
+- [ ] Choose a qualified profile: `cli` for Copilot CLI, `agent-host` for the VS
+  Code Copilot harness, or `vscode-local` for Local compatibility. Choose only
+  relevant components and domain instructions.
+- [ ] Keep existing project facts and custom rules. Managed always-loaded root
+  text has an 8,192 UTF-8 byte limit; report other active instruction sources
+  separately. Use scoped instructions for domain-specific guidance.
 
-## Directory Setup
+## Plan, apply and check
 
-- [ ] Create `AGENTS.md` at project root (adapt from `AGENTS.md.template`)
-  - Manually craft every line — don't auto-generate
-  - Keep it lean: only universally applicable instructions
-  - This is the cross-tool instruction file (read by Copilot, Claude Code, Cursor, Gemini CLI)
-- [ ] Create `.github/prompts/` and copy prompt files from `templates/prompts/`
-- [ ] Create `.github/instructions/` for path-specific rules (auto-loaded by glob):
-  - e.g., `tests.instructions.md` (applies to `**/*.test.{ts,tsx}`)
-  - e.g., `api.instructions.md` (applies to `**/routes/**`, `**/api/**`)
-  - Rules fire automatically when matching files are in context
-- [ ] Create `.github/chatmodes/` for specialized chat personas:
-  - e.g., `rpi-research.chatmode.md` (documentarian-constrained research mode)
-  - e.g., `rpi-planner.chatmode.md` (planning mode with pseudocode output)
-- [ ] Create `docs/` directory with subdirectories:
-  - `docs/research/` — Research documents
-  - `docs/plans/` — Implementation plans
-  - `docs/decisions/` — Architecture decision records
-  - `docs/agents/` — Agent reports and project memory
-- [ ] Configure `.vscode/settings.json` (adapt from `templates/vscode-settings.json.template`):
-  - Enable agent mode: `"chat.agent.enabled": true`
-  - Enable thinking: `"github.copilot.chat.agent.thinkingTool": true`
-  - Enable auto-fix: `"github.copilot.chat.agent.autoFix": true`
-- [ ] Create `.vscode/mcp.json` if the project uses MCP servers (adapt from `templates/vscode-mcp.json.template`)
-- [ ] Optionally create `.github/copilot-instructions.md` for Copilot-specific addenda
-  - Only needed if you have rules that apply only to Copilot (not Claude Code/Cursor)
-  - Most projects can skip this — AGENTS.md covers everything
+Use a verified rendered package and actual absolute paths for `package_dir`,
+`project_dir` and `plan_file`. Its bundled runtime uses Python 3.11+ without
+repository development dependencies. Select the profile in the plan command.
+The example shows Copilot CLI:
 
-## AGENTS.md Configuration
-
-### Authoring Principles
-
-- Keep AGENTS.md **LEAN** -- loaded every session,
-  only universally applicable instructions.
-- Budget: ~150 usable instruction slots.
-  The tool's system prompt uses some. Don't waste them.
-- Test: "Would removing this line cause mistakes?"
-  If not, cut it.
-- Domain rules go in `.github/instructions/` (conditional loading
-  via `applyTo` globs). Don't duplicate their content in AGENTS.md.
-- Use `.github/instructions/` with `applyTo` frontmatter for rules
-  that only apply when working with specific file types.
-- Manually craft every line --
-  don't auto-generate.
-
-### Checklist
-
-- [ ] Fill in project name, description, and stack
-- [ ] Document build/test/lint commands
-- [ ] Document deployment pipeline (which branch deploys where)
-- [ ] Document git workflow (default branch, production branch)
-- [ ] Add project-specific context (key routes, data types, code ownership)
-
-## Prompt Files
-
-Copy and adapt from `templates/prompts/`:
-
-- [ ] `/brainstorm` — Optional RPI pre-step: refine a vague/greenfield idea into a design brief
-- [ ] `/research` — Codebase research with documentarian constraint
-- [ ] `/plan` — Interactive plan creation with phases
-- [ ] `/implement` — Phase-by-phase execution with review gates
-- [ ] `/validate` — Post-implementation verification
-- [ ] `/debug` — Systematic root-cause procedure for novel bugs
-- [ ] `/describe-pr` — PR description generation
-- [ ] `/pre-launch` — Multi-specialist production audit
-- [ ] `/remediate` — Fix all pre-launch findings with parallel TDD agents
-- [ ] `/explore-release` — Fresh-context exploratory charters against a fixed release candidate (E2E Pro Wave B)
-- [ ] `/triage` — Morning processing of agent reports, GitHub alerts, and Dependabot PRs
-
-Verify each file has valid YAML frontmatter with `mode:` and `description:` fields.
-
-**Prompt files vs instructions:** Prompts (`.github/prompts/`) are user-invoked workflows. Instructions (`.github/instructions/`) are auto-loaded rules. Use prompts for RPI phases; use instructions for domain conventions.
-
-## Path-Specific Instructions
-
-Copy instruction templates from `templates/github/instructions/`:
-
-- [ ] Always: `tests.instructions.md` with `applyTo: "**/*.test.{ts,tsx}"`
-- [ ] If API routes exist: `api.instructions.md` with `applyTo: "**/routes/**"`
-- [ ] If deployment pipeline exists: `deployment-safety.instructions.md`
-  with `applyTo` for deploy-related files (.github/**, Dockerfile, etc.)
-- [ ] If using Supabase: `supabase.instructions.md`
-  with `applyTo` for supabase/sql/migration files
-- [ ] If migrations exist: `migrations.instructions.md` with `applyTo: "**/migrations/**"`
-- [ ] Review `applyTo` globs in each file --
-  adjust to match your project's actual file structure
-- [ ] Add project-specific instructions as needed
-
-Each file must have `applyTo` in YAML frontmatter -- without it, the file is silently ignored.
-
-## Chat Modes
-
-- [ ] Create research mode: `.github/chatmodes/rpi-research.chatmode.md`
-  - Bakes in the documentarian constraint at the session level
-  - Restricts tools to read-only (no file writes, no terminal)
-- [ ] Create planning mode: `.github/chatmodes/rpi-planner.chatmode.md`
-  - Includes pseudocode notation reference
-  - Focuses on interactive plan development
-- [ ] Create auditor mode: `.github/chatmodes/rpi-auditor.chatmode.md` (optional)
-  - Read-only validation with structured report output
-
-## Pre-Commit Hooks
-
-- [ ] Install a hook framework (e.g., Husky for Node.js, pre-commit for Python)
-- [ ] Configure pre-commit to run typecheck + lint:
-
-  ```bash
-  # Example: Husky
-  npx husky init
-  echo "pnpm run typecheck && pnpm run lint" > .husky/pre-commit
-  ```
-
-- [ ] Test that the hook rejects a commit with a deliberate type error
-- [ ] Add a note to AGENTS.md reminding agents to run checks before committing
-
-## CI Setup
-
-- [ ] Create a CI workflow (GitHub Actions, etc.) that runs on push and PR:
-  - Typecheck
-  - Lint
-  - Unit tests
-  - Build verification
-  - (Optional) Security audit, E2E tests
-- [ ] Mark critical CI jobs as required for PR merges
-- [ ] Enable branch protection on the production branch (require CI + review)
-- [ ] Verify CI runs successfully on the development branch
-
-## Git Setup
-
-- [ ] Initialize repo with `main` as production branch
-- [ ] Create `develop` as default working branch
-- [ ] Set up branch protection rules on GitHub
-- [ ] Configure pre-commit hooks (typecheck, lint, test) — see Pre-Commit Hooks above
-
-## Push Accountability
-
-- [ ] Add push accountability instructions to AGENTS.md:
-  - After every push to develop, verify CI passes
-  - Investigate failures, fix, and re-push
-- [ ] Test the workflow: push a deliberate failure, verify the process catches it
-
-## Scheduled Agents (Optional)
-
-- [ ] Create `scripts/agents/` directory for agent shell scripts
-- [ ] Create `docs/agents/` directory for agent reports and shared context
-- [ ] Create `logs/` directory for agent output capture
-- [ ] **Determine repo visibility** (Rule #42 -- commit policy depends on it):
-
-  ```bash
-  gh repo view --json visibility --jq '.visibility' 2>/dev/null
-  # PUBLIC -> gitignore the directories below (next step)
-  # PRIVATE / INTERNAL -> SKIP the gitignore step; agent dirs are tracked
-  # (no remote / gh unavailable) -> treat as PUBLIC (fail-safe)
-  ```
-
-- [ ] **(Public repos only) Gitignore agent operational directories** so operational details don't leak:
-
-  ```gitignore
-  # Agent operational output (gitignored on public repos; tracked on private repos)
-  docs/agents/
-  logs/
-  scripts/agents/
-  ```
-
-  On private repos, omit this -- reports are committed by `/triage` as historical artifacts.
-
-- [ ] Copy shared utilities:
-  - `templates/scripts/agents/lib/agent-utils.sh` to `scripts/agents/lib/agent-utils.sh`
-  - `templates/scripts/agents/install-agents.sh` to `scripts/agents/install-agents.sh`
-- [ ] **Set up the `/update` agent first** -- keeps your project in sync with copilot-rpi improvements:
-  1. Copy `templates/scripts/copilot-rpi-update-agent.sh` to `scripts/agents/copilot-rpi-update.sh`
-  2. Set `COPILOT_RPI_PATH` to your copilot-rpi clone location
-  3. Make executable: `chmod +x scripts/agents/copilot-rpi-update.sh`
-  4. Create required directories: `mkdir -p docs/agents logs scripts/agents/lib`
-  5. Add `# SCHEDULE: daily HH:MM` comment to the script (read by `install-agents.sh`)
-  6. Install with `bash scripts/agents/install-agents.sh`
-- [ ] Write additional agent scripts using the template in [scheduled-agents.md](../methodology/scheduled-agents.md):
-  - Source `agent-utils.sh` for environment setup, logging, and shared context
-  - Add `# SCHEDULE:` comment (`daily HH:MM` or `weekly DAY HH:MM`)
-  - Use `preflight_claude`, `read_shared_context`, `extract_and_write_shared_context`
-- [ ] Ensure CLI is authenticated for non-interactive use (`claude setup-token` or `copilot auth`)
-- [ ] Install all agents: `bash scripts/agents/install-agents.sh`
-- [ ] Test with `launchctl start` (macOS) -- don't test from a terminal, it masks launchd issues
-- [ ] Verify with `bash scripts/agents/install-agents.sh --status`
-
-## Release Verification (E2E Pro)
-
-E2E Pro is the release-**verification** layer: it proves every *required* check
-actually ran and passed against the exact artifact being tagged. It sits in front
-of `/release` (which keeps tagging authority) and complements `/pre-launch` +
-`/remediate` (which audit code as written, not the deployed candidate's behavior).
-
-Adopt by risk, not by default:
-
-- [ ] **Wave A is the mandatory floor for every project** — a release gate that
-  cannot lie: zero-pass fails, a required skip or failure blocks even when
-  quarantined, candidate identity is fixed and verified, and the tag is last.
-  Cheap and mechanical; do this even on small projects.
-- [ ] Copy `templates/e2e-pro-playbook-template.md` into the project (suggested:
-  `docs/plans/e2e-pro-implementation.md`) and replace every `<PLACEHOLDER>` with a
-  verified project-specific value.
-- [ ] Install `/explore-release` (Wave B) — diff-driven exploratory charters with
-  the mandatory eight-maneuver table and a synthetic-fixture safety contract.
-- [ ] Waves C-H (capability registry, combination engine, plan compiler, staging
-  fidelity, model-based tests, TTL automation) are structural and expensive.
-  Adopt by project risk; delete inapplicable sections and record why.
-
-## Workflow Habits
-
-- [ ] Always `/research` before `/plan` (except greenfield —
-  no code means nothing to research; start with `/plan`)
-- [ ] Always `/plan` before `/implement`
-- [ ] Always review plans before approving
-- [ ] Never skip the human confirmation gate between implementation phases
-- [ ] Use `/validate` after implementation
-- [ ] Run `/remediate` after `/pre-launch` to fix all findings with parallel agents
-- [ ] Run `/explore-release` before tagging, once the release candidate is fixed
-- [ ] Run `/triage` every morning to process overnight agent reports
-- [ ] Start a new Chat window between unrelated tasks to reset context
-- [ ] Run each RPI phase in its own conversation
-- [ ] Research and plan on the default branch; implement in feature branches
-- [ ] Read research output critically — throw out and redo if wrong
-- [ ] Invest most review time on research and plans, not generated code
-- [ ] Follow TDD: write failing tests before implementation code
-- [ ] Monitor CI after every push — never push and forget
-
-## Project-Type Adaptation
-
-The defaults above assume a web application. Adapt these sections based on your project type:
-
-### Web Application (default)
-
-The standard setup applies as-is.
-
-### Library / npm Package
-
-- **Git workflow:** May use `main` only (no `develop`) if releases are tagged from `main`
-- **CI additions:** Add `npm pack` or `pnpm pack` verification, publish dry-run
-- **AGENTS.md:** Document the public API surface
-
-### CLI Tool
-
-- **CI additions:** Test the CLI binary end-to-end
-- **AGENTS.md:** Document all commands and flags. ESM CLI files use shebang — never run with `node`
-
-### Monorepo
-
-- **CI additions:** Use `turbo`/`nx` affected detection
-- **AGENTS.md:** Document the workspace structure, how packages depend on each other
-- **Pre-commit:** Run typecheck across ALL workspace packages
-
-### Python Project
-
-- **Pre-commit hooks:** Use the `pre-commit` framework (not Husky)
-- **Key commands:** Replace `pnpm run *` with equivalents: `pytest`, `mypy .`, `ruff check .`
-
-### Static Site / Documentation
-
-- **Git workflow:** May deploy directly from `main`
-- **CI:** Build verification + link checking
-
-## Thoughts Directory Structure
-
-```text
-docs/
-├── research/                  # Research documents
-│   └── YYYY-MM-DD-topic.md
-├── plans/                     # Implementation plans
-│   ├── YYYY-MM-DD-feature.md  # Main plan
-│   └── YYYY-MM-DD-feature-phases/
-│       ├── phase-1.md
-│       └── phase-2.md
-├── decisions/                 # ADRs / decision records
-└── prs/                       # PR descriptions
-    └── {number}_description.md
+```bash
+python3 "$package_dir/.rpi/copilot/runtime/rpi-distribution.py" plan \
+  --package "$package_dir" --target "$project_dir" --profile cli \
+  --output "$plan_file"
 ```
+
+- [ ] Review source SHA, target identity, selected components, current input
+  hashes, create/update/remove actions, conflicts, capability changes and the
+  recovery path. Resolve unknown ownership before dependent writes.
+- [ ] Apply the unchanged reviewed plan within the authorization already given.
+  A stale plan requires a new review.
+
+  ```bash
+  python3 "$package_dir/.rpi/copilot/runtime/rpi-distribution.py" apply \
+    --plan "$plan_file"
+  python3 "$package_dir/.rpi/copilot/runtime/rpi-distribution.py" check \
+    --package "$package_dir" --target "$project_dir"
+  ```
+
+- [ ] Verify installed skills and bundled resources under `.github/skills/`,
+  roles under `.github/agents/`, and path instructions under
+  `.github/instructions/`. Check actual client discovery before claiming a file
+  loaded. Keep legacy prompt and chatmode copies until their exact ownership is
+  proven.
+- [ ] Preserve the project's `.rpi/manifest.json` if cc-rpi also uses the
+  repository. Copilot RPI owns only `.rpi/copilot/manifest.json`, its baselines
+  and local recovery journals under `.rpi/local/copilot/`.
+- [ ] Select MCP, native hooks, Git hooks, global customization and schedulers
+  separately. Example JSON files are inert; do not rename one to an active
+  configuration without reviewing its server, credentials and capability scope.
+
+## Native workflows and instructions
+
+- [ ] Select the relevant `rpi-*` skills. `rpi-research`, `rpi-assess`,
+  `rpi-plan`, `rpi-implement` and `rpi-validate` cover the core lifecycle.
+  Invoke publication workflows explicitly and verify their authority.
+- [ ] Use `.github/agents/` research, planner and auditor roles with their
+  declared tools. A read-only role returns cited findings; its parent writes
+  artifacts and runs checks.
+- [ ] For `vscode-local`, use generated `.prompt.md` wrappers with current
+  `agent` metadata. Do not install a wrapper and skill with the same command
+  name in one profile. Native `/plan` and `/status` are distinct from
+  `rpi-plan` and `rpi-status`.
+- [ ] Review `applyTo` globs against the actual target paths for tests, API,
+  migrations, deployment and selected domains. Verify the chosen harness loads
+  them. Preserve existing custom globs and instruction content.
+
+## Repository setup
+
+- [ ] Add curated `docs/research/`, `docs/plans/` and `docs/decisions/` when
+  useful. Keep raw runtime receipts in local ignored storage. Public projects
+  should not publish operational agent reports by default.
+- [ ] Structure the README with a project description, relevant badges and
+  verified commands. Adapt the release playbook using actual project facts;
+  Wave A checks the exact release candidate and blocks a required skip/failure.
+- [ ] Configure local checks and CI for the project's stack. Run typecheck,
+  lint, tests and build where applicable. Record every result against the final
+  candidate. Add branch protection only through an authorized remote change.
+- [ ] Use local task branches/worktrees and integrate completed work into the
+  documented local integration branch. Inspect CI and deployment triggers
+  before an authorized push. Verify expected workflows for the exact pushed
+  commit. Diagnose failure locally; a rerun or another push needs authority.
+- [ ] Test any selected pre-commit or native hook against a deliberate local
+  failure. A configured hook is not proof it ran or prevented an earlier edit.
+
+## Optional scheduled agents
+
+Scheduled agents are an opt-in project capability pending client and scheduler
+qualification. Record the owner's selection and target platform. Do not copy
+old Claude-specific scripts, install a launchd/cron schedule, start paid
+inference, or promise unattended updates as a side effect of project setup.
+
+## Removal and recovery
+
+Review a removal plan before detaching. Detach removes only unchanged, proven
+owned entries and preserves custom work:
+
+```bash
+python3 "$package_dir/.rpi/copilot/runtime/rpi-distribution.py" detach \
+  --package "$package_dir" --target "$project_dir" --output "$plan_file"
+python3 "$package_dir/.rpi/copilot/runtime/rpi-distribution.py" apply \
+  --plan "$plan_file"
+```
+
+On an interrupted transaction, use the journal path printed by the engine.
+Rollback refuses to overwrite a newer edit:
+
+```bash
+python3 "$package_dir/.rpi/copilot/runtime/rpi-distribution.py" rollback \
+  --journal "$journal_file"
+```
+
+## Workflow habits
+
+- [ ] Read existing code before research; use `rpi-assess` for evaluation and
+  `rpi-plan` for phased implementation. Greenfield work can start at planning.
+- [ ] Use a failing test first for behavioral changes. Complete independent
+  review, repair, simplify and all required local checks before phase
+  acceptance. An explicit all-phases request permits continuation after each
+  verified boundary.
+- [ ] Give every confirmed finding a disposition. Fix actionable findings,
+  reject false positives with evidence, and send strategic decisions for owner
+  review. Preserve the durable handoff and revalidate state on resume.
+- [ ] Use `rpi-pre-launch`, `rpi-remediate`, `rpi-update-docs` and `rpi-release`
+  for the pre-release sequence. `rpi-explore-release` supplies exploratory
+  evidence only for an existing authorized immutable candidate.
+
+## Project-type adaptation
+
+- **Web application:** Inspect deployment and preview triggers, route safety,
+  authorization, UI checks and production recovery.
+- **Library or package:** Verify public API, package artifact, compatibility
+  and publication preflight.
+- **CLI:** Test the installed command, arguments, errors and exit codes.
+- **Monorepo:** Record package boundaries and verify shared consumers/writers.
+- **Python:** Use the project's Python environment, formatter, type checker
+  and database fixtures.
+- **Static site or documentation:** Verify build output and internal links.

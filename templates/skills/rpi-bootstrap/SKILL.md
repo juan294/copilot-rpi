@@ -11,9 +11,9 @@ missing decisions such as project identity, stack, target path and intended user
 
 Read [the lifecycle contract](references/lifecycle-contract.md) completely.
 Resolve the installed package/source and target project from actual metadata and
-the request; do not assume the current directory is the intended target. Use the
-ownership-aware engine's explicit source/target plan/apply interface. Skill
-invocation or tool visibility does not grant extra authority.
+the request; do not assume the current directory is the intended target. Use
+the engine commands in the lifecycle contract with explicit package and target
+paths. Skill invocation or tool visibility does not grant extra authority.
 
 ## Discover and adapt
 
@@ -43,11 +43,12 @@ invocation or tool visibility does not grant extra authority.
 
 ## Install and verify
 
-1. Generate the engine's local `install` plan for the chosen source, target,
-   harnesses, route and domain selection. Inspect changes, ownership conflicts,
+1. Run `plan --package --target --profile --output` for the chosen package,
+   target, profile and component selection. Inspect changes, ownership conflicts,
    instruction-byte budgets, settings keys and recovery locations before apply.
-2. Apply the reviewed safe plan within the setup authorization already provided.
-   Preserve user files/settings and unknown ownership. Resolve conflicts before
+2. Run `apply --plan` for the unchanged reviewed plan within the setup
+   authorization already provided. Preserve user files/settings and unknown
+   ownership. Resolve conflicts before
    dependent changes; never overwrite custom content to complete setup.
 3. Create curated `docs/research/`, `docs/plans/`, `docs/decisions/` and handoff
    locations as appropriate. Version research, plans and decisions. Raw machine
@@ -63,7 +64,7 @@ invocation or tool visibility does not grant extra authority.
    facts. Remote repository settings, production, new hosted schedules and
    publication remain separately authorized operations. Do not enable optional
    agent teams or schedules merely because the blueprint supports them.
-6. Run engine diagnostics and actual applicable local verification. Verify native
+6. Run `check --package --target` and actual applicable local verification. Verify native
    registrations and bundled resources, unique scope/route registration, preserved
    local extensions and settings. Record selected Copilot client/version evidence.
 

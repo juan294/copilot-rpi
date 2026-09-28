@@ -11,9 +11,9 @@ for routine safe items already within that scope.
 
 Read [the lifecycle contract](references/lifecycle-contract.md) completely.
 Resolve the installed package/source and target project from actual metadata and
-the request; do not assume the current directory is the intended target. Use the
-ownership-aware engine's explicit source/target plan/apply interface. Skill
-invocation or tool visibility does not grant extra authority.
+the request; do not assume the current directory is the intended target. Use
+the engine commands in the lifecycle contract with explicit package and target
+paths. Skill invocation or tool visibility does not grant extra authority.
 
 ## Audit before mutation
 
@@ -50,11 +50,12 @@ from the actual repository and preserve local extensions.
 
 ## Execute authorized adoption
 
-1. Generate and review an explicit engine `install` plan for source and target.
-   Existing v1 metadata is evidence, not permission to overwrite unknown custom
-   files. Missing baseline bytes produce retained/conflicted candidates.
-2. Apply proven safe changes transactionally. Keep user settings and custom
-   content, preserve recovery bytes, and stop only dependent work at a real
+1. Run `plan --package --target --profile --output` and review its source,
+   target and selected components. Existing v1 metadata is evidence, not
+   permission to overwrite unknown custom files. Missing baseline bytes produce
+   retained/conflicted candidates.
+2. Run `apply --plan` for the unchanged reviewed plan. Keep user settings and
+   custom content, preserve recovery bytes, and stop only dependent work at a real
    conflict or new decision. Do not replace the entire AGENTS.md or instruction files.
 3. Install full selected native skill directories and resources without duplicate
    user/project or plugin/direct registrations. Never merge or edit a plugin cache.
@@ -68,7 +69,7 @@ from the actual repository and preserve local extensions.
 7. Adapt [the release playbook](references/e2e-pro-playbook.md): Wave A always;
    structural Waves C-H by actual risk with N/A reasons. Wave B exercises an
    existing authorized immutable candidate through `rpi-explore-release`.
-8. Run engine diagnostics and complete applicable local gates. Verify actual
+8. Run `check --package --target` and complete applicable local gates. Verify actual
    native entries/resources, rule reachability, settings preservation and recovery.
 
 ## Completion

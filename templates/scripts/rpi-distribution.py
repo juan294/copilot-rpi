@@ -13,6 +13,13 @@ import re
 import sys
 from pathlib import Path
 
+if __name__ == "__main__" and len(sys.argv) > 1 and sys.argv[1] in {"plan", "apply", "check", "rollback", "detach"}:
+    # Lifecycle is the adopter runtime. Dispatch before importing maintainer-only
+    # PyYAML so a rendered package runs with Python's standard library alone.
+    import runpy
+    runpy.run_path(str(Path(__file__).with_name("rpi-lifecycle.py")), run_name="__main__")
+    raise SystemExit(0)
+
 import yaml
 
 
@@ -430,10 +437,32 @@ def render(root, manifest, profile, target, include_examples=False):
     target.mkdir(parents=True, exist_ok=True)
     preserve_ids = set(manifest["self_application"].get("preserve", [])) if target == root else set()
     record = render_record(manifest, profile, outputs, roots, preserve_ids)
+    runtime = {}
+    if target != root:
+        for name in ("rpi-distribution.py", "rpi-lifecycle.py", "rpi-config.py"):
+            relative = f".rpi/copilot/runtime/{name}"
+            if name == "rpi-distribution.py":
+                runtime[relative] = (
+                    b"#!/usr/bin/env python3\n"
+                    b'"""Standalone Copilot RPI lifecycle entrypoint."""\n'
+                    b"import runpy\nfrom pathlib import Path\n"
+                    b"runpy.run_path(str(Path(__file__).with_name('rpi-lifecycle.py')), run_name='__main__')\n"
+                )
+            else:
+                source = safe_path(root, f"templates/scripts/{name}", "runtime source")
+                if not source.is_file():
+                    source = Path(__file__).with_name(name)
+                runtime[relative] = source.read_bytes()
+            record["files"].append({"path": relative, "component": f"runtime:{name}", "sha256": sha(runtime[relative])})
+        record["files"].sort(key=lambda item: item["path"])
     for relative, (data, cid) in sorted(outputs.items()):
         if cid in preserve_ids:
             continue
         path = safe_path(target, relative, "output")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(data)
+    for relative, data in runtime.items():
+        path = safe_path(target, relative, "runtime output")
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(data)
     output_manifest = safe_path(target, OUTPUT_MANIFEST, "output manifest")

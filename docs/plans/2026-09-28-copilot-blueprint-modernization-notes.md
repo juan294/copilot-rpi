@@ -69,3 +69,33 @@ checker, and 138 internal Markdown links. The managed root is 3,874 bytes;
 active root plus repository Copilot instructions is 5,134 bytes, under the
 8,192-byte limit. This is portable rendering evidence; live native discovery
 and lifecycle ownership remain later acceptance requirements.
+
+## Phase 3 acceptance
+
+Phase 3 added a standalone standard-library lifecycle runtime to rendered
+packages. It plans, applies, checks, rolls back and detaches project-local
+Copilot components. Managed files and baselines live under `.rpi/copilot/`;
+transaction journals live under `.rpi/local/copilot/`. Plans bind the package
+receipt, target identity and observed bytes. Existing files need exact
+historical template bytes and an explicit legacy source revision, or an
+explicit reviewed `--adopt-exact` component selection, before ownership is
+claimed. Legacy sync metadata alone remains an untrusted hint.
+
+Independent review found and repaired inactive-setting diagnostics, active
+MCP/hook path injection, JSONC comment and multi-key edits, hidden symlinked
+and nested legacy surfaces, malformed manifests, and forged file/key ownership
+records. A simplify review checked reuse, quality and efficiency. The native
+capability currently available for explicit selection is `vscode-settings`;
+hooks, MCP, schedulers and global configuration remain outside this lifecycle
+selection. The active self-render and four lifecycle skills now point to the
+rendered package runtime. The upstream lock records the adapted lifecycle and
+configuration sources and all changed destination hashes.
+
+The complete Phase 3 local gate passed on the staged candidate: 98 Python
+tests, count/version/prompt contracts, renderer validation and generated-file
+check, ShellCheck, Markdown lint over 188 active files, pinned upstream intake,
+and 137 internal links. The fixture matrix uses real temporary Git repositories
+and covers fresh/no-op installation, updates, conflict and stale-plan refusal,
+ownership tampering, JSONC preservation, interrupted rollback, detach/re-adopt,
+historical migration, symlinks, Unicode paths and cc-rpi state coexistence.
+This is local lifecycle evidence; native Copilot loading is a Phase 5 gate.
