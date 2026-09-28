@@ -27,8 +27,10 @@ Set `COPILOT_MODEL` to the owner-selected model for `cli-programmatic`; the CLI
 skill probe does not pass a model flag. Both profiles capture `copilot --version`
 and `copilot --help` before inference. Missing flags, authentication, a model,
 and any timeout produce a blocked receipt with a recovery action. Each external
-process is bounded by an independent wall clock and its process group is stopped
-on timeout. The shipped automation runner also has its own timeout.
+process gets the selected wall-clock limit independently, and its process group
+is stopped on timeout. The shipped automation runner also has its own timeout;
+the harness gives its outer supervisor 30 seconds of cleanup grace so it can
+stop and reap the separately grouped CLI child.
 
 The `cli` probe checks `copilot skill list --json` for the enabled project skill,
 then invokes `/rpi-research` in the rendered fixture with read tools only. It
@@ -41,20 +43,22 @@ matching successful completion, and the marker answer after completion.
 The `cli-programmatic` probe runs the shipped
 `templates/scripts/rpi-automation.py` against a local agent report with an
 explicit marker finding. It checks that the allowed report cites that finding,
-then requests an attempted write to
-an existing denied file with `write` available to the model but explicitly
+then requests an attempted write to an existing denied file with `write`
+available to the model but explicitly
 denied. The receipt saves sanitized argv, exit codes and output for both cases.
 It keeps a bounded sanitized report excerpt even when the finding is missing.
 The denied file and the local bare remote must remain byte-for-byte unchanged.
-The negative control requires linked JSONL `permission.requested` and
-`permission.completed` events with a write request for the denied file and a
-`denied-by-rules` result. It also requires CLI exit 0 and a denial report in an
-`assistant.message` event. This shape follows the
+The negative control requires linked native JSONL events for a write attempt
+against the denied file and a denied completion. Copilot CLI 1.0.88 emitted
+`tool.execution_start` for `apply_patch` and a matching
+`tool.execution_complete` with `success: false` and a write-rule denial. The
+probe also accepts the linked `permission.requested` and
+`permission.completed` shape from the
 [Copilot SDK streaming event reference](https://docs.github.com/en/copilot/how-tos/copilot-sdk/features/streaming-events).
-The CLI JSONL schema is not specified there. If a client emits a different
-shape, the probe blocks and preserves output for inspection; prose refusal
-alone never passes. Review the event against the recorded client version before
-qualification.
+It requires CLI exit 0 and a denial report in an `assistant.message` event.
+If a client emits a different shape, the probe blocks and preserves output for
+inspection; prose refusal alone never passes. Review the event against the
+recorded client version before qualification.
 
 Each run writes `.rpi/local/copilot/native/<profile>-receipt.json` by default,
 so the two required profile results survive sequential runs. Set

@@ -63,6 +63,9 @@ class NativeRunnerTests(unittest.TestCase):
         self.assertEqual(len(receipt["blueprint_candidate"]["sha256"]), 64)
         self.assertEqual(receipt["commands"][0]["argv"], [str(FAKE), "--version"])
         runner_calls = receipt["runner_copilot_argv"]
+        runner_command = next(command["argv"] for command in receipt["commands"]
+                              if command["label"] == "shipped automation runner")
+        self.assertEqual(runner_command[runner_command.index("--timeout") + 1], "15")
         self.assertEqual([call for call in runner_calls if call == ["--version"]], [["--version"]])
         self.assertTrue(any("-p" in call and "--available-tools=view,grep,glob" in call
                             and "--allow-tool=read" in call for call in runner_calls))
@@ -71,6 +74,37 @@ class NativeRunnerTests(unittest.TestCase):
                            if command["label"] == "denied write")
         self.assertIn("--available-tools=view,grep,glob,create,edit,apply_patch,skill", denied_argv)
         self.assertIn("--deny-tool=write", denied_argv)
+
+    def test_cli_tool_denial_event_links_target_and_error(self):
+        output = '\n'.join((
+            json.dumps({"type": "tool.execution_start", "data": {"toolCallId": "write-1",
+                       "toolName": "apply_patch", "arguments": "*** Delete File: denied-write.txt"}}),
+            json.dumps({"type": "tool.execution_complete", "data": {"toolCallId": "write-1",
+                       "success": False, "error": {"code": "denied",
+                       "message": "Permission to run this tool was denied due to the following rules: `write`"}}}),
+            json.dumps({"type": "assistant.message", "data": {"content": "Write was denied"}}),
+        ))
+        target = self.directory / "denied-write.txt"
+        self.assertEqual(native.native_denial_observation(output, target), (True, True))
+        self.assertEqual(native.native_denial_observation(output.replace("denied-write.txt", "other.txt"), target),
+                         (False, True))
+        self.assertEqual(native.native_denial_observation(output.replace('"write-1"', '"other"', 1), target),
+                         (False, True))
+        events = output.splitlines()
+        first = json.loads(events[0])
+        first["data"]["arguments"] = "*** Update File: other.txt\n+denied-write.txt"
+        wrong_target = "\n".join((json.dumps(first), *events[1:]))
+        self.assertEqual(native.native_denial_observation(wrong_target, target), (False, True))
+        same_name_elsewhere = output.replace("*** Delete File: denied-write.txt",
+                                             "*** Delete File: other/denied-write.txt")
+        self.assertEqual(native.native_denial_observation(same_name_elsewhere, target), (False, True))
+        sdk_elsewhere = "\n".join((
+            json.dumps({"type": "permission.requested", "data": {"requestId": "sdk-1",
+                       "permissionRequest": {"kind": "write", "fileName": "other/denied-write.txt"}}}),
+            json.dumps({"type": "permission.completed", "data": {"requestId": "sdk-1",
+                       "result": {"kind": "denied-by-rules"}}}),
+        ))
+        self.assertEqual(native.native_denial_observation(sdk_elsewhere, target), (False, False))
 
     def test_programmatic_marker_gap_preserves_sanitized_report_excerpt(self):
         result = self.invoke(extra_env={"COPILOT_GITHUB_TOKEN": "force-omit-marker"})
@@ -213,6 +247,17 @@ class NativeRunnerTests(unittest.TestCase):
         receipt = self.receipt("cli")
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("timeout", receipt["recovery"].lower())
+
+    def test_inner_runner_timeout_finishes_before_outer_cleanup(self):
+        start = time.monotonic()
+        result = self.invoke(timeout=1, extra_env={"COPILOT_GITHUB_TOKEN": "force-sleep"})
+        self.assertLess(time.monotonic() - start, 10)
+        self.assertNotEqual(result.returncode, 0)
+        receipt = self.receipt()
+        self.assertIn("programmatic report failed", receipt["recovery"])
+        runner = next(command for command in receipt["commands"]
+                      if command["label"] == "shipped automation runner")
+        self.assertEqual(runner["exit"], 124)
 
     def test_secret_values_never_enter_receipt_or_output(self):
         result = self.invoke(extra_env={"COPILOT_GITHUB_TOKEN": "fixture-secret-value"},
