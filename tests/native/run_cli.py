@@ -22,8 +22,9 @@ RENDERER = ROOT / "templates/scripts/rpi-distribution.py"
 AUTOMATION = ROOT / "templates/scripts/rpi-automation.py"
 SECRET_KEYS = ("COPILOT_GITHUB_TOKEN", "GH_TOKEN", "GITHUB_TOKEN", "COPILOT_PROVIDER_API_KEY")
 COMMON_FLAGS = ("-p", "--no-ask-user", "--available-tools", "--allow-tool",
-                "--deny-tool", "--no-remote", "--no-remote-export", "--no-auto-update")
-PROGRAMMATIC_FLAGS = ("-s", "--model", "--secret-env-vars", "--output-format")
+                "--deny-tool", "--no-remote", "--no-remote-export", "--no-auto-update",
+                "--output-format")
+PROGRAMMATIC_FLAGS = ("-s", "--model", "--secret-env-vars")
 
 
 class ProbeBlocked(Exception):
@@ -127,6 +128,48 @@ def cli_flags():
     return ["--no-ask-user", "--available-tools=view,grep,glob,skill", "--allow-tool=read",
             "--deny-tool=write", "--no-remote", "--no-remote-export",
             "--no-auto-update"]
+
+
+def skill_discovered(output, project):
+    """Accept only this fixture's enabled project skill in CLI discovery JSON."""
+    try:
+        skills = json.loads(output)
+    except json.JSONDecodeError as exc:
+        raise ProbeBlocked("Copilot skill list returned invalid JSON; inspect native discovery") from exc
+    if not isinstance(skills, list):
+        raise ProbeBlocked("Copilot skill list returned a non-list; inspect native discovery")
+    expected = (project / ".github/skills/rpi-research").resolve()
+    return any(isinstance(skill, dict) and skill.get("name") == "rpi-research"
+               and skill.get("source") == "project" and skill.get("enabled") is True
+               and isinstance(skill.get("path"), str)
+               and Path(skill["path"]).resolve() == expected for skill in skills)
+
+
+def skill_result_observed(output, marker):
+    """Require a successful native skill call before the marker-bearing reply."""
+    started = set()
+    completed = set()
+    answered = after = False
+    for line in output.splitlines():
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(event, dict) or not isinstance(event.get("data"), dict):
+            continue
+        data = event["data"]
+        if (event.get("type") == "tool.execution_start" and data.get("toolName") == "skill"
+                and isinstance(data.get("arguments"), dict)
+                and data["arguments"].get("skill") == "rpi-research"
+                and isinstance(data.get("toolCallId"), str) and data["toolCallId"]):
+            started.add(data["toolCallId"])
+        if (event.get("type") == "tool.execution_complete" and data.get("success") is True
+                and data.get("toolCallId") in started):
+            completed.add(data["toolCallId"])
+        if event.get("type") == "assistant.message" and marker in str(data.get("content", "")):
+            answered = True
+            after = after or bool(completed)
+    return bool(completed), answered, after
 
 
 def capture_wrapper(base, binary):
@@ -245,27 +288,35 @@ def probe(args, receipt):
         if secret_names:
             flags.append("--secret-env-vars=" + ",".join(secret_names))
         if args.profile == "cli":
+            code, output, error = run_process([binary, "skill", "list", "--json"],
+                                              cwd=project, env=env, deadline=deadline,
+                                              commands=receipt["commands"], label="skill list positive")
+            receipt["checks"]["skill_discovered"] = code == 0 and skill_discovered(output, project)
+            if not receipt["checks"]["skill_discovered"]:
+                raise ProbeBlocked("CLI did not discover the rendered project skill; inspect skill list output")
             prompt = ("/rpi-research Inspect README.md and report the exact fixture marker found there. "
                       "Return a concise research result in stdout. Do not create or modify files.")
-            argv = [binary, "-p", prompt, *flags]
+            argv = [binary, "-p", prompt, *flags, "--output-format=json"]
             code, output, error = run_process(argv, cwd=project, env=env, deadline=deadline,
                                               commands=receipt["commands"], label="cli skill")
-            if code or marker not in output:
-                raise ProbeBlocked(f"CLI skill result inconclusive (exit {code}); check authentication, skill discovery and output")
-            receipt["checks"]["skill_invoked"] = True
+            invoked, answered, after = skill_result_observed(output, marker)
+            receipt["checks"]["skill_invoked"] = invoked
+            receipt["checks"]["skill_answered"] = answered
+            receipt["checks"]["skill_answer_after_invocation"] = after
+            if code or not invoked or not after:
+                raise ProbeBlocked(f"CLI skill result inconclusive (exit {code}); inspect native skill event and answer")
             skill = project / ".github/skills/rpi-research"
             removed = base / "removed-rpi-research"
             skill.rename(removed)
             try:
-                code, output, error = run_process(argv, cwd=project, env=env,
+                code, output, error = run_process([binary, "skill", "list", "--json"], cwd=project, env=env,
                                                   deadline=deadline, commands=receipt["commands"],
-                                                  label="missing skill negative")
-                unavailable = bool(re.search(r"(?i)(unknown|not found|unavailable|no such skill)", output + error))
-                receipt["checks"]["missing_skill_negative"] = marker not in output and (code != 0 or unavailable)
+                                                  label="skill list negative")
+                receipt["checks"]["missing_skill_negative"] = code == 0 and not skill_discovered(output, project)
             finally:
                 removed.rename(skill)
             if not receipt["checks"]["missing_skill_negative"]:
-                raise ProbeBlocked("renamed-skill negative was inconclusive; inspect native discovery output")
+                raise ProbeBlocked("renamed skill remains discoverable or discovery failed; inspect native output")
         else:
             report = project / ".rpi/local/copilot/native-report.md"
             wrapper, capture = capture_wrapper(base, binary)

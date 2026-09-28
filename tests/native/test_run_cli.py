@@ -78,6 +78,7 @@ class NativeRunnerTests(unittest.TestCase):
         receipt = self.receipt("cli")
         self.assertEqual(receipt["status"], "passed")
         self.assertTrue(receipt["checks"]["skill_invoked"])
+        self.assertTrue(receipt["checks"]["skill_discovered"])
         self.assertTrue(receipt["checks"]["missing_skill_negative"])
         self.assertTrue(receipt["checks"]["product_unchanged"])
         self.assertTrue(receipt["checks"]["remote_unchanged"])
@@ -87,11 +88,38 @@ class NativeRunnerTests(unittest.TestCase):
         self.assertNotIn(receipt["fixture"]["marker"], " ".join(prompt_command))
         self.assertIn("--available-tools=view,grep,glob,skill", prompt_command)
         self.assertIn("--allow-tool=read", prompt_command)
+        self.assertEqual([command["label"] for command in receipt["commands"]
+                          if command["label"].startswith("skill list")],
+                         ["skill list positive", "skill list negative"])
 
     def test_prompt_echo_cannot_pass_skill_loading(self):
         result = self.invoke("cli", mode="prompt-echo")
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(self.receipt("cli")["status"], "blocked")
+
+    def test_correct_answer_without_native_skill_event_is_inconclusive(self):
+        result = self.invoke("cli", mode="no-skill-event")
+        self.assertNotEqual(result.returncode, 0)
+        receipt = self.receipt("cli")
+        self.assertTrue(receipt["checks"]["skill_answered"])
+        self.assertFalse(receipt["checks"]["skill_invoked"])
+        self.assertFalse(receipt["checks"]["skill_answer_after_invocation"])
+
+    def test_failed_skill_completion_cannot_pass_invocation(self):
+        result = self.invoke("cli", mode="failed-skill-event")
+        self.assertNotEqual(result.returncode, 0)
+        receipt = self.receipt("cli")
+        self.assertTrue(receipt["checks"]["skill_answered"])
+        self.assertFalse(receipt["checks"]["skill_invoked"])
+        self.assertFalse(receipt["checks"]["skill_answer_after_invocation"])
+
+    def test_answer_before_skill_completion_is_inconclusive(self):
+        result = self.invoke("cli", mode="answer-before-skill-complete")
+        self.assertNotEqual(result.returncode, 0)
+        receipt = self.receipt("cli")
+        self.assertTrue(receipt["checks"]["skill_invoked"])
+        self.assertTrue(receipt["checks"]["skill_answered"])
+        self.assertFalse(receipt["checks"]["skill_answer_after_invocation"])
 
     def test_prose_refusal_without_native_event_is_inconclusive(self):
         result = self.invoke(mode="prose-denial")

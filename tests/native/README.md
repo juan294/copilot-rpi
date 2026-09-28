@@ -9,9 +9,9 @@ Copilot configuration. Supply an already authorized credential through a
 supported environment variable if the client requires one. The receipt records
 variable names, never values.
 
-The 2026-09-28 local inventory found VS Code 1.137.0, no installed GitHub
-Copilot extension, and no `copilot` executable. This is prerequisite inventory,
-not a native compatibility result. CLI and Agent Host behavior remain unobserved.
+The initial 2026-09-28 local inventory found VS Code 1.137.0 and no `copilot`
+executable. Native observations must record the client and app versions used in
+their receipts because later installs or updates can change this inventory.
 
 ## CLI entry points
 
@@ -30,10 +30,15 @@ and any timeout produce a blocked receipt with a recovery action. Each external
 process is bounded by an independent wall clock and its process group is stopped
 on timeout. The shipped automation runner also has its own timeout.
 
-The `cli` probe invokes `/rpi-research` in the rendered fixture with read tools
-only. It asks for the randomly generated marker in `README.md` without placing
-the marker in the prompt. It then renames the skill and repeats the request;
-the missing-skill control must fail visibly. The `cli-programmatic` probe runs the shipped
+The `cli` probe checks `copilot skill list --json` for the enabled project skill,
+then invokes `/rpi-research` in the rendered fixture with read tools only. It
+asks for the randomly generated marker in `README.md` without placing the
+marker in the prompt. It then moves the skill outside the fixture and checks
+that it is absent from the native skill list. A marker in the answer alone
+does not prove skill invocation; the JSONL trace must also contain a native
+`tool.execution_start` for `skill` with `rpi-research` as its argument, a
+matching successful completion, and the marker answer after completion.
+The `cli-programmatic` probe runs the shipped
 `templates/scripts/rpi-automation.py` against a local agent report. It checks
 that the allowed report contains the marker, then requests an attempted write to
 an existing denied file with `write` available to the model but explicitly

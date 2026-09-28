@@ -2,6 +2,7 @@
 """Fake CLI boundary for native harness tests. No network or inference."""
 
 import os
+import json
 from pathlib import Path
 import re
 import sys
@@ -17,6 +18,10 @@ if args == ["--version"]:
     print("fake-copilot 1.2.3" + ("x" * 5000 if mode == "long-version" else ""))
 elif args == ["--help"]:
     print("-p" if mode == "old-help" else HELP)
+elif args == ["skill", "list", "--json"]:
+    skill = Path(".github/skills/rpi-research")
+    print(json.dumps([{"name": "rpi-research", "source": "project", "path": str(skill.resolve()),
+                       "enabled": True}] if skill.is_dir() else []))
 elif mode == "missing-auth":
     print("authentication required", file=sys.stderr)
     sys.exit(2)
@@ -51,6 +56,16 @@ else:
             print("unknown skill: rpi-research", file=sys.stderr)
             sys.exit(2)
         suffix = ("; unrelated_present=" + str("UNRELATED_SECRET" in os.environ).lower()) if mode == "env-check" else ""
-        print("Research result: " + marker + "; no product files changed" + suffix)
+        answer = json.dumps({"type": "assistant.message", "data": {
+            "content": "Research result: " + marker + "; no product files changed" + suffix}})
+        if mode != "no-skill-event":
+            print(json.dumps({"type": "tool.execution_start", "data": {
+                "toolCallId": "fake-skill-call", "toolName": "skill", "arguments": {"skill": "rpi-research"}}}))
+            if mode == "answer-before-skill-complete":
+                print(answer)
+            print(json.dumps({"type": "tool.execution_complete", "data": {
+                "toolCallId": "fake-skill-call", "success": mode != "failed-skill-event"}}))
+        if mode != "answer-before-skill-complete":
+            print(answer)
     else:
         print("Ready plan: " + marker + ". No changes made.")
