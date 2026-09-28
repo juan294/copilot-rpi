@@ -135,7 +135,11 @@ The future-intake checker compared the clean cc-rpi checkout at
 `de1845596a346b9f30ac375a07a1338401c409eb` with the pinned snapshot and
 reported no source differences. Synthetic tests prove changed and new items,
 resource-link changes, dirty checkout refusal, SHA/digest-bound decisions and
-a real no-op. The minimum Python and disposable Linux gates remain to run.
+a real no-op. An isolated Python 3.11.2 run passed all 165 tests. A disposable
+Debian Linux clone with Node 24.21.0, uv 0.12.19, ShellCheck 0.9.0 and Python
+3.14.7 passed the complete portable gate: 165 tests, all 10 checks and 179
+internal links. The first read-only Linux mount could not run Git tests that
+write objects; the writable clone resolved that environment limitation.
 
 The CLI native harness has 14 passing fake-process tests. Independent review
 found and repaired prompt-echo discovery, prose-only denial, overwritten
@@ -157,5 +161,9 @@ The complete portable gate passed on the Phase 5 local preparation: 165 Python
 tests and all 10 checks, including catalog/version contracts, rendered bytes,
 ShellCheck, Markdown lint over 193 files, pinned upstream intake and 179 local
 links. The `codex-simplify` reuse, quality and efficiency pass found no further
-safe code reduction in the changed scope. This is a local preparation gate;
-Phase 5 native primary acceptance and release remain open.
+safe code reduction in the changed scope. Both exact native CLI entry points
+produced blocked receipts because no Copilot CLI is installed. The VS Code
+extension is also absent. These are prerequisite failures, not native profile
+passes. The note update changes the tracked candidate, so its full portable
+gate must run again before native acceptance. Phase 5 primary acceptance and
+release remain open.
