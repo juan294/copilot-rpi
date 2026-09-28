@@ -111,7 +111,7 @@ check_version() {
 # gains a manifest, declare it here. Optional locations are checked only when
 # present, so a project without them is not blocked.
 DECLARED=0
-for manifest in package.json vsc-extension-quickstart.json; do
+for manifest in package.json templates/distribution.json vsc-extension-quickstart.json; do
   if [[ -f "$manifest" ]]; then
     check_version "$manifest" '"version": *"[0-9]+\.[0-9]+\.[0-9]+"' "Manifest version ($manifest)" 1
     DECLARED=$((DECLARED + 1))

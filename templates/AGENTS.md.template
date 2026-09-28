@@ -1,131 +1,19 @@
-# Project: [PROJECT NAME]
+# Project instructions
 
-<!-- AGENTS.md AUTHORING GUIDE
-This is the cross-tool instruction file -- read by GitHub Copilot, Claude Code, Cursor, and Gemini CLI.
-Keep it LEAN. It's loaded every session -- only include universally applicable instructions.
-For domain-specific knowledge, use .github/instructions/ (auto-loaded by glob).
-For detailed architecture docs, use docs/ or agent_docs/ (agent reads when relevant).
-Budget: ~150 usable instruction slots. The tool's system prompt uses some of those. Don't waste them.
-Test: "Would removing this line cause the agent to make mistakes?" If not, cut it.
--->
+Record this project's purpose, stack, package manager, integration branch, release target and verification commands during adoption. Preserve any existing project-specific rules. Do not infer these facts from a blueprint example.
 
-## One-liner
+## RPI workflow
 
-[Brief description of what this project does]
+Use the canonical skills under `.github/skills/` when installed. `rpi-research` describes the existing codebase; `rpi-assess` evaluates alternatives; `rpi-plan` writes a phased specification; `rpi-implement` executes approved phases; `rpi-validate` checks the result. Invoke lifecycle and release skills explicitly. A skill's availability is not authorization for its effects.
 
-## Stack
+Read the approved plan and current phase before implementation. For behavioral changes, write a failing test first. Complete implement, independent review, repair, simplify and all applicable local checks at each phase boundary. If the user explicitly authorized all phases, continue only after each boundary is verified. Record exact candidate identity, results, findings and deviations in a durable handoff. Revalidate the worktree and handoff on resume.
 
-[Framework, language, key libraries]
+Use local task worktrees for implementation. Give parallel agents disjoint files, bounded objectives and scoped tests. One integration owner combines completed work on the documented local integration branch and runs the full gate. Preserve unrelated changes and check branch identity before commits. Inspect workflow and deployment triggers before any authorized remote publication. Verify every expected check for the exact published commit. A failed remote check remains failed; diagnose it locally and seek separate authority for another remote action.
 
-## RPI Workflow
+## Project commands and domain rules
 
-This project follows Research-Plan-Implement (RPI).
+Record actual test, coverage, typecheck, lint, build and deployment preflight commands here after inspecting the project. Run required checks sequentially, preserving each exit status. Do not claim an unavailable or skipped check passed. Apply relevant `.github/instructions/` files to tests, API routes, migrations, deployment and selected domains. Prefer project-owned tools and existing conventions over blueprint examples.
 
-1. /research -- Understand the codebase as-is
-2. /plan -- Create a phased implementation spec
-3. /implement -- Execute one phase at a time with review gates
-4. /validate -- Verify implementation against the plan
+## Authority and reporting
 
-Each phase is its own conversation. STOP after each phase.
-Start a new Chat window between unrelated tasks.
-
-### Context Management
-
-- Use `#codebase` for broad searches; use `#file:path` for targeted reads.
-- Research and planning happen on the default branch. Implementation happens in feature branches.
-- If research comes back wrong, throw it out and restart with more specific steering.
-- Write a handoff doc at ~60% context usage. Don't wait for auto-compaction.
-
-### Rules for Implementation
-
-- Follow the atomic loop: implement -> self-review -> fix -> verify -> report.
-- **Two-pass review:** Self-review checks plan compliance. Then recommend `/quality-review` for code reuse, quality, and efficiency.
-- Run ALL automated verification after each phase.
-- STOP after each phase and wait for human confirmation.
-- If the plan marks phases as `[batch-eligible]`, inform the user they can run those in parallel via `copilot -p` or `@copilot` issues.
-- If the plan doesn't match reality, STOP and explain the mismatch.
-
-### Pre-Release Workflow
-
-```
-/pre-launch -> fix findings -> /update-docs -> /release
-```
-
-## Key Commands
-
-```bash
-# [Adjust these for your project]
-pnpm run test           # Run all tests
-pnpm run typecheck      # Check types
-pnpm run lint           # Check linting
-pnpm run dev            # Local dev server
-pnpm run build          # Production build
-```
-
-## Git Workflow
-
-**`develop` is the default branch. `main` is production only.**
-
-Conventional commits:
-`feat|fix|test|refactor|chore|docs(scope): description`
-
-```bash
-# Push -- commit before pulling (rebase fails with dirty tree)
-git add <files> && git commit -m "msg"
-git pull --rebase && git push
-```
-
-Run verification sequentially with `;` or `&&`, never as parallel processes.
-
-### Cleanup After Merge
-
-`gh pr merge --squash --delete-branch` deletes only the **remote** branch. A
-complete cleanup also covers worktrees, the local branch, and stale tracking
-refs -- then verifies nothing is left dangling (otherwise the "done" leaves a
-second pass behind):
-
-```bash
-# 1. Remove worktrees FIRST (a branch checked out in a worktree won't delete)
-git worktree remove --force /absolute/path/to/worktree
-git worktree prune
-
-# 2. Delete the local branch (remote went with --delete-branch at merge)
-git branch -D <branch>      # uppercase -D: squash merges are never "fully merged"
-
-# 3. Drop stale remote-tracking refs for branches deleted on the remote
-git fetch --prune
-
-# 4. Verify -- these should list ONLY active work, nothing merged
-git branch --merged         # local branches already merged
-git worktree list           # lingering worktrees
-```
-
-Anything still listed in step 4 is the "second pass" -- finish it now, not later.
-
-## Deployment
-
-[Describe your deployment pipeline -- which branch deploys where]
-
-Domain-specific rules (deployment, testing, Supabase, API) are loaded via `.github/instructions/` when relevant files are in context. Full rule catalog: `patterns/quick-reference.md`.
-
-## Agent Behavior
-
-Exhaust CLI tools, terminal commands, and file operations before asking the user. Only escalate when genuinely impossible. Production-affecting actions need explicit human authorization.
-
-After pushing, verify CI: `gh run list --branch develop --limit 1`. If CI fails, investigate with `gh run view <id> --log-failed`, fix, and re-push. The push isn't done until CI is green.
-
-Project memory lives at `docs/agents/project-memory.md`. Read it at session start. Write operational lessons immediately -- CI quirks, environment gotchas, workarounds. Don't wait to be asked.
-
-## Project File Locations
-
-Go directly to these paths -- never search the codebase for them.
-
-| Topic | Path | Notes |
-|-------|------|-------|
-| Agent reports | `docs/agents/*-report.md` | Gitignored. Local-only operational history. Never committed |
-| Agent logs | `logs/<name>.log`, `<name>.error.log` | Gitignored. Read alongside reports to diagnose failures |
-| Agent scripts | `scripts/agents/` | Gitignored. Standalone bash files invoking CLI headless |
-| Project memory | `docs/agents/project-memory.md` | Read at session start, append operational lessons |
-| ADRs | `docs/decisions/` | Architecture decision records |
-| Research docs | `docs/research/YYYY-MM-DD-description.md` | |
-| Plans | `docs/plans/YYYY-MM-DD-description.md` | Phase files in `-phases/phase-N.md` |
+Complete authorized local work autonomously. A remote push, pull request, release, deployment, paid/cloud run, migration against a remote database, issue mutation or destructive cleanup needs the applicable explicit authority. Use authorization already given; do not ask again for routine work inside it. Report unknown ownership, incomplete evidence and real conflicts with the concrete recovery action. Keep secrets out of reports and handoffs.

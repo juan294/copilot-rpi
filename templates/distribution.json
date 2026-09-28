@@ -1,0 +1,879 @@
+{
+  "schema_version": 1,
+  "version": "1.18.0",
+  "root_budget_bytes": 8192,
+  "profiles": {
+    "cli": {
+      "description": "Copilot CLI"
+    },
+    "agent-host": {
+      "description": "VS Code Agent Host Copilot harness"
+    },
+    "vscode-local": {
+      "description": "VS Code Local compatibility"
+    }
+  },
+  "upstream_lock": "upstream/cc-rpi.lock.json",
+  "self_application": {
+    "profile": "cli",
+    "preserve": [
+      "root:agents",
+      "skill:process-errors"
+    ],
+    "legacy_active": [
+      ".github/prompts/remediate.prompt.md",
+      ".github/prompts/triage.prompt.md",
+      ".github/prompts/process-errors.prompt.md"
+    ]
+  },
+  "components": [
+    {
+      "id": "skill:process-errors",
+      "kind": "skill",
+      "source": "templates/skills/process-errors",
+      "destination": ".github/skills/process-errors",
+      "profiles": [
+        "cli",
+        "agent-host"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/process-errors.prompt.md"
+      ]
+    },
+    {
+      "id": "prompt:process-errors",
+      "kind": "prompt",
+      "source": "templates/skills/process-errors",
+      "destination": ".github/prompts/process-errors.prompt.md",
+      "profiles": [
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/process-errors.prompt.md"
+      ]
+    },
+    {
+      "id": "skill:rpi-adopt",
+      "kind": "skill",
+      "source": "templates/skills/rpi-adopt",
+      "destination": ".github/skills/rpi-adopt",
+      "profiles": [
+        "cli",
+        "agent-host"
+      ],
+      "resources": [
+        "references/e2e-pro-playbook.md",
+        "references/lifecycle-contract.md"
+      ],
+      "former_paths": [
+        ".github/prompts/adopt.prompt.md"
+      ]
+    },
+    {
+      "id": "prompt:rpi-adopt",
+      "kind": "prompt",
+      "source": "templates/skills/rpi-adopt",
+      "destination": ".github/prompts/rpi-adopt.prompt.md",
+      "profiles": [
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/adopt.prompt.md"
+      ]
+    },
+    {
+      "id": "skill:rpi-assess",
+      "kind": "skill",
+      "source": "templates/skills/rpi-assess",
+      "destination": ".github/skills/rpi-assess",
+      "profiles": [
+        "cli",
+        "agent-host"
+      ],
+      "resources": [
+        "references/handoff.md"
+      ],
+      "former_paths": []
+    },
+    {
+      "id": "prompt:rpi-assess",
+      "kind": "prompt",
+      "source": "templates/skills/rpi-assess",
+      "destination": ".github/prompts/rpi-assess.prompt.md",
+      "profiles": [
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": []
+    },
+    {
+      "id": "skill:rpi-bootstrap",
+      "kind": "skill",
+      "source": "templates/skills/rpi-bootstrap",
+      "destination": ".github/skills/rpi-bootstrap",
+      "profiles": [
+        "cli",
+        "agent-host"
+      ],
+      "resources": [
+        "references/e2e-pro-playbook.md",
+        "references/lifecycle-contract.md"
+      ],
+      "former_paths": [
+        ".github/prompts/bootstrap.prompt.md"
+      ]
+    },
+    {
+      "id": "prompt:rpi-bootstrap",
+      "kind": "prompt",
+      "source": "templates/skills/rpi-bootstrap",
+      "destination": ".github/prompts/rpi-bootstrap.prompt.md",
+      "profiles": [
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/bootstrap.prompt.md"
+      ]
+    },
+    {
+      "id": "skill:rpi-brainstorm",
+      "kind": "skill",
+      "source": "templates/skills/rpi-brainstorm",
+      "destination": ".github/skills/rpi-brainstorm",
+      "profiles": [
+        "cli",
+        "agent-host"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/brainstorm.prompt.md"
+      ]
+    },
+    {
+      "id": "prompt:rpi-brainstorm",
+      "kind": "prompt",
+      "source": "templates/skills/rpi-brainstorm",
+      "destination": ".github/prompts/rpi-brainstorm.prompt.md",
+      "profiles": [
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/brainstorm.prompt.md"
+      ]
+    },
+    {
+      "id": "skill:rpi-debug",
+      "kind": "skill",
+      "source": "templates/skills/rpi-debug",
+      "destination": ".github/skills/rpi-debug",
+      "profiles": [
+        "cli",
+        "agent-host"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/debug.prompt.md"
+      ]
+    },
+    {
+      "id": "prompt:rpi-debug",
+      "kind": "prompt",
+      "source": "templates/skills/rpi-debug",
+      "destination": ".github/prompts/rpi-debug.prompt.md",
+      "profiles": [
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/debug.prompt.md"
+      ]
+    },
+    {
+      "id": "skill:rpi-describe-pr",
+      "kind": "skill",
+      "source": "templates/skills/rpi-describe-pr",
+      "destination": ".github/skills/rpi-describe-pr",
+      "profiles": [
+        "cli",
+        "agent-host"
+      ],
+      "resources": [
+        "references/handoff.md"
+      ],
+      "former_paths": [
+        ".github/prompts/describe-pr.prompt.md"
+      ]
+    },
+    {
+      "id": "prompt:rpi-describe-pr",
+      "kind": "prompt",
+      "source": "templates/skills/rpi-describe-pr",
+      "destination": ".github/prompts/rpi-describe-pr.prompt.md",
+      "profiles": [
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/describe-pr.prompt.md"
+      ]
+    },
+    {
+      "id": "skill:rpi-detach",
+      "kind": "skill",
+      "source": "templates/skills/rpi-detach",
+      "destination": ".github/skills/rpi-detach",
+      "profiles": [
+        "cli",
+        "agent-host"
+      ],
+      "resources": [
+        "references/lifecycle-contract.md"
+      ],
+      "former_paths": [
+        ".github/prompts/detach.prompt.md"
+      ]
+    },
+    {
+      "id": "prompt:rpi-detach",
+      "kind": "prompt",
+      "source": "templates/skills/rpi-detach",
+      "destination": ".github/prompts/rpi-detach.prompt.md",
+      "profiles": [
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/detach.prompt.md"
+      ]
+    },
+    {
+      "id": "skill:rpi-explore-release",
+      "kind": "skill",
+      "source": "templates/skills/rpi-explore-release",
+      "destination": ".github/skills/rpi-explore-release",
+      "profiles": [
+        "cli",
+        "agent-host"
+      ],
+      "resources": [
+        "references/e2e-pro-playbook.md"
+      ],
+      "former_paths": [
+        ".github/prompts/explore-release.prompt.md"
+      ]
+    },
+    {
+      "id": "prompt:rpi-explore-release",
+      "kind": "prompt",
+      "source": "templates/skills/rpi-explore-release",
+      "destination": ".github/prompts/rpi-explore-release.prompt.md",
+      "profiles": [
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/explore-release.prompt.md"
+      ]
+    },
+    {
+      "id": "skill:rpi-fix-ci",
+      "kind": "skill",
+      "source": "templates/skills/rpi-fix-ci",
+      "destination": ".github/skills/rpi-fix-ci",
+      "profiles": [
+        "cli",
+        "agent-host"
+      ],
+      "resources": [
+        "references/handoff.md"
+      ],
+      "former_paths": [
+        ".github/prompts/fix-ci.prompt.md"
+      ]
+    },
+    {
+      "id": "prompt:rpi-fix-ci",
+      "kind": "prompt",
+      "source": "templates/skills/rpi-fix-ci",
+      "destination": ".github/prompts/rpi-fix-ci.prompt.md",
+      "profiles": [
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/fix-ci.prompt.md"
+      ]
+    },
+    {
+      "id": "skill:rpi-implement",
+      "kind": "skill",
+      "source": "templates/skills/rpi-implement",
+      "destination": ".github/skills/rpi-implement",
+      "profiles": [
+        "cli",
+        "agent-host"
+      ],
+      "resources": [
+        "references/dispatch.md",
+        "references/handoff.md",
+        "scripts/rpi-dispatch.py",
+        "scripts/validate-findings.py"
+      ],
+      "former_paths": [
+        ".github/prompts/implement.prompt.md"
+      ]
+    },
+    {
+      "id": "prompt:rpi-implement",
+      "kind": "prompt",
+      "source": "templates/skills/rpi-implement",
+      "destination": ".github/prompts/rpi-implement.prompt.md",
+      "profiles": [
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/implement.prompt.md"
+      ]
+    },
+    {
+      "id": "skill:rpi-plan",
+      "kind": "skill",
+      "source": "templates/skills/rpi-plan",
+      "destination": ".github/skills/rpi-plan",
+      "profiles": [
+        "cli",
+        "agent-host"
+      ],
+      "resources": [
+        "references/handoff.md",
+        "references/pseudocode-notation.md"
+      ],
+      "former_paths": [
+        ".github/prompts/plan.prompt.md"
+      ]
+    },
+    {
+      "id": "prompt:rpi-plan",
+      "kind": "prompt",
+      "source": "templates/skills/rpi-plan",
+      "destination": ".github/prompts/rpi-plan.prompt.md",
+      "profiles": [
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/plan.prompt.md"
+      ]
+    },
+    {
+      "id": "skill:rpi-pre-launch",
+      "kind": "skill",
+      "source": "templates/skills/rpi-pre-launch",
+      "destination": ".github/skills/rpi-pre-launch",
+      "profiles": [
+        "cli",
+        "agent-host"
+      ],
+      "resources": [
+        "references/dispatch.md",
+        "references/handoff.md",
+        "scripts/rpi-dispatch.py",
+        "scripts/validate-findings.py"
+      ],
+      "former_paths": [
+        ".github/prompts/pre-launch.prompt.md"
+      ]
+    },
+    {
+      "id": "prompt:rpi-pre-launch",
+      "kind": "prompt",
+      "source": "templates/skills/rpi-pre-launch",
+      "destination": ".github/prompts/rpi-pre-launch.prompt.md",
+      "profiles": [
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/pre-launch.prompt.md"
+      ]
+    },
+    {
+      "id": "skill:rpi-quality-review",
+      "kind": "skill",
+      "source": "templates/skills/rpi-quality-review",
+      "destination": ".github/skills/rpi-quality-review",
+      "profiles": [
+        "cli",
+        "agent-host"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/quality-review.prompt.md"
+      ]
+    },
+    {
+      "id": "prompt:rpi-quality-review",
+      "kind": "prompt",
+      "source": "templates/skills/rpi-quality-review",
+      "destination": ".github/prompts/rpi-quality-review.prompt.md",
+      "profiles": [
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/quality-review.prompt.md"
+      ]
+    },
+    {
+      "id": "skill:rpi-release",
+      "kind": "skill",
+      "source": "templates/skills/rpi-release",
+      "destination": ".github/skills/rpi-release",
+      "profiles": [
+        "cli",
+        "agent-host"
+      ],
+      "resources": [
+        "references/e2e-pro-playbook.md",
+        "references/handoff.md"
+      ],
+      "former_paths": [
+        ".github/prompts/release.prompt.md"
+      ]
+    },
+    {
+      "id": "prompt:rpi-release",
+      "kind": "prompt",
+      "source": "templates/skills/rpi-release",
+      "destination": ".github/prompts/rpi-release.prompt.md",
+      "profiles": [
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/release.prompt.md"
+      ]
+    },
+    {
+      "id": "skill:rpi-remediate",
+      "kind": "skill",
+      "source": "templates/skills/rpi-remediate",
+      "destination": ".github/skills/rpi-remediate",
+      "profiles": [
+        "cli",
+        "agent-host"
+      ],
+      "resources": [
+        "references/dispatch.md",
+        "references/handoff.md",
+        "scripts/rpi-dispatch.py",
+        "scripts/validate-findings.py"
+      ],
+      "former_paths": [
+        ".github/prompts/remediate.prompt.md"
+      ]
+    },
+    {
+      "id": "prompt:rpi-remediate",
+      "kind": "prompt",
+      "source": "templates/skills/rpi-remediate",
+      "destination": ".github/prompts/rpi-remediate.prompt.md",
+      "profiles": [
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/remediate.prompt.md"
+      ]
+    },
+    {
+      "id": "skill:rpi-research",
+      "kind": "skill",
+      "source": "templates/skills/rpi-research",
+      "destination": ".github/skills/rpi-research",
+      "profiles": [
+        "cli",
+        "agent-host"
+      ],
+      "resources": [
+        "references/handoff.md",
+        "references/research-contract.md"
+      ],
+      "former_paths": [
+        ".github/prompts/research.prompt.md"
+      ]
+    },
+    {
+      "id": "prompt:rpi-research",
+      "kind": "prompt",
+      "source": "templates/skills/rpi-research",
+      "destination": ".github/prompts/rpi-research.prompt.md",
+      "profiles": [
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/research.prompt.md"
+      ]
+    },
+    {
+      "id": "skill:rpi-status",
+      "kind": "skill",
+      "source": "templates/skills/rpi-status",
+      "destination": ".github/skills/rpi-status",
+      "profiles": [
+        "cli",
+        "agent-host"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/status.prompt.md"
+      ]
+    },
+    {
+      "id": "prompt:rpi-status",
+      "kind": "prompt",
+      "source": "templates/skills/rpi-status",
+      "destination": ".github/prompts/rpi-status.prompt.md",
+      "profiles": [
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/status.prompt.md"
+      ]
+    },
+    {
+      "id": "skill:rpi-tool-design",
+      "kind": "skill",
+      "source": "templates/skills/rpi-tool-design",
+      "destination": ".github/skills/rpi-tool-design",
+      "profiles": [
+        "cli",
+        "agent-host"
+      ],
+      "resources": [
+        "references/webmcp/DOMAIN.md",
+        "references/webmcp/references/tool-design-framework.md"
+      ],
+      "former_paths": []
+    },
+    {
+      "id": "prompt:rpi-tool-design",
+      "kind": "prompt",
+      "source": "templates/skills/rpi-tool-design",
+      "destination": ".github/prompts/rpi-tool-design.prompt.md",
+      "profiles": [
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": []
+    },
+    {
+      "id": "skill:rpi-triage",
+      "kind": "skill",
+      "source": "templates/skills/rpi-triage",
+      "destination": ".github/skills/rpi-triage",
+      "profiles": [
+        "cli",
+        "agent-host"
+      ],
+      "resources": [
+        "references/handoff.md",
+        "references/triage-state.md",
+        "scripts/rpi-triage-state.py"
+      ],
+      "former_paths": [
+        ".github/prompts/triage.prompt.md"
+      ]
+    },
+    {
+      "id": "prompt:rpi-triage",
+      "kind": "prompt",
+      "source": "templates/skills/rpi-triage",
+      "destination": ".github/prompts/rpi-triage.prompt.md",
+      "profiles": [
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/triage.prompt.md"
+      ]
+    },
+    {
+      "id": "skill:rpi-update",
+      "kind": "skill",
+      "source": "templates/skills/rpi-update",
+      "destination": ".github/skills/rpi-update",
+      "profiles": [
+        "cli",
+        "agent-host"
+      ],
+      "resources": [
+        "references/lifecycle-contract.md"
+      ],
+      "former_paths": [
+        ".github/prompts/update.prompt.md"
+      ]
+    },
+    {
+      "id": "prompt:rpi-update",
+      "kind": "prompt",
+      "source": "templates/skills/rpi-update",
+      "destination": ".github/prompts/rpi-update.prompt.md",
+      "profiles": [
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/update.prompt.md"
+      ]
+    },
+    {
+      "id": "skill:rpi-update-docs",
+      "kind": "skill",
+      "source": "templates/skills/rpi-update-docs",
+      "destination": ".github/skills/rpi-update-docs",
+      "profiles": [
+        "cli",
+        "agent-host"
+      ],
+      "resources": [
+        "references/handoff.md"
+      ],
+      "former_paths": [
+        ".github/prompts/update-docs.prompt.md"
+      ]
+    },
+    {
+      "id": "prompt:rpi-update-docs",
+      "kind": "prompt",
+      "source": "templates/skills/rpi-update-docs",
+      "destination": ".github/prompts/rpi-update-docs.prompt.md",
+      "profiles": [
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/update-docs.prompt.md"
+      ]
+    },
+    {
+      "id": "skill:rpi-validate",
+      "kind": "skill",
+      "source": "templates/skills/rpi-validate",
+      "destination": ".github/skills/rpi-validate",
+      "profiles": [
+        "cli",
+        "agent-host"
+      ],
+      "resources": [
+        "references/dispatch.md",
+        "references/handoff.md",
+        "scripts/rpi-dispatch.py",
+        "scripts/validate-findings.py"
+      ],
+      "former_paths": [
+        ".github/prompts/validate.prompt.md"
+      ]
+    },
+    {
+      "id": "prompt:rpi-validate",
+      "kind": "prompt",
+      "source": "templates/skills/rpi-validate",
+      "destination": ".github/prompts/rpi-validate.prompt.md",
+      "profiles": [
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/prompts/validate.prompt.md"
+      ]
+    },
+    {
+      "id": "agent:rpi-auditor",
+      "kind": "agent",
+      "source": "templates/github/agents/rpi-auditor.agent.md",
+      "destination": ".github/agents/rpi-auditor.agent.md",
+      "profiles": [
+        "cli",
+        "agent-host",
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/chatmodes/rpi-auditor.chatmode.md"
+      ]
+    },
+    {
+      "id": "agent:rpi-planner",
+      "kind": "agent",
+      "source": "templates/github/agents/rpi-planner.agent.md",
+      "destination": ".github/agents/rpi-planner.agent.md",
+      "profiles": [
+        "cli",
+        "agent-host",
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/chatmodes/rpi-planner.chatmode.md"
+      ]
+    },
+    {
+      "id": "agent:rpi-research",
+      "kind": "agent",
+      "source": "templates/github/agents/rpi-research.agent.md",
+      "destination": ".github/agents/rpi-research.agent.md",
+      "profiles": [
+        "cli",
+        "agent-host",
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [
+        ".github/chatmodes/rpi-research.chatmode.md"
+      ]
+    },
+    {
+      "id": "instruction:api",
+      "kind": "instruction",
+      "source": "templates/github/instructions/api.instructions.md.template",
+      "destination": ".github/instructions/api.instructions.md",
+      "profiles": [
+        "cli",
+        "agent-host",
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": []
+    },
+    {
+      "id": "instruction:deployment-safety",
+      "kind": "instruction",
+      "source": "templates/github/instructions/deployment-safety.instructions.md.template",
+      "destination": ".github/instructions/deployment-safety.instructions.md",
+      "profiles": [
+        "cli",
+        "agent-host",
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": []
+    },
+    {
+      "id": "instruction:migrations",
+      "kind": "instruction",
+      "source": "templates/github/instructions/migrations.instructions.md.template",
+      "destination": ".github/instructions/migrations.instructions.md",
+      "profiles": [
+        "cli",
+        "agent-host",
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": []
+    },
+    {
+      "id": "instruction:supabase",
+      "kind": "instruction",
+      "source": "templates/github/instructions/supabase.instructions.md.template",
+      "destination": ".github/instructions/supabase.instructions.md",
+      "profiles": [
+        "cli",
+        "agent-host",
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": []
+    },
+    {
+      "id": "instruction:tests",
+      "kind": "instruction",
+      "source": "templates/github/instructions/tests.instructions.md.template",
+      "destination": ".github/instructions/tests.instructions.md",
+      "profiles": [
+        "cli",
+        "agent-host",
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": []
+    },
+    {
+      "id": "root:agents",
+      "kind": "root",
+      "source": "templates/AGENTS.md.template",
+      "destination": "AGENTS.md",
+      "profiles": [
+        "cli",
+        "agent-host",
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": []
+    },
+    {
+      "id": "root:copilot",
+      "kind": "root",
+      "source": "templates/github/copilot-instructions.md.template",
+      "destination": ".github/copilot-instructions.md",
+      "profiles": [
+        "cli",
+        "agent-host",
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": []
+    },
+    {
+      "id": "example:vscode-settings",
+      "kind": "example",
+      "source": "templates/vscode-settings.json.template",
+      "destination": ".vscode/settings.example.json",
+      "profiles": [
+        "cli",
+        "agent-host",
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [],
+      "optional": true
+    },
+    {
+      "id": "example:vscode-mcp",
+      "kind": "example",
+      "source": "templates/vscode-mcp.json.template",
+      "destination": ".vscode/mcp.example.json",
+      "profiles": [
+        "cli",
+        "agent-host",
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [],
+      "optional": true
+    },
+    {
+      "id": "example:cli-mcp",
+      "kind": "example",
+      "source": "templates/copilot-cli-mcp.json.template",
+      "destination": ".github/mcp.example.json",
+      "profiles": [
+        "cli",
+        "agent-host",
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": [],
+      "optional": true
+    }
+  ],
+  "adapter": "templates/adapters/copilot.json"
+}

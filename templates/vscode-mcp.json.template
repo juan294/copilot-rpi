@@ -1,10 +1,18 @@
 {
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "example-token",
+      "description": "Token for a reviewed MCP server",
+      "password": true
+    }
+  ],
   "servers": {
-    "example-server": {
-      "command": "npx",
-      "args": ["-y", "@example/mcp-server"],
-      "env": {
-        "API_KEY": "${input:apiKey}"
+    "example": {
+      "type": "http",
+      "url": "https://mcp.example.invalid/mcp",
+      "headers": {
+        "Authorization": "Bearer ${input:example-token}"
       }
     }
   }

@@ -1,0 +1,357 @@
+{
+  "schema_version": 1,
+  "source_version": "1.18.0",
+  "profile": "cli",
+  "managed_root_bytes": 3874,
+  "files": [
+    {
+      "path": ".github/agents/rpi-auditor.agent.md",
+      "component": "agent:rpi-auditor",
+      "sha256": "264e99c80ab0af8617ca9f6d7d7e91b487b617ab63f0e53aa199a982c7422013"
+    },
+    {
+      "path": ".github/agents/rpi-planner.agent.md",
+      "component": "agent:rpi-planner",
+      "sha256": "68726dd1afaa1076bc4d3be8bc58e687c8633273017c63e8b13bb18eef780bb5"
+    },
+    {
+      "path": ".github/agents/rpi-research.agent.md",
+      "component": "agent:rpi-research",
+      "sha256": "cd86ae27a40733667502d58ae220f6f9032da5817935196a06903f49bbd3ab84"
+    },
+    {
+      "path": ".github/copilot-instructions.md",
+      "component": "root:copilot",
+      "sha256": "af50ebf136b105b57414f8e346dd0951f617fefe185880c938c3fdf738d35563"
+    },
+    {
+      "path": ".github/instructions/api.instructions.md",
+      "component": "instruction:api",
+      "sha256": "b14be47eb275279a018cced32245a7e06ce1d2b4dcd898b06a3f83c0e6e1a0d6"
+    },
+    {
+      "path": ".github/instructions/deployment-safety.instructions.md",
+      "component": "instruction:deployment-safety",
+      "sha256": "61e5c0bcee959ce051ce348d37a21e5a8ed8b4d108dd4d1f514bb033e1d981dd"
+    },
+    {
+      "path": ".github/instructions/migrations.instructions.md",
+      "component": "instruction:migrations",
+      "sha256": "57396e94794d419952d010ef7b48562412424ae8319791b99da30f9e3ff02a17"
+    },
+    {
+      "path": ".github/instructions/supabase.instructions.md",
+      "component": "instruction:supabase",
+      "sha256": "59240770e984d0abe462fa7ab13809320d99d9f330833cf0642b6eca82e880e2"
+    },
+    {
+      "path": ".github/instructions/tests.instructions.md",
+      "component": "instruction:tests",
+      "sha256": "62b7bc140e09b3889f7468f8b2ada6cbed3198c8cc34f9cd028e6a2be8176080"
+    },
+    {
+      "path": ".github/skills/rpi-adopt/SKILL.md",
+      "component": "skill:rpi-adopt",
+      "sha256": "6ade70ffd51d5fa441a157fc2e273632b1fc3be883b3df8213a157c4bc52fbd6"
+    },
+    {
+      "path": ".github/skills/rpi-adopt/references/e2e-pro-playbook.md",
+      "component": "skill:rpi-adopt",
+      "sha256": "13d2c12f46e48777e38e76f6c756cf2849b6b39269c919194a78a03d186f2194"
+    },
+    {
+      "path": ".github/skills/rpi-adopt/references/lifecycle-contract.md",
+      "component": "skill:rpi-adopt",
+      "sha256": "5a77e48f50622ab92102bc19ea8075fd18b737822b1f5eddef3cf5c8d239a2c9"
+    },
+    {
+      "path": ".github/skills/rpi-assess/SKILL.md",
+      "component": "skill:rpi-assess",
+      "sha256": "8dce5b2d090b96741ef61009a9b8f1504a407432931270c786939281946b3ee4"
+    },
+    {
+      "path": ".github/skills/rpi-assess/references/handoff.md",
+      "component": "skill:rpi-assess",
+      "sha256": "be95cbc66b3bcdbd256decddd759cee282ab5b5c2ab82069c392ec1b2b135aa6"
+    },
+    {
+      "path": ".github/skills/rpi-bootstrap/SKILL.md",
+      "component": "skill:rpi-bootstrap",
+      "sha256": "8111c305515ba31105fb1d14ff1c816421a9b9e7b6bae4319b02bbb353266df2"
+    },
+    {
+      "path": ".github/skills/rpi-bootstrap/references/e2e-pro-playbook.md",
+      "component": "skill:rpi-bootstrap",
+      "sha256": "13d2c12f46e48777e38e76f6c756cf2849b6b39269c919194a78a03d186f2194"
+    },
+    {
+      "path": ".github/skills/rpi-bootstrap/references/lifecycle-contract.md",
+      "component": "skill:rpi-bootstrap",
+      "sha256": "5a77e48f50622ab92102bc19ea8075fd18b737822b1f5eddef3cf5c8d239a2c9"
+    },
+    {
+      "path": ".github/skills/rpi-brainstorm/SKILL.md",
+      "component": "skill:rpi-brainstorm",
+      "sha256": "4b9dfe53c32345632369adcf2495a94dbb9cc15b4aa4c3517ed9da4c68e55c04"
+    },
+    {
+      "path": ".github/skills/rpi-debug/SKILL.md",
+      "component": "skill:rpi-debug",
+      "sha256": "e97f8c3a7ed37d007256d261e6a96cc29664b46a02d2d515efff5f4c577de183"
+    },
+    {
+      "path": ".github/skills/rpi-describe-pr/SKILL.md",
+      "component": "skill:rpi-describe-pr",
+      "sha256": "fa2c096883af6870b83e2fcbac25eb76e440f4967d2c10705ec9db58d6036c1d"
+    },
+    {
+      "path": ".github/skills/rpi-describe-pr/references/handoff.md",
+      "component": "skill:rpi-describe-pr",
+      "sha256": "be95cbc66b3bcdbd256decddd759cee282ab5b5c2ab82069c392ec1b2b135aa6"
+    },
+    {
+      "path": ".github/skills/rpi-detach/SKILL.md",
+      "component": "skill:rpi-detach",
+      "sha256": "15ab26a73d90a3f07cc780979e1b35b71af4923ba473ca9edc147b3f36932a75"
+    },
+    {
+      "path": ".github/skills/rpi-detach/references/lifecycle-contract.md",
+      "component": "skill:rpi-detach",
+      "sha256": "5a77e48f50622ab92102bc19ea8075fd18b737822b1f5eddef3cf5c8d239a2c9"
+    },
+    {
+      "path": ".github/skills/rpi-explore-release/SKILL.md",
+      "component": "skill:rpi-explore-release",
+      "sha256": "617cd83f14a86c21af537b9ca97de2a61116689386b4b7cde6598300f5699eb4"
+    },
+    {
+      "path": ".github/skills/rpi-explore-release/references/e2e-pro-playbook.md",
+      "component": "skill:rpi-explore-release",
+      "sha256": "13d2c12f46e48777e38e76f6c756cf2849b6b39269c919194a78a03d186f2194"
+    },
+    {
+      "path": ".github/skills/rpi-fix-ci/SKILL.md",
+      "component": "skill:rpi-fix-ci",
+      "sha256": "f86ee753fefe637f2fd68e2fcb3564f5ef69475c08a153ed0d80c45d328fecbe"
+    },
+    {
+      "path": ".github/skills/rpi-fix-ci/references/handoff.md",
+      "component": "skill:rpi-fix-ci",
+      "sha256": "be95cbc66b3bcdbd256decddd759cee282ab5b5c2ab82069c392ec1b2b135aa6"
+    },
+    {
+      "path": ".github/skills/rpi-implement/SKILL.md",
+      "component": "skill:rpi-implement",
+      "sha256": "944f16297fa199e1d44c4685b1c02e954e31548a0d18c004085a81a0f0a3c1d7"
+    },
+    {
+      "path": ".github/skills/rpi-implement/references/dispatch.md",
+      "component": "skill:rpi-implement",
+      "sha256": "60311b06204d30e2a3d980133f5b3e8a81265f2516fdc00f807d87286e727e16"
+    },
+    {
+      "path": ".github/skills/rpi-implement/references/handoff.md",
+      "component": "skill:rpi-implement",
+      "sha256": "be95cbc66b3bcdbd256decddd759cee282ab5b5c2ab82069c392ec1b2b135aa6"
+    },
+    {
+      "path": ".github/skills/rpi-implement/scripts/rpi-dispatch.py",
+      "component": "skill:rpi-implement",
+      "sha256": "18b91c4db6b54591849fb25ad6b41c9d81e9d822a76a92dc25f54cc9689029e9"
+    },
+    {
+      "path": ".github/skills/rpi-implement/scripts/validate-findings.py",
+      "component": "skill:rpi-implement",
+      "sha256": "da9a4705c92c59f8284a936012f18d1bbedb7bc9fa591725a6435fc1a97f90c5"
+    },
+    {
+      "path": ".github/skills/rpi-plan/SKILL.md",
+      "component": "skill:rpi-plan",
+      "sha256": "1cd7ef6c29e62e007c5b13a04d5759b24a8b8ae6ea3228b34efe2635a0863530"
+    },
+    {
+      "path": ".github/skills/rpi-plan/references/handoff.md",
+      "component": "skill:rpi-plan",
+      "sha256": "be95cbc66b3bcdbd256decddd759cee282ab5b5c2ab82069c392ec1b2b135aa6"
+    },
+    {
+      "path": ".github/skills/rpi-plan/references/pseudocode-notation.md",
+      "component": "skill:rpi-plan",
+      "sha256": "15fedaa9db4f860c9ddee00dcf900471ecaf4e8915ab09b07bee31ebd54ab3f7"
+    },
+    {
+      "path": ".github/skills/rpi-pre-launch/SKILL.md",
+      "component": "skill:rpi-pre-launch",
+      "sha256": "822cf3a6948b524070ea1d44ccad7ae7d8ec28063cd137c94861b7bd17ea224c"
+    },
+    {
+      "path": ".github/skills/rpi-pre-launch/references/dispatch.md",
+      "component": "skill:rpi-pre-launch",
+      "sha256": "60311b06204d30e2a3d980133f5b3e8a81265f2516fdc00f807d87286e727e16"
+    },
+    {
+      "path": ".github/skills/rpi-pre-launch/references/handoff.md",
+      "component": "skill:rpi-pre-launch",
+      "sha256": "be95cbc66b3bcdbd256decddd759cee282ab5b5c2ab82069c392ec1b2b135aa6"
+    },
+    {
+      "path": ".github/skills/rpi-pre-launch/scripts/rpi-dispatch.py",
+      "component": "skill:rpi-pre-launch",
+      "sha256": "18b91c4db6b54591849fb25ad6b41c9d81e9d822a76a92dc25f54cc9689029e9"
+    },
+    {
+      "path": ".github/skills/rpi-pre-launch/scripts/validate-findings.py",
+      "component": "skill:rpi-pre-launch",
+      "sha256": "da9a4705c92c59f8284a936012f18d1bbedb7bc9fa591725a6435fc1a97f90c5"
+    },
+    {
+      "path": ".github/skills/rpi-quality-review/SKILL.md",
+      "component": "skill:rpi-quality-review",
+      "sha256": "c2087e54a9ba10f09a866ae2cc5e2c35b95299cf538826b7e3288ad1c869d740"
+    },
+    {
+      "path": ".github/skills/rpi-release/SKILL.md",
+      "component": "skill:rpi-release",
+      "sha256": "9fd86222693d1bb7413d1c5f729b0eabc3110b7633cc5d026fc8dd642d31cbd5"
+    },
+    {
+      "path": ".github/skills/rpi-release/references/e2e-pro-playbook.md",
+      "component": "skill:rpi-release",
+      "sha256": "13d2c12f46e48777e38e76f6c756cf2849b6b39269c919194a78a03d186f2194"
+    },
+    {
+      "path": ".github/skills/rpi-release/references/handoff.md",
+      "component": "skill:rpi-release",
+      "sha256": "be95cbc66b3bcdbd256decddd759cee282ab5b5c2ab82069c392ec1b2b135aa6"
+    },
+    {
+      "path": ".github/skills/rpi-remediate/SKILL.md",
+      "component": "skill:rpi-remediate",
+      "sha256": "49a218c7f8ff73a5c594676e06b31665103d438d6de9984fe23a46cab0c57d8d"
+    },
+    {
+      "path": ".github/skills/rpi-remediate/references/dispatch.md",
+      "component": "skill:rpi-remediate",
+      "sha256": "60311b06204d30e2a3d980133f5b3e8a81265f2516fdc00f807d87286e727e16"
+    },
+    {
+      "path": ".github/skills/rpi-remediate/references/handoff.md",
+      "component": "skill:rpi-remediate",
+      "sha256": "be95cbc66b3bcdbd256decddd759cee282ab5b5c2ab82069c392ec1b2b135aa6"
+    },
+    {
+      "path": ".github/skills/rpi-remediate/scripts/rpi-dispatch.py",
+      "component": "skill:rpi-remediate",
+      "sha256": "18b91c4db6b54591849fb25ad6b41c9d81e9d822a76a92dc25f54cc9689029e9"
+    },
+    {
+      "path": ".github/skills/rpi-remediate/scripts/validate-findings.py",
+      "component": "skill:rpi-remediate",
+      "sha256": "da9a4705c92c59f8284a936012f18d1bbedb7bc9fa591725a6435fc1a97f90c5"
+    },
+    {
+      "path": ".github/skills/rpi-research/SKILL.md",
+      "component": "skill:rpi-research",
+      "sha256": "2e7ef9a0825acd290201113ba086f0da6680765657c6ff620b8ed243040dc833"
+    },
+    {
+      "path": ".github/skills/rpi-research/references/handoff.md",
+      "component": "skill:rpi-research",
+      "sha256": "be95cbc66b3bcdbd256decddd759cee282ab5b5c2ab82069c392ec1b2b135aa6"
+    },
+    {
+      "path": ".github/skills/rpi-research/references/research-contract.md",
+      "component": "skill:rpi-research",
+      "sha256": "93c304a71fa7039ee3b246328f34c181b90c990c03ff594a924eae9ba8509bf6"
+    },
+    {
+      "path": ".github/skills/rpi-status/SKILL.md",
+      "component": "skill:rpi-status",
+      "sha256": "a1eedd5e825fcca72d18a039cc1f989feefe3a0606ca57e03029b7fe6c0697a6"
+    },
+    {
+      "path": ".github/skills/rpi-tool-design/SKILL.md",
+      "component": "skill:rpi-tool-design",
+      "sha256": "e5a66ab7a3c08a8a7b2d54abb3aee8ae8ba46940a795a94b0e36641825275b47"
+    },
+    {
+      "path": ".github/skills/rpi-tool-design/references/webmcp/DOMAIN.md",
+      "component": "skill:rpi-tool-design",
+      "sha256": "9bb3096d0174679a48fac1a3866b02f33e8dda5a30f6f84ec5f98e1139e8cbfd"
+    },
+    {
+      "path": ".github/skills/rpi-tool-design/references/webmcp/references/tool-design-framework.md",
+      "component": "skill:rpi-tool-design",
+      "sha256": "c802cc226b94e16df3b3978df190271f364fe38d00108574c3940ed288531def"
+    },
+    {
+      "path": ".github/skills/rpi-triage/SKILL.md",
+      "component": "skill:rpi-triage",
+      "sha256": "651b8bdcc96acb83b39b1e693b8b38e105d6afcaa1d99224dcf38ea3c29edc4e"
+    },
+    {
+      "path": ".github/skills/rpi-triage/references/handoff.md",
+      "component": "skill:rpi-triage",
+      "sha256": "be95cbc66b3bcdbd256decddd759cee282ab5b5c2ab82069c392ec1b2b135aa6"
+    },
+    {
+      "path": ".github/skills/rpi-triage/references/triage-state.md",
+      "component": "skill:rpi-triage",
+      "sha256": "9dac64bae51f6e725d1ebe7432290a171f6300178bc903e8ad495f8799df6d01"
+    },
+    {
+      "path": ".github/skills/rpi-triage/scripts/rpi-triage-state.py",
+      "component": "skill:rpi-triage",
+      "sha256": "cd66ae06436452190eac245399746bf80087faa0c3b1b9782bd267cfc006fcc7"
+    },
+    {
+      "path": ".github/skills/rpi-update-docs/SKILL.md",
+      "component": "skill:rpi-update-docs",
+      "sha256": "68fb540af5bca5893d871769d0c48f2e86270cc28ecd06c298bb76d25d24ff92"
+    },
+    {
+      "path": ".github/skills/rpi-update-docs/references/handoff.md",
+      "component": "skill:rpi-update-docs",
+      "sha256": "be95cbc66b3bcdbd256decddd759cee282ab5b5c2ab82069c392ec1b2b135aa6"
+    },
+    {
+      "path": ".github/skills/rpi-update/SKILL.md",
+      "component": "skill:rpi-update",
+      "sha256": "1620631ab925179f22c762387972d1c02512739d140b0c0ab273401e7f5c4c3d"
+    },
+    {
+      "path": ".github/skills/rpi-update/references/lifecycle-contract.md",
+      "component": "skill:rpi-update",
+      "sha256": "5a77e48f50622ab92102bc19ea8075fd18b737822b1f5eddef3cf5c8d239a2c9"
+    },
+    {
+      "path": ".github/skills/rpi-validate/SKILL.md",
+      "component": "skill:rpi-validate",
+      "sha256": "600b1d09ee7b02f8675ad2499401d2f0cb5558b79732e048a25e7410a949fd06"
+    },
+    {
+      "path": ".github/skills/rpi-validate/references/dispatch.md",
+      "component": "skill:rpi-validate",
+      "sha256": "60311b06204d30e2a3d980133f5b3e8a81265f2516fdc00f807d87286e727e16"
+    },
+    {
+      "path": ".github/skills/rpi-validate/references/handoff.md",
+      "component": "skill:rpi-validate",
+      "sha256": "be95cbc66b3bcdbd256decddd759cee282ab5b5c2ab82069c392ec1b2b135aa6"
+    },
+    {
+      "path": ".github/skills/rpi-validate/scripts/rpi-dispatch.py",
+      "component": "skill:rpi-validate",
+      "sha256": "18b91c4db6b54591849fb25ad6b41c9d81e9d822a76a92dc25f54cc9689029e9"
+    },
+    {
+      "path": ".github/skills/rpi-validate/scripts/validate-findings.py",
+      "component": "skill:rpi-validate",
+      "sha256": "da9a4705c92c59f8284a936012f18d1bbedb7bc9fa591725a6435fc1a97f90c5"
+    }
+  ],
+  "preserved": [
+    ".github/skills/process-errors/SKILL.md",
+    "AGENTS.md"
+  ]
+}

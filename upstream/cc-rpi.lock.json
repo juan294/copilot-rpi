@@ -607,11 +607,11 @@
       "kind": "resource",
       "source": "templates/scripts/rpi-distribution.py",
       "source_sha256": "2f4eb75a032064ccab38ce3cdb95b2680d7a712197eff8b0be375ef299d27689",
-      "disposition": "deferred",
-      "rationale": "Portable resource or lifecycle algorithm awaits the phase that adapts it for Copilot.",
-      "destination": null,
-      "destination_sha256": null,
-      "adaptation_note": null
+      "disposition": "adapted",
+      "rationale": "Pinned upstream distribution contract has a Copilot-owned Phase 2 implementation.",
+      "destination": "templates/scripts/rpi-distribution.py",
+      "destination_sha256": "a20a96e5719780ea3657707d1703143f745004acecb5dc14784b13d88ff46266",
+      "adaptation_note": "Path safety, manifest validation, resource accounting and deterministic rendering adapted to Copilot profiles and metadata."
     },
     {
       "id": "resource:lifecycle-engine",
@@ -651,11 +651,11 @@
       "kind": "resource",
       "source": "templates/distribution.json",
       "source_sha256": "6ab6b24255380c7105412ddd101a1c455343b4154b7de89b3deddea781a026a0",
-      "disposition": "deferred",
-      "rationale": "Portable resource or lifecycle algorithm awaits the phase that adapts it for Copilot.",
-      "destination": null,
-      "destination_sha256": null,
-      "adaptation_note": null
+      "disposition": "adapted",
+      "rationale": "Pinned upstream distribution contract has a Copilot-owned Phase 2 implementation.",
+      "destination": "templates/distribution.json",
+      "destination_sha256": "72c581438b8d6d0c3084ba448f51adddfd5771703d0c4a73f5c0f1be99fd7581",
+      "adaptation_note": "Component identity and resource declarations adapted to Copilot skills, agents, Local wrappers and optional examples."
     },
     {
       "id": "resource:claude-adapter",

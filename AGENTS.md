@@ -1,150 +1,71 @@
-# copilot-rpi -- GitHub Copilot Reference & Project Intelligence
+# copilot-rpi project instructions
 
-## One-liner
+Copilot RPI is a standalone blueprint for GitHub Copilot projects. `templates/`
+contains the exported product. Canonical workflows are in
+`templates/skills/rpi-*/SKILL.md`; `patterns/` holds 40 known agent error patterns
+and 55 operational rules, each with permanent IDs. Read `patterns/quick-reference.md` and
+`methodology/README.md` when orienting to the product. Preserve adopter and
+project-specific guidance when updating a target.
 
-Blueprint repository for GitHub Copilot projects. Contains the RPI methodology, 40 known agent error patterns, 55 operational rules, and templates for AGENTS.md, prompt files, instructions, chat modes, and project setup.
+## RPI work
 
-## Stack
+Use the relevant `rpi-*` skill under `.github/skills/` when installed.
+`rpi-research` describes existing behavior; `rpi-assess` evaluates alternatives;
+`rpi-plan` specifies phases; `rpi-implement` executes approved phases; and
+`rpi-validate` verifies them. Read the approved plan and current phase in full.
+For behavioral changes, write a failing test first. Complete independent review,
+repair, simplify and the full local gate before each phase acceptance. An explicit
+all-phases request permits continuation only after each phase passes. Record the
+candidate, findings, decisions, deviations and test evidence in a durable
+handoff. Revalidate actual state when resuming.
 
-Markdown documentation, shell scripts (bash). CI: GitHub Actions with markdownlint.
+## Git and verification
 
-## How This Repo Is Used
+`main` is the long-lived integration branch. Implement on local task branches
+and isolated worktrees, then integrate completed work locally into `main`.
+Preserve unrelated files, including owner customizations and `.summon`.
+Check the current branch before each commit and commit intended changes before
+pulling. Keep working branches local. One integration owner combines changes.
 
-When starting a new project, the agent is told: "Go check my copilot-rpi repository and set up the environment to follow all the best practices."
+Run `bash scripts/verify-local.sh` sequentially after each implementation phase.
+It aggregates Python tests, catalog/version/surface contracts, ShellCheck,
+Markdown lint, offline upstream provenance and internal links. Phase plans name
+additional acceptance checks. Distinguish static/local results from observed
+Copilot CLI or VS Code behavior. Keep raw receipts under ignored `.rpi/local/`.
+Do not use default Markdown formatting rules in place of this repository's
+configured lint. Documentation contains no emoji.
 
-The agent should:
+Inspect CI and deployment triggers before an authorized push. Verify every
+expected workflow for the exact pushed commit. Diagnose a failed remote run
+locally; another push or rerun needs its own authority. No Vercel Preview or
+working-branch publication is part of local RPI work.
 
-1. Read `patterns/quick-reference.md` -- internalize all operational rules
-2. Read `methodology/README.md` -- understand the RPI approach (follow reading order for depth)
-3. Use `templates/setup-checklist.md` to set up the new project
-4. Adapt `templates/AGENTS.md.template` for the new project's AGENTS.md
-5. Copy `templates/prompts/` into the new project's `.github/prompts/`
-6. Copy relevant `templates/github/instructions/` into `.github/instructions/`
-7. Copy `templates/github/chatmodes/` into `.github/chatmodes/`
+## Authority and ownership
 
-The full error catalog (`patterns/agent-errors.md`) is available for debugging but not required for onboarding.
+Complete authorized local work autonomously. Pushing, tagging, releasing,
+deploying, paid or cloud inference, remote database migration, issue mutation,
+and destructive owner cleanup require explicit authority. Use authority already
+given in the session without asking again. A skill invocation or installation
+manifest does not grant those effects. Unknown ownership is a conflict: preserve
+original bytes, show a reviewed plan and a runnable recovery action.
 
-## Repo Structure
+For blueprint intake, `upstream/cc-rpi.lock.json` pins reviewed cc-rpi source
+and catalog dispositions. The default checker works offline; only explicit
+maintainer intake reads a supplied upstream checkout. Do not hand-edit
+generated native outputs or silently update sibling projects, global Copilot
+configuration or schedulers. Active legacy prompts are migration inputs until
+ownership-aware retirement proves which bytes may be removed.
 
-```text
-copilot-rpi/
-├── .github/
-│   ├── copilot-instructions.md       # Copilot auto-loaded project instructions
-│   └── prompts/                      # Prompt files for maintaining THIS repo
-│       └── process-errors.prompt.md  # /process-errors -- error screenshot pipeline
-├── AGENTS.md                         # This file (repo self-description)
-├── GUIDE.md                          # Human-readable quick-start guide
-├── README.md                         # Public documentation
-├── methodology/                      # The RPI approach
-│   ├── README.md                     # Overview and reading order
-│   ├── philosophy.md                 # Core tenets, error amplification
-│   ├── context-engineering.md        # Context management, compaction, settings
-│   ├── four-phases.md                # Research -> Plan -> Implement -> Validate
-│   ├── agent-design.md               # Documentarian rule, research catalog, autonomy
-│   ├── pseudocode-notation.md        # Plan notation format
-│   ├── testing.md                    # Automated-first verification, TDD protocol
-│   ├── push-accountability.md        # Post-push CI ownership, background verification
-│   ├── ci-and-guardrails.md          # Pre-commit hooks, CI workflows, enforcement
-│   ├── scheduled-agents.md           # Recurring quality agents, cron/launchd
-│   └── error-success-logging.md      # Systematic improvement framework
-├── examples/                         # Sample documents and workflow walkthroughs
-├── patterns/                         # Operational knowledge
-│   ├── quick-reference.md            # 54 rules to internalize before any work
-│   ├── agent-errors.md               # 39-error catalog with solutions
-│   └── deployment-safety.md          # Resource efficiency and production deployment
-└── templates/                        # Files to adapt for new projects
-    ├── AGENTS.md.template            # Starting point for project AGENTS.md
-    ├── vscode-settings.json.template # .vscode/settings.json (Copilot config)
-    ├── vscode-mcp.json.template      # .vscode/mcp.json (MCP server config)
-    ├── setup-checklist.md            # Step-by-step new project setup
-    ├── prompts/                      # Prompt file templates (.github/prompts/)
-    ├── scripts/                      # Agent shell script templates
-    └── github/                       # Copilot-specific templates
-        ├── copilot-instructions.md.template
-        ├── instructions/             # Path-specific rule templates
-        │   ├── tests.instructions.md.template
-        │   ├── api.instructions.md.template
-        │   ├── migrations.instructions.md.template
-        │   ├── deployment-safety.instructions.md.template
-        │   └── supabase.instructions.md.template
-        └── chatmodes/                # Specialized chat persona templates
-            ├── rpi-research.chatmode.md
-            ├── rpi-planner.chatmode.md
-            └── rpi-auditor.chatmode.md
-```
+## Project references
 
-## RPI Workflow
+| Topic | Source |
+| --- | --- |
+| Workflow bodies | `templates/skills/` |
+| Native profiles and rendering | `templates/distribution.json`, `templates/scripts/rpi-distribution.py` |
+| Catalog and retirement | `patterns/`, `CONTRIBUTING.md` |
+| Method | `methodology/README.md` |
+| Local gate | `scripts/verify-local.sh` |
+| Current approved plan | `docs/plans/2026-09-28-copilot-blueprint-modernization.md` |
 
-This project follows its own Research-Plan-Implement pattern.
-
-1. /research -- Understand the codebase as-is
-2. /plan -- Create a phased implementation spec
-3. /implement -- Execute one phase at a time with review gates
-4. /validate -- Verify implementation against the plan
-
-Each phase is its own conversation. STOP after each phase.
-
-## Key Commands
-
-```bash
-# Verification (CI runs markdownlint)
-npx markdownlint '**/*.md' --ignore node_modules --ignore .claude 2>&1
-```
-
-Run verification sequentially with `&&` or `;`, NEVER as parallel Bash calls.
-
-## Git Workflow
-
-**`main` is the long-lived integration branch.** Implementation uses a local
-task branch and isolated worktree. Keep working branches local.
-
-1. Complete the local verification gate before integrating into `main`.
-2. Inspect CI triggers before an authorized push of `main`.
-3. Commit intended changes before pulling; preserve unrelated local files.
-4. Verify the current branch before each commit.
-
-### Commit Messages
-
-```text
-feat: description       # New errors, rules, methodology content
-fix: description        # Corrections to existing content
-docs: description       # GUIDE.md, README, examples
-chore: description      # CI, templates, scripts
-release: vX.Y.Z         # Version bumps
-```
-
-## Agent Behavior
-
-Exhaust tools before asking the user. Production actions need human authorization.
-
-After an authorized push, inspect all expected workflows for the exact commit.
-Diagnose a failed remote run from its logs and reproduce locally; a new push
-requires separate authorization.
-
-## Contributing to This Repo
-
-When new error patterns are discovered during work on ANY project:
-
-1. Add them to `patterns/agent-errors.md` following the existing format
-2. Add a one-liner to `patterns/quick-reference.md`
-3. Update counts in `GUIDE.md` (two locations: prose paragraph + "Where to Go Deeper" table)
-4. Update `CHANGELOG.md`
-5. Keep entries generic -- no project-specific references
-
-## Project File Locations
-
-Go directly to these paths -- never search the codebase for them.
-
-| Topic | Path | Notes |
-|-------|------|-------|
-| Error catalog | `patterns/agent-errors.md` | 40 errors, source of truth |
-| Operational rules | `patterns/quick-reference.md` | 55 rules with scope/stack tags |
-| Deployment safety | `patterns/deployment-safety.md` | Resource efficiency rules |
-| Release verification | `templates/e2e-pro-playbook-template.md` | E2E Pro playbook; Wave A gate + structural waves, `/explore-release` runs Wave B |
-| Repo invariants | `templates/scripts/verify-counts.sh`, `verify-version.sh`, `verify-prompts.sh` | All three gate CI; each prints BLOCKED/WHY/FIX with a runnable fix |
-| Instruction templates | `templates/github/instructions/` | 5 path-specific rule templates |
-| Methodology | `methodology/` | 11 files, order in README.md |
-| Prompts | `templates/prompts/` | Canonical prompt definitions |
-| Active prompts | `.github/prompts/` | This repo's own prompts |
-| Research | `docs/research/YYYY-MM-DD-*.md` | RPI research about copilot-rpi |
-| Plans | `docs/plans/YYYY-MM-DD-*.md` | RPI plans for copilot-rpi |
+Use `file:line` references for source claims. Keep project knowledge and local
+extensions intact when rendering self-application.

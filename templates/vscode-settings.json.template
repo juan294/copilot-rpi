@@ -1,6 +1,3 @@
 {
-  "chat.agent.enabled": true,
-  "github.copilot.chat.agent.thinkingTool": true,
-  "github.copilot.chat.agent.autoFix": true,
-  "github.copilot.chat.agent.runTasks": true
+  "chat.useAgentsMdFile": true
 }

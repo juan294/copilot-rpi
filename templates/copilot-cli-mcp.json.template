@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "example": {
+      "type": "http",
+      "url": "https://mcp.example.invalid/mcp",
+      "headers": {
+        "Authorization": "Bearer $COPILOT_MCP_EXAMPLE_TOKEN"
+      },
+      "tools": ["search"]
+    }
+  }
+}
