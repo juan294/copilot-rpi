@@ -221,4 +221,36 @@ bound, while the one-second native child timeout was recorded correctly. The
 test now checks the blocked receipt independently of setup duration. A direct
 one-second process test verifies process termination and that a descendant never
 writes its delayed marker after process-group cleanup. Both focused tests pass;
-the complete gate must be rerun on the final commit.
+the complete gate subsequently passed on commit `663685f` with 176 Python
+tests, all 10 checks and 179 internal links. Python 3.11.16 passed the same
+176 tests. A writable disposable Linux checkout from the exact commit passed
+the portable gate with Node 24.21.0 and Python 3.14.7. Both required real
+Copilot CLI 1.0.88 profiles passed on `663685f`; the programmatic receipt
+includes a native denied-write event and unchanged denied file. Their receipts
+are under ignored `.rpi/local/copilot/`.
+
+Two fresh-context Wave B exploratory charters ran against `663685f` using
+synthetic, cleaned-up fixtures. The lifecycle charter passed all eight
+maneuvers, including repeated apply/detach, stale plans, interrupted rollback,
+owner edits, separate processes, C-locale Unicode paths and false legacy
+ownership. The automation charter attempted all eight maneuvers and found two
+failures. A locally edited ignored green receipt could pass the optional
+pre-push gate for an unverified newer fixture commit. A local hook and its
+receipt cannot authenticate against an actor who can edit both; the owner
+must review this explicit trust limit before release. `docs/native-policy.md`
+now states it, and exact-commit remote CI remains the publication gate. The
+other failure was actionable: if writing `.last-good` failed, the automation
+runner left the current report changed despite returning failure. A red test
+reproduced it. Independent review found the reversed write order could also
+change `.last-good` when the current write failed. A second red test reproduced
+that path. The runner now restores the prior recovery copy if the second
+write fails, using a staged hard link so an out-of-space error does not need a
+new data write during rollback. A third red/green test covers that case.
+Independent re-review found no remaining scoped issue, and all 19 automation
+tests pass. The complete gate remains pending on this new candidate.
+
+The computer-use pipe still fails to start, so the required visual Agent Host
+selection, discovery inventory and Local-to-Agent-Host handoff remain
+unobserved. Permission to try macOS accessibility scripting for those UI-only
+checks was requested from the owner and is pending. No version bump,
+integration, push, tag or release has occurred.

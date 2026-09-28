@@ -58,6 +58,41 @@ def atomic_write(path, content):
             os.unlink(tmp)
 
 
+def publish_report(report, body):
+    """Restore the prior recovery copy if publishing the current report fails."""
+    last_good = report.with_suffix(report.suffix + ".last-good")
+    if last_good.is_symlink():
+        raise OSError("Last-good report must not be a symlink")
+    backup = None
+    if last_good.exists():
+        backup = last_good.with_name(f".{last_good.name}.{uuid.uuid4().hex}.backup")
+        os.link(last_good, backup, follow_symlinks=False)
+    changed_last_good = False
+    try:
+        atomic_write(last_good, body)
+        changed_last_good = True
+        atomic_write(report, body)
+    except OSError:
+        if changed_last_good:
+            try:
+                if backup is None:
+                    last_good.unlink()
+                else:
+                    os.replace(backup, last_good)
+                    backup = None
+            except OSError as restore_error:
+                recovery = str(backup) if backup else "the current last-good path"
+                backup = None  # Retain the hard-linked prior copy for manual recovery.
+                raise OSError(f"Cannot restore last-good report; prior copy is at {recovery}") from restore_error
+        raise
+    finally:
+        if backup is not None:
+            try:
+                backup.unlink()
+            except OSError as cleanup_error:
+                print(f"WARNING: prior report backup remains at {backup}: {cleanup_error}", file=sys.stderr)
+
+
 def command(argv, *, cwd, env, timeout):
     process = subprocess.Popen(argv, cwd=cwd, env=env, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE, start_new_session=True)
@@ -218,10 +253,9 @@ def run_job(*, job, project, blueprint, report, binary, model, timeout, environ=
             return code
         body = (f"# {job.title()} discovery report\n\n{response}\n").encode("utf-8")
         try:
-            atomic_write(report, body)
-            atomic_write(report.with_suffix(report.suffix + ".last-good"), body)
+            publish_report(report, body)
         except OSError as exc:
-            print(f"FAILED: cannot write report or last good copy: {exc.strerror}; check directory permissions", file=sys.stderr)
+            print(f"FAILED: cannot write report or last good copy: {exc}; check directory permissions", file=sys.stderr)
             return 2
         print(f"OK: {report}")
         return 0

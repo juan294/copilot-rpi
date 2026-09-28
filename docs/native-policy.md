@@ -35,6 +35,9 @@ The local verifier writes `.rpi/local/copilot/verification.json` for the
 tested candidate. It records all required checks and invalidates success for
 changed inputs or a failed/interrupted run. The Git pre-push adapter is a
 separate opt-in gate; neither package rendering nor verification installs it.
+The receipt is an editable local file. The adapter detects stale or failed
+ordinary runs, but it cannot authenticate the check results against someone who
+can rewrite local files. Exact-commit CI results remain the publication gate.
 It acts on the exact refs Git is about to publish and requires a reviewed
 `.rpi/policy.json` check inventory. Preview and inspect the existing Git hook
 path and policy before activation:

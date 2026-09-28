@@ -2,6 +2,7 @@
 
 import importlib.util
 import fcntl
+import errno
 import json
 import os
 from pathlib import Path
@@ -95,6 +96,54 @@ print('Ready plan: inspect reports. No changes made.')
         self.assertEqual(self.report.read_bytes(), before)
         self.assertNotEqual(self.run_job(mode="malformed"), 0)
         self.assertEqual(self.report.read_bytes(), before)
+
+    def test_last_good_write_failure_preserves_current_report(self):
+        self.report.write_text("previous confirmed report\n")
+        last_good = self.report.with_suffix(".md.last-good")
+        last_good.mkdir()
+        before = self.report.read_bytes()
+
+        self.assertNotEqual(self.run_job(), 0)
+        self.assertEqual(self.report.read_bytes(), before)
+        self.assertTrue(last_good.is_dir())
+
+    def test_current_write_failure_preserves_last_good_report(self):
+        self.report.write_text("previous current report\n")
+        last_good = self.report.with_suffix(".md.last-good")
+        last_good.write_text("previous last good report\n")
+        current_before, last_good_before = self.report.read_bytes(), last_good.read_bytes()
+        original_write = automation.atomic_write
+
+        def fail_current(path, content):
+            if path == self.report.resolve():
+                raise OSError("current report is unwritable")
+            return original_write(path, content)
+
+        with mock.patch.object(automation, "atomic_write", side_effect=fail_current):
+            self.assertNotEqual(self.run_job(), 0)
+        self.assertEqual(self.report.read_bytes(), current_before)
+        self.assertEqual(last_good.read_bytes(), last_good_before)
+
+    def test_out_of_space_after_last_good_write_restores_prior_copy(self):
+        self.report.write_text("previous current report\n")
+        last_good = self.report.with_suffix(".md.last-good")
+        last_good.write_text("previous last good report\n")
+        current_before, last_good_before = self.report.read_bytes(), last_good.read_bytes()
+        original_write = automation.atomic_write
+        out_of_space = False
+
+        def fail_after_first_write(path, content):
+            nonlocal out_of_space
+            if path == self.report.resolve():
+                out_of_space = True
+            if out_of_space:
+                raise OSError(errno.ENOSPC, "No space left on device")
+            return original_write(path, content)
+
+        with mock.patch.object(automation, "atomic_write", side_effect=fail_after_first_write):
+            self.assertNotEqual(self.run_job(), 0)
+        self.assertEqual(self.report.read_bytes(), current_before)
+        self.assertEqual(last_good.read_bytes(), last_good_before)
 
     def test_timeout_is_bounded_and_preserves_report(self):
         self.report.write_text("old")
