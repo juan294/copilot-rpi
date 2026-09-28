@@ -55,6 +55,9 @@ review, TDD and phase acceptance still apply.
 9. Mark completed items and apply the [durable handoff](references/handoff.md)
    contract in the phase notes, including every finding's disposition and exact
    candidate/check identity. Include pending work and next-phase entry conditions.
+   Inspect the actual candidate before naming it; if its identity was not
+   measured, say that it is unavailable. A request label or scenario marker is
+   never a candidate identity.
    Record deviations in `docs/plans/<plan-name>-notes.md` under `## Deviations`:
    plan said / found / chose / why. Preserve approved plans, phase files and notes
    as curated history; raw operational evidence follows visibility policy.

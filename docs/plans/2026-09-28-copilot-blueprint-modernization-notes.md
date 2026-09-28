@@ -141,15 +141,54 @@ Debian Linux clone with Node 24.21.0, uv 0.12.19, ShellCheck 0.9.0 and Python
 internal links. The first read-only Linux mount could not run Git tests that
 write objects; the writable clone resolved that environment limitation.
 
-The CLI native harness has 14 passing fake-process tests. Independent review
-found and repaired prompt-echo discovery, prose-only denial, overwritten
-receipts and candidate identity gaps. It preserves separate profile receipts
-and fails closed on an unrecognized native denial event. This evidence does not
-qualify the actual Copilot CLI. The installed VS Code app is 1.137.0, but its
-extension inventory has no GitHub Copilot extension, and no `copilot` executable
-is on PATH. The requested isolated setup, inference and release-version
-decisions remain pending. No native inference, global install, cloud job or
-scheduled service ran.
+The owner then authorized isolated client setup, native inference and version
+2.0.0. Copilot CLI 1.0.88 was installed under ignored task-local state; VS Code
+was updated to 1.139.1 with bundled GitHub Copilot Chat 0.67.0. No scheduler,
+cloud job or global Copilot CLI configuration was activated. The CLI harness
+has 22 passing fake-process tests, which verify its controls rather than native
+product behavior. Independent review found and repaired prompt-echo discovery,
+prose-only denial, overwritten receipts, candidate identity gaps, process-group
+cleanup and client event-shape mismatches.
+
+On committed candidate `5942d6e`, both real Copilot CLI 1.0.88 entry points
+passed. The `cli` receipt proves project skill discovery, a successful native
+skill invocation before the marker answer, a renamed-skill negative control,
+and unchanged product/remote bytes. The `cli-programmatic` receipt proves the
+shipped runner's allowed report, bounded exit, linked native denied-write event
+and unchanged denied file/remote. Native receipts are in ignored
+`.rpi/local/copilot/native/`; they store no credential value. A separate
+isolated CLI session resumed a stale handoff, read actual Git refs and rejected
+its prior green receipt for the different candidate.
+
+VS Code's Copilot Agent Host provider `copilotcli` loaded the rendered
+`rpi-research` skill and bundled resource, reported the README marker with a
+line citation, and failed to load that skill after it was renamed. A custom
+research role exposed only read/search tools; the harmless denied-write file
+remained unchanged. A delegated research subagent read a temporary repository
+instruction nonce in a fresh session, used the role's read/search tools and
+inherited the parent model. The temporary instruction was restored. The six
+workflow fixtures were run in native Agent Host sessions and independently
+scored. Four passed initially. Research omitted the explicit `rpi-assess`
+handoff, and missing-review mislabeled a scenario marker as candidate identity.
+The canonical skills were repaired and reapplied through the ownership engine.
+An intermediate research retest still made an unsupported quality judgment;
+the skill now requires literal observations and forbids quality labels.
+Fresh Agent Host retests invoked each repaired skill successfully: research
+stayed descriptive and named `rpi-assess`; missing-review used the inspected
+fixture commit and blocked acceptance without reviewer evidence. The original
+failure and the retests remain in ignored native evidence for review.
+The pinned upstream intake records the two repaired destination hashes; its
+source pin and snapshots are unchanged.
+
+The initial VS Code UI observation used the Local extension host, so it is
+optional compatibility evidence only. The computer-use native pipe then failed
+repeatedly, including after a reset. The selected Agent Host UI, visual
+discovery inventory and Local-to-Agent-Host handoff could not be inspected.
+Native session state and `code agent ps` prove Agent Host execution but do not
+satisfy the plan's visual acceptance step. Phase 5 remains open, and the
+approved version bump, merge, push, tag and release are deferred until the
+mandatory primary profile is qualified or the owner explicitly changes that
+acceptance requirement.
 
 The ownership engine self-applied 31 exact canonical components in the task
 worktree with zero file actions and conflicts; its `check` reported healthy.
@@ -157,13 +196,11 @@ The local `process-errors` extension and three unproven legacy prompts were
 retained. The ownership manifest binds to the worktree path and is ignored by
 Git; self-application must be repeated in the final integration checkout.
 
-The complete portable gate passed on the Phase 5 local preparation: 165 Python
-tests and all 10 checks, including catalog/version contracts, rendered bytes,
-ShellCheck, Markdown lint over 193 files, pinned upstream intake and 179 local
-links. The `codex-simplify` reuse, quality and efficiency pass found no further
-safe code reduction in the changed scope. Both exact native CLI entry points
-produced blocked receipts because no Copilot CLI is installed. The VS Code
-extension is also absent. These are prerequisite failures, not native profile
-passes. The note update changes the tracked candidate, so its full portable
-gate must run again before native acceptance. Phase 5 primary acceptance and
-release remain open.
+The retained pre-repair portable log shows 168 Python tests and all 10 checks;
+the 174-test run reported during later CLI harness work has no retained passing
+receipt, so it is not used as acceptance evidence. The `codex-simplify` reuse,
+quality and efficiency pass found no further safe code reduction then. A full
+rerun after the skill repairs found stale destination hashes in the upstream
+lock; those two hashes were updated, and the standalone pinned-intake check
+passed. The current candidate still needs a complete passing portable gate and
+affected native requalification before Phase 5 acceptance.

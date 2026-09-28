@@ -9,6 +9,16 @@ Use the question and file paths in the request. This workflow is descriptive:
 record what exists and how it works. For alternatives, current-practice judgments
 or recommendations, use `rpi-assess` as a separate evaluative workflow.
 
+If the request asks whether a design is best, compares alternatives, or seeks a
+recommendation, record only observed behavior with `file:line` evidence. Do not
+answer the evaluative question, even with a qualified judgment such as "likely
+best" or "best fit." End the answer with an explicit **Assessment handoff** to
+`rpi-assess` for that judgment.
+Use literal observations such as "the file contains a heading and a marker"
+or "the file does not state selection criteria." Do not call the observed
+design good, bad, complete, incomplete, substantive, minimal, or a placeholder;
+those labels assess quality or intent beyond the observed bytes.
+
 ## Process
 
 1. Read [the research contract](references/research-contract.md) and every
@@ -35,9 +45,11 @@ or recommendations, use `rpi-assess` as a separate evaluative workflow.
    in this artifact so the next phase can revalidate its baseline and scope.
 6. Preserve the research artifact as curated project knowledge under the project's
    tracking policy. Keep raw machine inventories and transient evidence local.
-7. Present a concise summary, artifact path and outstanding uncertainty. **Stop at
-   the research boundary.** Do not begin planning or implementation unless the
-   user explicitly authorized that next workflow.
+7. Present a concise summary, artifact path and outstanding uncertainty. When
+   the request asks which design is best or seeks a recommendation, explicitly
+   route that decision to `rpi-assess` in the handoff. **Stop at the research
+   boundary.** Do not begin planning or implementation unless the user
+   explicitly authorized that next workflow.
 
 ## Boundaries
 

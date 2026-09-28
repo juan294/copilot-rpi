@@ -142,7 +142,7 @@
     {
       "path": ".github/skills/rpi-implement/SKILL.md",
       "component": "skill:rpi-implement",
-      "sha256": "944f16297fa199e1d44c4685b1c02e954e31548a0d18c004085a81a0f0a3c1d7"
+      "sha256": "e4ff323d426b2a5720be45d8fb96dbc7418d362d35084d6dc7df5f6eb7af1970"
     },
     {
       "path": ".github/skills/rpi-implement/references/dispatch.md",
@@ -252,7 +252,7 @@
     {
       "path": ".github/skills/rpi-research/SKILL.md",
       "component": "skill:rpi-research",
-      "sha256": "2e7ef9a0825acd290201113ba086f0da6680765657c6ff620b8ed243040dc833"
+      "sha256": "25fc72376260546104ada86001079d7ce1bafe3a8cdb6645523477aae3643394"
     },
     {
       "path": ".github/skills/rpi-research/references/handoff.md",

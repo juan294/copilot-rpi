@@ -104,8 +104,8 @@
       "disposition": "adapted",
       "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1.",
       "destination": "templates/skills/rpi-implement",
-      "destination_sha256": "2b7569a2c54411b9a1bb26ccd033f267ec0f1b8de827f4d34616fe5abfaa7cd9",
-      "adaptation_note": "Copilot invocation, local integration authority and phase handoff."
+      "destination_sha256": "f2e24717e53e1046f1bfa9461370b1f2ef4be513c815b3267a22ea0ea2db54aa",
+      "adaptation_note": "Copilot invocation, local integration authority, reviewer gate, and measured candidate identity in phase handoffs."
     },
     {
       "id": "skill:rpi-plan",
@@ -159,8 +159,8 @@
       "disposition": "adapted",
       "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1.",
       "destination": "templates/skills/rpi-research",
-      "destination_sha256": "cee38d9a42df4fb291f25bc022deb5ba4dd0ea2381a8fe017b9f7ececf6275b1",
-      "adaptation_note": "Copilot skill metadata, explicit local authority and native path wording while retaining the portable workflow contract."
+      "destination_sha256": "1234a73520ec3647fcc7c54ae36bf27c19d954f46fe043278533b8276386c584",
+      "adaptation_note": "Copilot skill metadata, descriptive research boundary, explicit assessment handoff, and evidence-only wording."
     },
     {
       "id": "skill:rpi-status",
