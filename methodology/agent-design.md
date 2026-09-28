@@ -162,25 +162,9 @@ The reason isn't just cost. A worked example is a demonstration, and a capable m
 
 This does not contradict the wrong/right example pairs used throughout this blueprint's prompts and error catalog. Those pairs mostly encode an **environment fact** — this exact flag, this exact frontmatter key, this exact error string a real tool actually produces — and a fact isn't something interface design can imply; it has to be stated. Keep those. The distinction to apply going forward: if an example merely demonstrates a shape a well-designed interface could have implied instead (which enum value to pass, which file goes where), replace it with better interface design; if it records a fact the model has no other way to learn, keep the example.
 
-### Chat Modes (`.github/chatmodes/`)
+### Role Profiles and Legacy Local Chatmodes
 
-Chat modes are specialized personas with behavioral constraints and tool restrictions. They provide structural enforcement of rules like the documentarian constraint.
-
-```markdown
----
-name: RPI Research
-description: Research-only mode — describes what exists, never suggests changes
-tools: ["codebase", "file"]
----
-You are in RPI Research mode.
-
-ABSOLUTE CONSTRAINT: You are a documentarian. Describe what EXISTS. Never suggest what SHOULD BE.
-- No improvement suggestions, no problem identification, no critiques
-- Every claim must include a file:line reference
-- Structure output as a research document
-```
-
-**Why chat modes matter:** The documentarian rule is baked into the session at the mode level, not repeated per-prompt. More reliable than per-prompt injection because it constrains the agent's entire behavioral frame.
+Canonical workflows render to `.github/skills/`; scoped specialist roles render to `.github/agents/`. The old `.github/chatmodes/` entries are retained only for the optional VS Code Local compatibility profile until migration and native qualification. A role description is guidance, not mechanical enforcement of read-only tool boundaries. Verify the selected client's actual discovery and permissions.
 
 ### MCP Servers (`.vscode/mcp.json`)
 
@@ -230,17 +214,9 @@ wait
 
 **When to use:** Independent research tasks, parallel audits, batch migrations.
 
-### `@copilot` Cloud Agent
+### Optional `@copilot` Cloud Agent
 
-Assign a GitHub Issue to `@copilot` for async implementation. The cloud agent:
-
-- Reads the issue description and referenced files
-- Creates a branch and implements the changes
-- Opens a PR for review
-
-**When to use:** After completing Research + Plan interactively, delegate the Implementation to the cloud agent by creating a GitHub Issue with the plan attached. This is a unique Copilot workflow not available in other tools.
-
-**Best for:** Well-specified implementation tasks where the plan is complete and unambiguous. Not suitable for tasks requiring interactive Q&A or complex judgment calls.
+Cloud-agent issue delegation is an opt-in external profile. Use it only when the owner explicitly authorizes the issue, branch and PR actions, and its setup is qualified for the target project. Local RPI work does not create GitHub issues or cloud jobs by default. The local integration and exact-candidate verification contract remains controlling.
 
 ### Quality Review Pattern
 
@@ -249,19 +225,13 @@ After each implementation phase, run a quality review pass. This is separate fro
 - **Self-review** checks plan compliance — "did I follow the plan?"
 - **Quality review** (`/quality-review`) checks code reuse, quality, and efficiency — "is the code good?"
 
-This two-pass model ensures that plan compliance and code quality are evaluated independently. In a single Copilot session, both passes happen sequentially. Alternatively, start a fresh Chat window for the quality review to get an unbiased second opinion (Writer/Reviewer pattern).
+Plan compliance needs an independent reviewer, not only the implementation author. After repairing that review, run a separate simplify pass for reuse, quality and efficiency. A fresh context or qualified reviewer can supply independent review; missing reviewer evidence blocks acceptance.
 
-The `/quality-review` prompt reviews the `git diff` for three concerns: code reuse opportunities (existing utilities that could replace new code), code quality issues (redundant state, copy-paste, leaky abstractions), and efficiency problems (unnecessary work, missed concurrency, hot-path bloat). Unlike a full `/pre-launch` audit, this is scoped to changed files only.
+The `rpi-quality-review` skill reviews the `git diff` for three concerns: code reuse opportunities (existing utilities that could replace new code), code quality issues (redundant state, copy-paste, leaky abstractions), and efficiency problems (unnecessary work, missed concurrency, hot-path bloat). Unlike a full `/pre-launch` audit, this is scoped to changed files only.
 
-### Batch-Eligible Parallel Execution
+### Batch-Eligible Independent Units
 
-Plans should assess phase independence and mark phases with no file overlap and no dependency on another phase's output as `[batch-eligible]`. When phases are marked batch-eligible, the user can choose to:
-
-- **Fan-out with `copilot -p`** — run one terminal per phase, each implementing independently
-- **Assign to `@copilot`** — create a GitHub Issue per phase, assign all to the cloud agent for parallel async implementation
-- **Run sequentially** — the default, always works
-
-This is a planning-time optimization. The agent identifies the opportunity; the user decides whether to parallelize.
+A plan may mark independent units **within one authorized phase** `[batch-eligible]` when their file ownership does not overlap and their outputs do not depend on each other. Give each unit a bounded objective, owned files, evidence, resource limit and terminal condition. Keep at most three implementers and use fewer when the task or available slots do not justify three. One integration owner combines and verifies the local result. Phase execution and acceptance remain sequential even when the user authorizes continuation across all phases. Do not publish working branches or PRs as batch output.
 
 ### Pre-Launch Audit Pattern
 
@@ -293,87 +263,15 @@ Each specialist:
 
 The report drives `/remediate` which processes findings in 3 waves:
 Wave 1 (Before launch), Wave 2 (After launch), Wave 3 (Later/strategic).
-Wave 3 items create GitHub issues only -- no fix agents spawn.
+Wave 3 strategic items receive a local disposition and owner review. Creating GitHub issues requires separate authorization.
 
 ---
 
 ## Git Protocol for Multi-Agent Work
 
-When multiple agents operate in parallel (`copilot -p` processes, `@copilot` cloud agents, or concurrent sessions), git operations are the primary source of conflicts. These rules prevent wrong-branch pushes, merge conflicts, and orphaned references.
+One integration owner manages the local `main` result. Give independent agents distinct files, a resource budget, scoped checks, and a terminal condition. A worktree agent can commit only to its local task branch; the integration owner reviews and integrates that branch after verification. Working branches stay local. Only the completed integration branch may be published, after local gates, trigger inspection, and explicit authorization. The owner checks the exact pushed commit and reports failed remote runs without autonomous reruns or fix-and-repush cycles.
 
-### Central Commit Rule
-
-**Designate one agent or process as the git committer.** Parallel agents write code but do not commit independently to shared branches.
-
-| Agent Role | Can Edit Files | Can git commit | Can git push |
-|------------|:-:|:-:|:-:|
-| Main session / Lead agent | Yes | Yes | Yes |
-| Background `copilot -p` agent | Yes | No | No |
-| Worktree agent (parallel `copilot -p`) | Yes | Yes (local only) | No — main agent batches |
-| `@copilot` cloud agent | Yes | Yes (own branch) | Yes (opens PR) |
-| Fan-out `copilot -p` unit | Yes (in worktree) | Yes (isolated branch) | Yes (opens PR) |
-
-`@copilot` cloud agents and fan-out units are exceptions — they create isolated branches with their own PRs, so each can safely commit without conflicts.
-
-### Branch Verification Before Every Commit
-
-Before any `git commit`, the agent must run `git branch --show-current` and verify the result matches the intended target. This applies even when the user said "push to develop" earlier in the conversation — git state is the source of truth, not conversation memory.
-
-### File Ownership for Parallel Agents
-
-When spawning parallel agents, assign distinct file sets to each:
-
-```text
-Agent 1: src/auth/*.ts, tests/auth/*.ts
-Agent 2: src/api/*.ts, tests/api/*.ts
-Agent 3: src/utils/*.ts, tests/utils/*.ts
-```
-
-If two agents must touch the same file, run them sequentially or have the second agent read the first agent's output before starting.
-
-### Branch Strategy for Agent Orchestration
-
-For complex multi-agent work:
-
-1. Each agent creates a branch: `agent/<task-slug>`
-2. Each agent completes work with passing tests on its branch
-3. The orchestrator merges agent branches into the target branch sequentially
-4. After each merge, run the full test suite — if it breaks, fix before proceeding
-5. Delete agent branches after successful merge
-
-This pattern is more complex than central commit but necessary when agents need full git access (e.g., agents running in separate worktrees).
-
-### Parallel Agent Push Strategy
-
-When N agents each push independently, every push triggers M workflow runs (CI matrix + auxiliary workflows like Dependency Review, CodeQL). For 8 agents x 4 workflows = 32 workflow runs, most of which queue simultaneously and compete for runner minutes. On macOS runners (10x cost multiplier), this burns through Actions minutes fast.
-
-**Strategy: agents commit locally, main agent pushes in batch.**
-
-| Step | Who | What |
-|------|-----|------|
-| 1. Spawn | Main agent | Creates worktrees — each `copilot -p` agent gets its own branch via `git worktree add` |
-| 2. Implement | Worktree agents | Write code, run tests, commit — but never push or create PRs. Deliverable is a local commit on their branch |
-| 3. Review | Main agent | Verifies each worktree has clean commits. Optionally runs cross-branch checks (type conflicts, shared file edits) |
-| 4. Push | Main agent | Pushes all branches in one burst: `git push origin branch-1 branch-2 ... branch-N` |
-| 5. PRs | Main agent | Creates all PRs sequentially via `gh pr create`, linking to corresponding issues |
-| 6. Monitor | Background agent | Watches all CI runs: `gh run list --branch branch-1 --branch branch-2 ... --limit N`. If any fail, main agent fixes and re-pushes just that branch |
-
-**Why it matters:**
-
-| Approach | Pushes | CI triggers | Risk |
-|----------|--------|-------------|------|
-| Each agent pushes | N x retries | N x M x retries | Wrong-branch pushes, merge conflicts |
-| Main agent batches | N (once) | N x M (once) | None — single point of control |
-
-**Key benefits:**
-
-- Fewer CI runs — agents debugging locally don't trigger CI on every attempt
-- Lower API usage — no redundant GitHub API calls from parallel agents
-- No wrong-branch pushes — only the main agent touches remote
-- No merge conflicts — main agent can detect shared-file edits before pushing
-- Cheaper GitHub Actions minutes — especially on macOS runners (10x cost multiplier)
-
-**Note:** This does not apply to `@copilot` cloud agents or fan-out units that create their own isolated branches and PRs — those are already isolated by design.
+Before each commit, verify the current branch. Before removing a task worktree, inspect dirty and untracked files, preserve intended work, and verify integration. Do not delete another agent's worktree or an unproven branch.
 
 ### Scope Discipline and the Watchdog
 
@@ -446,9 +344,9 @@ Classify every action by its risk level to determine autonomy:
 |--------|----------|----------|
 | **Read-only** | Searching code, reading files, running tests, `git status`, `git log` | Fully autonomous |
 | **Low** | Writing code per approved plan, creating branches, committing to feature branches | Fully autonomous |
-| **Medium** | Pushing to `develop`, creating PRs, running `npm install` | Autonomous with post-action verification |
-| **High** | Merging PRs, pushing to `main`/production, deploying, modifying external services | Human-gated — always ask first |
-| **Critical** | Deleting branches, force-pushing, dropping databases, modifying CI/CD pipelines | Human-gated — explain consequences before asking |
+| **Medium** | Installing development dependencies, local branch integration | Autonomous with local verification |
+| **High** | Pushing to `main`, creating PRs, deploying, modifying external services | Requires explicit authorization; use authorization already given for the concrete action |
+| **Critical** | Force-pushing, dropping databases, or changing remote infrastructure | Requires explicit authorization for the concrete destructive action |
 
 #### The Quality Cascade Principle
 

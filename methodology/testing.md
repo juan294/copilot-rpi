@@ -62,7 +62,7 @@ TDD integrates into the Implement phase:
 2. For each phase, write failing tests that capture the acceptance criteria
 3. Implement until all tests pass
 4. Run the full verification suite
-5. Stop and wait for human review
+5. Record the reviewed phase result; continue only when the owner explicitly authorized later phases
 
 The tests written in step 2 become the automated verification for the phase.
 
@@ -71,4 +71,4 @@ The tests written in step 2 become the automated verification for the phase.
 1. Run ALL automated verification commands.
 2. Use tools to inspect outputs, API responses, file changes.
 3. If all automated checks pass, mark phase complete.
-4. **STOP. Wait for human confirmation.** Even if everything passes.
+4. Complete independent review, simplify and candidate-bound verification. Stop at the phase boundary unless the owner explicitly authorized sequential continuation.

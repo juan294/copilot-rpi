@@ -232,7 +232,7 @@ launchd provides a minimal execution environment that breaks CLI tools in severa
 | **Dependency health** | Weekly | Outdated packages, version conflicts, lockfile integrity |
 | **Performance check** | Weekly | Bundle sizes, build times, regression detection |
 | **Documentation sync** | Weekly | Stale docs, undocumented public APIs, broken links |
-| **Cost report** | Weekly | AI spend per workflow and per outcome, tier-adherence drift (see [cost-monitoring.md](cost-monitoring.md)) |
+| **Cost report** | Weekly | AI spend per workflow and per outcome where attribution exists; mark unavailable values unmeasured (see [cost-monitoring.md](cost-monitoring.md)) |
 
 ## Concrete Agent Prompts
 
@@ -333,7 +333,7 @@ Append to shared-context.md:
 
 ### Cost Report Agent
 
-Run this agent on the **floor tier** — it reads and summarizes usage data, it does not reason.
+Run this optional agent only after owner authorization and runner qualification. The owner may record a concrete model for reproducibility; installation does not choose a paid model or start inference.
 
 ```bash
 PROMPT="You are the cost-report scheduled agent. You turn raw AI usage data into
@@ -347,19 +347,19 @@ Perform these checks:
    /implement, /triage, /fix-ci, etc. (e.g. by branch, session label, or commit trailer).
 3. Compute cost-per-outcome: total spend / PRs merged this period, and average
    cost per run for each recurring workflow.
-4. Compute the floor ratio: share of spend on the everyday floor tier vs frontier.
+4. Compare observed spend across owner-selected models only when the provider export supports attribution; otherwise mark it unmeasured.
 5. Compare each workflow's per-run cost to the previous report; flag any that grew.
 
 Write your report to docs/agents/cost-report.md with sections:
-- Summary (1 line: GREEN/YELLOW/RED + total spend + floor ratio)
+- Summary (1 line: GREEN/YELLOW/RED + measured spend and attribution limits)
 - Cost Per Outcome (cost per merged PR; trend vs last period)
 - Per-Workflow Cost (workflow, runs, avg cost/run, delta vs last period)
-- Tier Drift (any workflow trending above its declared tier or its historical cost)
-- Recommendations (re-tier, re-codify, or gate any workflow that is drifting)
+- Cost Drift (a workflow trending above its measured historical cost, where comparable)
+- Recommendations (review observed costs or revise the workflow where evidence supports it)
 
 Append to shared-context.md:
-- Total spend and floor ratio for the period
-- Any workflow flagged for re-tiering"
+- Measured spend and attribution limits for the period
+- Any workflow with measured cost drift"
 ```
 
 ## Resilience Patterns
@@ -476,9 +476,9 @@ After scheduled agents finish their overnight runs, use `/triage` to process all
 3. Scans open Dependabot PRs (Rule #45) and classifies them by update type and CI status
 4. Reads all reports and shared-context.md
 5. Synthesizes findings and drafts an action plan
-6. Implements all fixes (fix everything -- Rule #31)
-7. Commits code fixes (and reports too, on private repos -- Rule #42)
-8. Processes Dependabot PRs (auto-merge patch/minor with green CI, attempt-fix obvious failures, defer majors)
+6. Records findings and proposed dispositions; implementation needs its own authorized scope
+7. Preserves reports according to repository visibility and ownership
+8. Reviews Dependabot PRs read-only; merge, rebase, and repair need separate authority
 9. Touches `.last-triage` marker to record which reports have been processed
 10. Updates shared-context.md with triage results
 

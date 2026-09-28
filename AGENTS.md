@@ -95,12 +95,13 @@ Run verification sequentially with `&&` or `;`, NEVER as parallel Bash calls.
 
 ## Git Workflow
 
-**`main` is the only branch. Documentation project -- no develop/main split.**
+**`main` is the long-lived integration branch.** Implementation uses a local
+task branch and isolated worktree. Keep working branches local.
 
-1. All work happens directly on `main`
-2. Always run markdownlint before committing
-3. Always commit before pulling (hook enforced)
-4. Verify current branch before any commit
+1. Complete the local verification gate before integrating into `main`.
+2. Inspect CI triggers before an authorized push of `main`.
+3. Commit intended changes before pulling; preserve unrelated local files.
+4. Verify the current branch before each commit.
 
 ### Commit Messages
 
@@ -116,7 +117,9 @@ release: vX.Y.Z         # Version bumps
 
 Exhaust tools before asking the user. Production actions need human authorization.
 
-After pushing, verify CI: `gh run list --branch main --limit 1`. If CI fails, investigate with `gh run view <id> --log-failed`, fix, and re-push.
+After an authorized push, inspect all expected workflows for the exact commit.
+Diagnose a failed remote run from its logs and reproduce locally; a new push
+requires separate authorization.
 
 ## Contributing to This Repo
 

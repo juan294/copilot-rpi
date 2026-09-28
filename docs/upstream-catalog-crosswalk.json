@@ -1,0 +1,2114 @@
+{
+  "source": {
+    "repository": "cc-rpi",
+    "version": "2.1.0",
+    "commit": "aa3ea57fb26ae2e1e167acada4b769e073a417f4"
+  },
+  "policy": "IDs are independent and permanent. A model improvement alone is never grounds to retire an error. P1 retires no Copilot ID; deferred entries remain active until native qualification or a versioned retirement decision.",
+  "copilot_errors": [
+    {
+      "id": 1,
+      "title": "Commit rejected by pre-commit hook (typecheck/lint failure)",
+      "upstream_ids": [
+        3
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 2,
+      "title": "Wrong `--json` field names for `gh` CLI commands",
+      "upstream_ids": [
+        4
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 3,
+      "title": "SyntaxError running CLI tool with `node dist/index.js`",
+      "upstream_ids": [
+        5
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 4,
+      "title": "Cannot delete branch used by a worktree during PR merge",
+      "upstream_ids": [
+        6
+      ],
+      "disposition": "adapted",
+      "rationale": "Copilot-specific authority or runtime wording updated while preserving the observed failure and permanent ID."
+    },
+    {
+      "id": 5,
+      "title": "`execSync(...).trim is not a function` — Buffer vs string",
+      "upstream_ids": [
+        7
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 6,
+      "title": "`git push` rejected (non-fast-forward)",
+      "upstream_ids": [
+        9
+      ],
+      "disposition": "adapted",
+      "rationale": "Copilot-specific authority or runtime wording updated while preserving the observed failure and permanent ID."
+    },
+    {
+      "id": 7,
+      "title": "Checking CI for multiple PRs in one jumbled command",
+      "upstream_ids": [
+        10
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 8,
+      "title": "`git worktree remove` fails, cascading failures with `&&`",
+      "upstream_ids": [
+        11
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 9,
+      "title": "Push and forget — CI breaks silently",
+      "upstream_ids": [
+        12
+      ],
+      "disposition": "adapted",
+      "rationale": "Copilot-specific authority or runtime wording updated while preserving the observed failure and permanent ID."
+    },
+    {
+      "id": 10,
+      "title": "Skipping TDD — writing implementation before tests",
+      "upstream_ids": [
+        13
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 11,
+      "title": "Suggesting manual steps instead of using available tools",
+      "upstream_ids": [
+        14
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 12,
+      "title": "`git branch -d` fails on worktree branches (not fully merged)",
+      "upstream_ids": [
+        15
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 13,
+      "title": "Missing YAML frontmatter in legacy Local `.prompt.md` files",
+      "upstream_ids": [],
+      "disposition": "deferred",
+      "rationale": "Legacy Local prompt frontmatter remains for the optional compatibility profile until native P2 qualification."
+    },
+    {
+      "id": 14,
+      "title": "Using `$ARGUMENTS` instead of `${input:variableName}` in legacy Local prompts",
+      "upstream_ids": [],
+      "disposition": "deferred",
+      "rationale": "Legacy Local prompt parameter syntax remains for the optional compatibility profile until native P2 qualification."
+    },
+    {
+      "id": 15,
+      "title": "Path-specific instructions not loading (missing `applyTo`)",
+      "upstream_ids": [],
+      "disposition": "deferred",
+      "rationale": "Copilot applyTo metadata has no same upstream error; retain for scoped instruction rendering."
+    },
+    {
+      "id": 16,
+      "title": "Legacy Local chat mode file in wrong directory",
+      "upstream_ids": [],
+      "disposition": "deferred",
+      "rationale": "Legacy chatmode discovery is deferred to P2 migration; retain the incident and ID."
+    },
+    {
+      "id": 17,
+      "title": "Copilot CLI auth expires in scheduled agents",
+      "upstream_ids": [],
+      "disposition": "deferred",
+      "rationale": "Copilot scheduled CLI authentication failure remains a product-specific case."
+    },
+    {
+      "id": 18,
+      "title": "Agent CLI crashes with \"Unexpected\" when plist runs script directly",
+      "upstream_ids": [
+        38
+      ],
+      "disposition": "adapted",
+      "rationale": "Copilot-specific authority or runtime wording updated while preserving the observed failure and permanent ID."
+    },
+    {
+      "id": 19,
+      "title": "`git pull --rebase` fails with uncommitted changes",
+      "upstream_ids": [
+        33
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 20,
+      "title": "`git push --tags` pushes ALL local tags — old tags cause push failure",
+      "upstream_ids": [
+        44
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 21,
+      "title": "Agent fabricates filesystem paths — \"No such file or directory\"",
+      "upstream_ids": [
+        45
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 22,
+      "title": "Scaffolding tool fails on non-empty directory",
+      "upstream_ids": [
+        46
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 23,
+      "title": "Piping API response to JSON parser without error checking",
+      "upstream_ids": [
+        47
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 24,
+      "title": "Agent commits or pushes to the wrong branch",
+      "upstream_ids": [
+        48
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 25,
+      "title": "Parallel agents create git conflicts from overlapping work",
+      "upstream_ids": [
+        49
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 26,
+      "title": "Agent skips test suite after config or infrastructure changes",
+      "upstream_ids": [
+        50
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 27,
+      "title": "CI explosion from parallel agent pushes",
+      "upstream_ids": [
+        51
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 28,
+      "title": "Agent assumes GitHub labels exist when creating issues",
+      "upstream_ids": [
+        52
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 29,
+      "title": "Agent runs `gh pr create` without checking for existing PR",
+      "upstream_ids": [
+        53
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 30,
+      "title": "`git checkout --` fails on unmerged (conflicted) files",
+      "upstream_ids": [
+        54
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 31,
+      "title": "`git merge` blocked by untracked working tree files",
+      "upstream_ids": [
+        55
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 32,
+      "title": "Agent merges to `main` without understanding deployment topology",
+      "upstream_ids": [
+        56
+      ],
+      "disposition": "adapted",
+      "rationale": "Copilot-specific authority or runtime wording updated while preserving the observed failure and permanent ID."
+    },
+    {
+      "id": 33,
+      "title": "Sequential merge cascade wastes CI resources (O(n^2) rebase storm)",
+      "upstream_ids": [
+        57
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 34,
+      "title": "Agent deploys untested code to production (no staging verification)",
+      "upstream_ids": [
+        58
+      ],
+      "disposition": "adapted",
+      "rationale": "Copilot-specific authority or runtime wording updated while preserving the observed failure and permanent ID."
+    },
+    {
+      "id": 35,
+      "title": "Agent improvises production recovery with repeated failed deployments",
+      "upstream_ids": [
+        59
+      ],
+      "disposition": "adapted",
+      "rationale": "Copilot-specific authority or runtime wording updated while preserving the observed failure and permanent ID."
+    },
+    {
+      "id": 36,
+      "title": "Agent treats all dependency updates as equal risk",
+      "upstream_ids": [
+        60
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 37,
+      "title": "Silent fallback masks production data failure",
+      "upstream_ids": [
+        61
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 38,
+      "title": "Agent pushes Supabase migration to remote without local testing",
+      "upstream_ids": [
+        62
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 39,
+      "title": "Parallel agents each run full test suite, exhausting local resources",
+      "upstream_ids": [
+        63
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 40,
+      "title": "Agent implements a finding's recommendation literally, breaking an invariant the fix never checked",
+      "upstream_ids": [
+        64
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    }
+  ],
+  "copilot_rules": [
+    {
+      "id": 1,
+      "title": "Run typecheck/lint before committing",
+      "upstream_ids": [
+        5
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 2,
+      "title": "Exhaust all tools before suggesting manual steps",
+      "upstream_ids": [
+        14
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 3,
+      "title": "Don't fabricate filesystem paths",
+      "upstream_ids": [
+        49
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 4,
+      "title": "Save curl output before parsing",
+      "upstream_ids": [
+        51
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 5,
+      "title": "Reconcile before an authorized push",
+      "upstream_ids": [
+        6
+      ],
+      "disposition": "adapted",
+      "rationale": "Copilot-specific authority or runtime wording updated while preserving the observed failure and permanent ID."
+    },
+    {
+      "id": 6,
+      "title": "Preserve and integrate work before removing worktrees",
+      "upstream_ids": [
+        7
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 7,
+      "title": "Inspect worktrees before cleanup",
+      "upstream_ids": [
+        8
+      ],
+      "disposition": "adapted",
+      "rationale": "Copilot-specific authority or runtime wording updated while preserving the observed failure and permanent ID."
+    },
+    {
+      "id": 8,
+      "title": "Delete task branches after verified integration",
+      "upstream_ids": [
+        15
+      ],
+      "disposition": "adapted",
+      "rationale": "Copilot-specific authority or runtime wording updated while preserving the observed failure and permanent ID."
+    },
+    {
+      "id": 9,
+      "title": "Commit or preserve intended work before pulling",
+      "upstream_ids": [
+        33
+      ],
+      "disposition": "adapted",
+      "rationale": "Copilot-specific authority or runtime wording updated while preserving the observed failure and permanent ID."
+    },
+    {
+      "id": 10,
+      "title": "Push specific tags, not `--tags`",
+      "upstream_ids": [
+        48
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 11,
+      "title": "Verify current branch before committing",
+      "upstream_ids": [
+        52
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 12,
+      "title": "Don't guess `gh --json` field names",
+      "upstream_ids": [
+        9
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 13,
+      "title": "Check CI per-PR with `--json`",
+      "upstream_ids": [
+        10
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 14,
+      "title": "Don't assume GitHub labels exist",
+      "upstream_ids": [
+        56
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 15,
+      "title": "Check for existing PRs before `gh pr create`",
+      "upstream_ids": [
+        57
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 16,
+      "title": "Verify CI after an authorized push",
+      "upstream_ids": [
+        12
+      ],
+      "disposition": "adapted",
+      "rationale": "Copilot-specific authority or runtime wording updated while preserving the observed failure and permanent ID."
+    },
+    {
+      "id": 17,
+      "title": "Write tests before implementation (TDD)",
+      "upstream_ids": [
+        13
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 18,
+      "title": "Run full test suite after config changes",
+      "upstream_ids": [
+        54
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 19,
+      "title": "Run scaffolding tools before adding config files",
+      "upstream_ids": [
+        50
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 20,
+      "title": "Legacy Local prompt files need YAML frontmatter",
+      "upstream_ids": [],
+      "disposition": "deferred",
+      "rationale": "Legacy Local prompt frontmatter remains for the optional compatibility profile until P2 qualification."
+    },
+    {
+      "id": 21,
+      "title": "Use Copilot inputs in legacy Local prompts",
+      "upstream_ids": [],
+      "disposition": "deferred",
+      "rationale": "Legacy Local prompt parameter syntax remains for the optional compatibility profile until P2 qualification."
+    },
+    {
+      "id": 22,
+      "title": "Path-specific instruction files need `applyTo` in frontmatter",
+      "upstream_ids": [],
+      "disposition": "deferred",
+      "rationale": "Copilot applyTo metadata remains required for scoped instructions."
+    },
+    {
+      "id": 23,
+      "title": "Authenticate the Copilot CLI before using it in cron/launchd",
+      "upstream_ids": [],
+      "disposition": "deferred",
+      "rationale": "Copilot CLI authentication remains a native prerequisite for an authorized scheduler."
+    },
+    {
+      "id": 24,
+      "title": "Proactive compaction before auto-compaction",
+      "upstream_ids": [],
+      "disposition": "deferred",
+      "rationale": "Copilot context compaction remains a product-specific operational rule."
+    },
+    {
+      "id": 25,
+      "title": "Treat chatmode files as legacy Local surfaces",
+      "upstream_ids": [],
+      "disposition": "deferred",
+      "rationale": "Legacy chatmode discovery remains for the optional Local profile until P2 migration."
+    },
+    {
+      "id": 26,
+      "title": "Pass `{ encoding: 'utf-8' }` to `execSync`/`spawnSync`",
+      "upstream_ids": [
+        4
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 27,
+      "title": "Don't run ESM CLI tools with `node <file>`",
+      "upstream_ids": [
+        11
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 28,
+      "title": "Designate one agent as the git committer",
+      "upstream_ids": [
+        53
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 29,
+      "title": "Only the integration owner publishes",
+      "upstream_ids": [
+        55
+      ],
+      "disposition": "adapted",
+      "rationale": "Copilot-specific authority or runtime wording updated while preserving the observed failure and permanent ID."
+    },
+    {
+      "id": 30,
+      "title": "Inspect deployment topology before merging",
+      "upstream_ids": [
+        62
+      ],
+      "disposition": "adapted",
+      "rationale": "Copilot-specific authority or runtime wording updated while preserving the observed failure and permanent ID."
+    },
+    {
+      "id": 31,
+      "title": "Batch dependency updates into a single PR",
+      "upstream_ids": [
+        63
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 32,
+      "title": "Every CI run costs money -- count before triggering",
+      "upstream_ids": [
+        64
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 33,
+      "title": "Framework upgrades need runtime verification",
+      "upstream_ids": [
+        65
+      ],
+      "disposition": "adapted",
+      "rationale": "Copilot-specific authority or runtime wording updated while preserving the observed failure and permanent ID."
+    },
+    {
+      "id": 34,
+      "title": "When production is down: roll back first",
+      "upstream_ids": [
+        66
+      ],
+      "disposition": "adapted",
+      "rationale": "Copilot-specific authority or runtime wording updated while preserving the observed failure and permanent ID."
+    },
+    {
+      "id": 35,
+      "title": "Justify every external action before triggering",
+      "upstream_ids": [],
+      "disposition": "deferred",
+      "rationale": "External-action justification remains a Copilot rule even though upstream retired its old wording."
+    },
+    {
+      "id": 36,
+      "title": "Test migrations locally before pushing to remote",
+      "upstream_ids": [
+        72
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 37,
+      "title": "Disposition every confirmed finding",
+      "upstream_ids": [
+        58
+      ],
+      "disposition": "adapted",
+      "rationale": "Copilot-specific authority or runtime wording updated while preserving the observed failure and permanent ID."
+    },
+    {
+      "id": 38,
+      "title": "Every fallback path must be observable",
+      "upstream_ids": [
+        68
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 39,
+      "title": "launchd plist must not run project scripts directly",
+      "upstream_ids": [
+        38
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 40,
+      "title": "Use `--ours`/`--theirs` for unmerged files",
+      "upstream_ids": [
+        60
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 41,
+      "title": "Remove conflicting untracked files before merge",
+      "upstream_ids": [
+        61
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 42,
+      "title": "Agent report commit policy depends on repo visibility",
+      "upstream_ids": [
+        70
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 43,
+      "title": "Use timestamp-based discovery for triage, not git status",
+      "upstream_ids": [
+        71
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 44,
+      "title": "Parallel agents run scoped tests only -- full suite runs once at integration",
+      "upstream_ids": [
+        73
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 45,
+      "title": "Triage discovers Dependabot PRs",
+      "upstream_ids": [
+        84
+      ],
+      "disposition": "adapted",
+      "rationale": "Copilot-specific authority or runtime wording updated while preserving the observed failure and permanent ID."
+    },
+    {
+      "id": 46,
+      "title": "Inherit the interactive model and effort",
+      "upstream_ids": [
+        74
+      ],
+      "disposition": "adapted",
+      "rationale": "Copilot-specific authority or runtime wording updated while preserving the observed failure and permanent ID."
+    },
+    {
+      "id": 47,
+      "title": "Measure cost per outcome",
+      "upstream_ids": [
+        75
+      ],
+      "disposition": "adapted",
+      "rationale": "Copilot-specific authority or runtime wording updated while preserving the observed failure and permanent ID."
+    },
+    {
+      "id": 48,
+      "title": "Spawn agents with a terminal condition, watchdog the rest",
+      "upstream_ids": [
+        78
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 49,
+      "title": "Dedup against repo state before doing or continuing work",
+      "upstream_ids": [
+        79
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 50,
+      "title": "Verify an API supports a call before chaining on it",
+      "upstream_ids": [
+        31
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 51,
+      "title": "Format markdown tables programmatically, never by hand",
+      "upstream_ids": [
+        81
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 52,
+      "title": "No CodeQL workflow without GHAS",
+      "upstream_ids": [
+        82
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 53,
+      "title": "Review GitHub repo settings per project",
+      "upstream_ids": [
+        76
+      ],
+      "disposition": "adapted",
+      "rationale": "Copilot-specific authority or runtime wording updated while preserving the observed failure and permanent ID."
+    },
+    {
+      "id": 54,
+      "title": "No emojis in documentation",
+      "upstream_ids": [
+        77
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    },
+    {
+      "id": 55,
+      "title": "A finding's recommendation is a hypothesis, not a work order",
+      "upstream_ids": [
+        83
+      ],
+      "disposition": "retained",
+      "rationale": "Same operational meaning as upstream; Copilot ID and native examples remain authoritative."
+    }
+  ],
+  "upstream_errors": [
+    {
+      "id": 1,
+      "title": "Sibling tool call errored (parallel verification commands)",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Sibling tool call errored (parallel verification commands)\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 2,
+      "title": "Shell cwd resets to main repo when working in a worktree",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Shell cwd resets to main repo when working in a worktree\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 3,
+      "title": "Commit rejected by pre-commit hook (typecheck/lint failure)",
+      "copilot_ids": [
+        1
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #1; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 4,
+      "title": "Wrong `--json` field names for `gh` CLI commands",
+      "copilot_ids": [
+        2
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #2; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 5,
+      "title": "SyntaxError running CLI tool with `node dist/index.js`",
+      "copilot_ids": [
+        3
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #3; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 6,
+      "title": "Cannot delete branch used by a worktree during PR merge",
+      "copilot_ids": [
+        4
+      ],
+      "disposition": "adapted",
+      "rationale": "Meaning carried in Copilot error #4; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 7,
+      "title": "`execSync(...).trim is not a function` — Buffer vs string",
+      "copilot_ids": [
+        5
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #5; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 8,
+      "title": "Write/Read/Edit fail with `~` (tilde) in file paths",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Write/Read/Edit fail with `~` (tilde) in file paths\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 9,
+      "title": "`git push` rejected (non-fast-forward)",
+      "copilot_ids": [
+        6
+      ],
+      "disposition": "adapted",
+      "rationale": "Meaning carried in Copilot error #6; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 10,
+      "title": "Checking CI for multiple PRs in one jumbled command",
+      "copilot_ids": [
+        7
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #7; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 11,
+      "title": "`git worktree remove` fails on modified/untracked files, cascading failures",
+      "copilot_ids": [
+        8
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #8; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 12,
+      "title": "Push and forget — CI breaks silently",
+      "copilot_ids": [
+        9
+      ],
+      "disposition": "adapted",
+      "rationale": "Meaning carried in Copilot error #9; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 13,
+      "title": "Skipping TDD — writing implementation before tests",
+      "copilot_ids": [
+        10
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #10; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 14,
+      "title": "Suggesting manual steps instead of using available tools",
+      "copilot_ids": [
+        11
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #11; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 15,
+      "title": "`git branch -d` fails on worktree branches (not fully merged)",
+      "copilot_ids": [
+        12
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #12; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 16,
+      "title": "Commands fail because dependencies aren't installed",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Commands fail because dependencies aren't installed\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 17,
+      "title": "jq syntax error — shell escaping corrupts filter expressions",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"jq syntax error — shell escaping corrupts filter expressions\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 18,
+      "title": "Git commands fail on repo with no commits yet",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Git commands fail on repo with no commits yet\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 19,
+      "title": "API content filter blocks file creation in parallel",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"API content filter blocks file creation in parallel\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 20,
+      "title": "`gh release create --body` — wrong flag name",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"`gh release create --body` — wrong flag name\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 21,
+      "title": "`pip3 install` fails on macOS — externally-managed-environment",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"`pip3 install` fails on macOS — externally-managed-environment\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 22,
+      "title": "`rm` fails on stale file list — agent doesn't re-read directory",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"`rm` fails on stale file list — agent doesn't re-read directory\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 23,
+      "title": "`gh` command fails — agent fabricates repo/resource names",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"`gh` command fails — agent fabricates repo/resource names\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 24,
+      "title": "Cross-project `../` relative paths fail in Bash commands",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Cross-project `../` relative paths fail in Bash commands\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 25,
+      "title": "`git push` or `git pull --rebase` fails — no upstream tracking for branch",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"`git push` or `git pull --rebase` fails — no upstream tracking for branch\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 26,
+      "title": "Complex shell regex fails in zsh — special characters parsed differently",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Complex shell regex fails in zsh — special characters parsed differently\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 27,
+      "title": "Linter runs on wrong file types or fights intentional patterns",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Linter runs on wrong file types or fights intentional patterns\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 28,
+      "title": "Agent manually fixes auto-fixable linter issues instead of using `--fix`",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Agent manually fixes auto-fixable linter issues instead of using `--fix`\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 29,
+      "title": "`uv sync` fails — auto-selected Python version too new for packages",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"`uv sync` fails — auto-selected Python version too new for packages\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 30,
+      "title": "`gh pr create` before pushing branch to remote",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"`gh pr create` before pushing branch to remote\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 31,
+      "title": "Agent guesses CLI flags that don't exist on unfamiliar tools",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Agent guesses CLI flags that don't exist on unfamiliar tools\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 32,
+      "title": "`gh pr merge` fails — wrong merge method, branch not up-to-date, or auto-merge disabled",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"`gh pr merge` fails — wrong merge method, branch not up-to-date, or auto-merge disabled\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 33,
+      "title": "`git pull --rebase` fails — unstaged changes in working tree",
+      "copilot_ids": [
+        19
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #19; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 34,
+      "title": "WebFetch returns 403 — agent retries same blocked domain",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"WebFetch returns 403 — agent retries same blocked domain\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 35,
+      "title": "`gh pr checks` exit code 0 with pending checks — misread as \"all passed\"",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"`gh pr checks` exit code 0 with pending checks — misread as \"all passed\"\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 36,
+      "title": "Agent builds mega inline shell one-liner that zsh can't parse",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Agent builds mega inline shell one-liner that zsh can't parse\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 37,
+      "title": "Scheduled agent silently fails under macOS launchd",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Scheduled agent silently fails under macOS launchd\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 38,
+      "title": "Claude CLI crashes with \"Unexpected\" when plist runs script directly",
+      "copilot_ids": [
+        18
+      ],
+      "disposition": "adapted",
+      "rationale": "Meaning carried in Copilot error #18; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 39,
+      "title": "`gh` CLI fails with \"Projects (classic) deprecated\" GraphQL error",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"`gh` CLI fails with \"Projects (classic) deprecated\" GraphQL error\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 40,
+      "title": "Agent uses `python3` instead of `uv run python` — bypasses venv",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Agent uses `python3` instead of `uv run python` — bypasses venv\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 41,
+      "title": "Over-escaping `!=` as `\\!=` in inline Python — SyntaxError",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Over-escaping `!=` as `\\!=` in inline Python — SyntaxError\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 42,
+      "title": "Python script fails — package-relative imports without `-m` flag",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Python script fails — package-relative imports without `-m` flag\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 43,
+      "title": "Agent indexes JSON list with string key — TypeError",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Agent indexes JSON list with string key — TypeError\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 44,
+      "title": "`git push --tags` pushes ALL local tags — old tags cause push failure",
+      "copilot_ids": [
+        20
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #20; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 45,
+      "title": "Agent fabricates filesystem paths — \"No such file or directory\"",
+      "copilot_ids": [
+        21
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #21; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 46,
+      "title": "Scaffolding tool fails on non-empty directory",
+      "copilot_ids": [
+        22
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #22; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 47,
+      "title": "Piping API response to JSON parser without error checking",
+      "copilot_ids": [
+        23
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #23; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 48,
+      "title": "Agent commits or pushes to the wrong branch",
+      "copilot_ids": [
+        24
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #24; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 49,
+      "title": "Sub-agents create git conflicts from parallel work",
+      "copilot_ids": [
+        25
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #25; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 50,
+      "title": "Agent skips test suite after config or infrastructure changes",
+      "copilot_ids": [
+        26
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #26; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 51,
+      "title": "CI explosion from parallel agent pushes",
+      "copilot_ids": [
+        27
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #27; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 52,
+      "title": "Agent assumes GitHub labels exist when creating issues",
+      "copilot_ids": [
+        28
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #28; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 53,
+      "title": "Agent runs `gh pr create` without checking for existing PR",
+      "copilot_ids": [
+        29
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #29; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 54,
+      "title": "`git checkout --` fails on unmerged (conflicted) files",
+      "copilot_ids": [
+        30
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #30; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 55,
+      "title": "`git merge` blocked by untracked working tree files",
+      "copilot_ids": [
+        31
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #31; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 56,
+      "title": "Agent merges to `main` without understanding deployment topology",
+      "copilot_ids": [
+        32
+      ],
+      "disposition": "adapted",
+      "rationale": "Meaning carried in Copilot error #32; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 57,
+      "title": "Sequential merge cascade wastes CI resources (O(n^2) rebase storm)",
+      "copilot_ids": [
+        33
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #33; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 58,
+      "title": "Agent deploys untested code to production (no preview verification)",
+      "copilot_ids": [
+        34
+      ],
+      "disposition": "adapted",
+      "rationale": "Meaning carried in Copilot error #34; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 59,
+      "title": "Agent improvises production recovery with repeated failed deployments",
+      "copilot_ids": [
+        35
+      ],
+      "disposition": "adapted",
+      "rationale": "Meaning carried in Copilot error #35; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 60,
+      "title": "Agent treats all dependency updates as equal risk",
+      "copilot_ids": [
+        36
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #36; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 61,
+      "title": "Silent fallback masks production data failure",
+      "copilot_ids": [
+        37
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #37; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 62,
+      "title": "Agent pushes Supabase migration to remote without local testing",
+      "copilot_ids": [
+        38
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #38; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 63,
+      "title": "Parallel agents each run full test suite, exhausting local resources",
+      "copilot_ids": [
+        39
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #39; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 64,
+      "title": "Agent implements a finding's recommendation literally, breaking an invariant the fix never checked",
+      "copilot_ids": [
+        40
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot error #40; permanent Copilot numbering and native wording take precedence."
+    }
+  ],
+  "upstream_rules": [
+    {
+      "id": 1,
+      "title": "Preserve every verification exit status",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Preserve every verification exit status\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 2,
+      "title": "Use absolute paths in worktree commands",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Use absolute paths in worktree commands\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 3,
+      "title": "Resolve paths explicitly unless the specific file API promises expansion",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Resolve paths explicitly unless the specific file API promises expansion\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 4,
+      "title": "Pass `{ encoding: 'utf-8' }` to `execSync`/`spawnSync`",
+      "copilot_ids": [
+        26
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #26; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 5,
+      "title": "Run typecheck/lint before committing",
+      "copilot_ids": [
+        1
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #1; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 6,
+      "title": "Reconcile remote integration changes locally before publication",
+      "copilot_ids": [
+        5
+      ],
+      "disposition": "adapted",
+      "rationale": "Meaning carried in Copilot rule #5; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 7,
+      "title": "Preserve and integrate work before removing its worktree",
+      "copilot_ids": [
+        6
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #6; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 8,
+      "title": "Inspect worktree ownership and dirty files before cleanup",
+      "copilot_ids": [
+        7
+      ],
+      "disposition": "adapted",
+      "rationale": "Meaning carried in Copilot rule #7; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 9,
+      "title": "Don't guess `gh --json` field names",
+      "copilot_ids": [
+        12
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #12; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 10,
+      "title": "Check CI per-PR with `--json`",
+      "copilot_ids": [
+        13
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #13; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 11,
+      "title": "Inspect Node module format and generated bytes on CLI failure",
+      "copilot_ids": [
+        27
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #27; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 12,
+      "title": "Verify CI after every push",
+      "copilot_ids": [
+        16
+      ],
+      "disposition": "adapted",
+      "rationale": "Meaning carried in Copilot rule #16; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 13,
+      "title": "Write tests before implementation (TDD)",
+      "copilot_ids": [
+        17
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #17; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 14,
+      "title": "Exhaust all tools before suggesting manual steps",
+      "copilot_ids": [
+        2
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #2; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 15,
+      "title": "Use safe branch deletion after verified integration",
+      "copilot_ids": [
+        8
+      ],
+      "disposition": "adapted",
+      "rationale": "Meaning carried in Copilot rule #8; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 16,
+      "title": "Install dependencies before running commands",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Install dependencies before running commands\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 17,
+      "title": "Don't escape operators inside single-quoted jq filters",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Don't escape operators inside single-quoted jq filters\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 18,
+      "title": "Handle empty repos gracefully",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Handle empty repos gracefully\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 19,
+      "title": "Isolate an observed blocked write; preserve every batch result",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Isolate an observed blocked write; preserve every batch result\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 20,
+      "title": "`gh release create` uses `--notes`, not `--body`",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"`gh release create` uses `--notes`, not `--body`\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 21,
+      "title": "Use `brew install` instead of `pip3 install`",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Use `brew install` instead of `pip3 install`\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 22,
+      "title": "Re-read directory contents before bulk operations",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Re-read directory contents before bulk operations\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 23,
+      "title": "Don't fabricate GitHub identifiers",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Don't fabricate GitHub identifiers\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 24,
+      "title": "Use absolute paths for cross-project commands",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Use absolute paths for cross-project commands\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 25,
+      "title": "Missing upstream does not authorize working-branch publication",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Missing upstream does not authorize working-branch publication\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 26,
+      "title": "Separate shell quoting from regex executable support",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Separate shell quoting from regex executable support\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 27,
+      "title": "Only pass matching file types to linters",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Only pass matching file types to linters\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 28,
+      "title": "Use `--fix` for auto-fixable linter issues",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Use `--fix` for auto-fixable linter issues\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 29,
+      "title": "Honor project Python pins and supported interpreter constraints",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Honor project Python pins and supported interpreter constraints\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 30,
+      "title": "Keep working branches local; release PRs require authorization",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Keep working branches local; release PRs require authorization\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 31,
+      "title": "Run `--help` on unfamiliar CLIs before guessing flags",
+      "copilot_ids": [
+        50
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #50; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 32,
+      "title": "Check repo merge settings before `gh pr merge`",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Check repo merge settings before `gh pr merge`\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 33,
+      "title": "Commit before `git pull --rebase`",
+      "copilot_ids": [
+        9
+      ],
+      "disposition": "adapted",
+      "rationale": "Meaning carried in Copilot rule #9; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 34,
+      "title": "Diagnose HTTP 403 before changing access strategy",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Diagnose HTTP 403 before changing access strategy\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 35,
+      "title": "Handle gh checks pending exit 8 and verify expected inventory",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Handle gh checks pending exit 8 and verify expected inventory\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 36,
+      "title": "Write temp scripts instead of mega one-liners",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Write temp scripts instead of mega one-liners\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 37,
+      "title": "Diagnose the actual launchd environment and authentication",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Diagnose the actual launchd environment and authentication\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 38,
+      "title": "Reproduce launchd failures before applying the historical wrapper",
+      "copilot_ids": [
+        39
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #39; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 39,
+      "title": "Run `/simplify` after reviewer approval",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Run `/simplify` after reviewer approval\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 40,
+      "title": "Mark independent assignments within the current phase `[batch-eligible]`",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Mark independent assignments within the current phase `[batch-eligible]`\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 41,
+      "title": "Bound bulk assignments by ownership, resources and terminal conditions",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Bound bulk assignments by ownership, resources and terminal conditions\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 42,
+      "title": "Include simplification in the complete pre-launch finding loop",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Include simplification in the complete pre-launch finding loop\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 43,
+      "title": "Upgrade `gh` on \"Projects (classic) deprecated\"",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Upgrade `gh` on \"Projects (classic) deprecated\"\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 44,
+      "title": "Use `uv run python`, not bare `python3`",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Use `uv run python`, not bare `python3`\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 45,
+      "title": "Don't escape `!=` inside single-quoted strings",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Don't escape `!=` inside single-quoted strings\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 46,
+      "title": "Use `python -m` for scripts with relative imports",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Use `python -m` for scripts with relative imports\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 47,
+      "title": "Inspect JSON structure before indexing",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Inspect JSON structure before indexing\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 48,
+      "title": "Push specific tags, not `--tags`",
+      "copilot_ids": [
+        10
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #10; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 49,
+      "title": "Don't fabricate filesystem paths",
+      "copilot_ids": [
+        3
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #3; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 50,
+      "title": "Run scaffolding tools before adding config files",
+      "copilot_ids": [
+        19
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #19; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 51,
+      "title": "Save curl output before parsing",
+      "copilot_ids": [
+        4
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #4; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 52,
+      "title": "Verify current branch before committing",
+      "copilot_ids": [
+        11
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #11; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 53,
+      "title": "Only the main agent handles git commit/push",
+      "copilot_ids": [
+        28
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #28; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 54,
+      "title": "Run the full test suite after config changes",
+      "copilot_ids": [
+        18
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #18; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 55,
+      "title": "Only the main agent pushes; worktree agents commit",
+      "copilot_ids": [
+        29
+      ],
+      "disposition": "adapted",
+      "rationale": "Meaning carried in Copilot rule #29; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 56,
+      "title": "Don't assume GitHub labels exist",
+      "copilot_ids": [
+        14
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #14; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 57,
+      "title": "Check for existing PRs before `gh pr create`",
+      "copilot_ids": [
+        15
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #15; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 58,
+      "title": "Fix everything, always",
+      "copilot_ids": [
+        37
+      ],
+      "disposition": "adapted",
+      "rationale": "Meaning carried in Copilot rule #37; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 59,
+      "title": "Use `.claude/rules/` with `paths` frontmatter",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Use `.claude/rules/` with `paths` frontmatter\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 60,
+      "title": "Use `--ours`/`--theirs` for unmerged files",
+      "copilot_ids": [
+        40
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #40; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 61,
+      "title": "Preserve conflicting untracked files before merge",
+      "copilot_ids": [
+        41
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #41; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 62,
+      "title": "Merging to the production branch IS deploying",
+      "copilot_ids": [
+        30
+      ],
+      "disposition": "adapted",
+      "rationale": "Meaning carried in Copilot rule #30; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 63,
+      "title": "Batch verified dependency updates into local integration",
+      "copilot_ids": [
+        31
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #31; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 64,
+      "title": "Every CI run costs money -- count first",
+      "copilot_ids": [
+        32
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #32; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 65,
+      "title": "Run local runtime and platform packaging preflights",
+      "copilot_ids": [
+        33
+      ],
+      "disposition": "adapted",
+      "rationale": "Meaning carried in Copilot rule #33; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 66,
+      "title": "When production is down, roll back first",
+      "copilot_ids": [
+        34
+      ],
+      "disposition": "adapted",
+      "rationale": "Meaning carried in Copilot rule #34; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 68,
+      "title": "Every fallback path must be observable",
+      "copilot_ids": [
+        38
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #38; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 70,
+      "title": "Report commit policy depends on repo visibility",
+      "copilot_ids": [
+        42
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #42; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 71,
+      "title": "Use timestamp-based discovery for triage",
+      "copilot_ids": [
+        43
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #43; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 72,
+      "title": "Test migrations locally before pushing to remote",
+      "copilot_ids": [
+        36
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #36; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 73,
+      "title": "Parallel agents run scoped tests only",
+      "copilot_ids": [
+        44
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #44; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 74,
+      "title": "Inherit the owner pane model and effort; economy is explicit",
+      "copilot_ids": [
+        46
+      ],
+      "disposition": "adapted",
+      "rationale": "Meaning carried in Copilot rule #46; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 75,
+      "title": "Measure cost per outcome, not per token",
+      "copilot_ids": [
+        47
+      ],
+      "disposition": "adapted",
+      "rationale": "Meaning carried in Copilot rule #47; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 76,
+      "title": "Standardize GitHub repo settings per project",
+      "copilot_ids": [
+        53
+      ],
+      "disposition": "adapted",
+      "rationale": "Meaning carried in Copilot rule #53; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 77,
+      "title": "No emojis in documentation",
+      "copilot_ids": [
+        54
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #54; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 78,
+      "title": "Spawn agents with a terminal condition",
+      "copilot_ids": [
+        48
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #48; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 79,
+      "title": "Dedup against repo state before continuing work",
+      "copilot_ids": [
+        49
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #49; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 81,
+      "title": "Format markdown tables programmatically",
+      "copilot_ids": [
+        51
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #51; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 82,
+      "title": "Check code-scanning product eligibility and caller permissions",
+      "copilot_ids": [
+        52
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #52; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 83,
+      "title": "A finding's recommendation is a hypothesis",
+      "copilot_ids": [
+        55
+      ],
+      "disposition": "adopted",
+      "rationale": "Meaning carried in Copilot rule #55; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 84,
+      "title": "Triage processes Dependabot PRs",
+      "copilot_ids": [
+        45
+      ],
+      "disposition": "adapted",
+      "rationale": "Meaning carried in Copilot rule #45; permanent Copilot numbering and native wording take precedence."
+    },
+    {
+      "id": 85,
+      "title": "Scope each WebMCP tool to one function",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Scope each WebMCP tool to one function\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 86,
+      "title": "Name agent tools by effect -- execute vs initiate",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Name agent tools by effect -- execute vs initiate\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 87,
+      "title": "Take raw user input; don't make the agent compute",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Take raw user input; don't make the agent compute\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 88,
+      "title": "Validate strictly in code, loosely in schema",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Validate strictly in code, loosely in schema\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 89,
+      "title": "A tool error is a recovery instruction, not a stack trace",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"A tool error is a recovery instruction, not a stack trace\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 90,
+      "title": "Register and unregister tools with page state",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Register and unregister tools with page state\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 91,
+      "title": "Confine the pre-standard modelContext global to one adapter",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Confine the pre-standard modelContext global to one adapter\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 92,
+      "title": "Role-play and ship an eval before shipping a tool",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Role-play and ship an eval before shipping a tool\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 93,
+      "title": "Mock only what you do not own",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Mock only what you do not own\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 94,
+      "title": "Every assertion must be able to fail",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Every assertion must be able to fail\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    },
+    {
+      "id": 95,
+      "title": "Coverage is evidence, not a target",
+      "copilot_ids": [],
+      "disposition": "deferred",
+      "rationale": "Upstream case \"Coverage is evidence, not a target\" has no equivalent observed Copilot catalog item in source 2.1.0. Review its domain or tool applicability before assigning a new permanent Copilot ID."
+    }
+  ],
+  "retirements": {
+    "copilot_errors": [],
+    "copilot_rules": [],
+    "upstream_rules": [
+      67,
+      69,
+      80
+    ]
+  }
+}

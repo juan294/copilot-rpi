@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:copilot-rpi:upstream:cc-rpi-lock:v1",
+  "title": "Pinned cc-rpi intake lock",
+  "type": "object",
+  "required": ["schema_version", "upstream", "components", "catalog", "crosswalk"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": 1 },
+    "upstream": {
+      "type": "object",
+      "required": ["repository", "commit", "version", "license", "note"],
+      "additionalProperties": false,
+      "properties": {
+        "repository": { "const": "cc-rpi" },
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "version": { "type": "string" },
+        "license": { "const": "LICENSE" },
+        "note": { "type": "string", "minLength": 1 }
+      }
+    },
+    "components": {
+      "type": "array",
+      "minItems": 61,
+      "items": { "$ref": "#/$defs/component" }
+    },
+    "catalog": {
+      "type": "array",
+      "minItems": 156,
+      "items": { "$ref": "#/$defs/catalog_entry" }
+    },
+    "crosswalk": {
+      "type": "object",
+      "required": ["path", "sha256"],
+      "additionalProperties": false,
+      "properties": {
+        "path": { "const": "docs/upstream-catalog-crosswalk.json" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "component": {
+      "type": "object",
+      "required": ["id", "kind", "source", "source_sha256", "disposition", "rationale", "destination", "destination_sha256", "adaptation_note"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "minLength": 1 },
+        "source_sha256": { "$ref": "#/$defs/sha256" },
+        "disposition": { "enum": ["adopted", "adapted", "deferred", "inapplicable"] },
+        "rationale": { "type": "string", "minLength": 1 },
+        "destination": { "type": ["string", "null"] },
+        "destination_sha256": { "oneOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] },
+        "adaptation_note": { "type": ["string", "null"] }
+      }
+    },
+    "catalog_entry": {
+      "type": "object",
+      "required": ["id", "source", "title", "source_sha256", "disposition", "rationale", "copilot_ids", "destination", "destination_sha256"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "source_sha256": { "$ref": "#/$defs/sha256" },
+        "disposition": { "enum": ["adopted", "adapted", "deferred", "inapplicable"] },
+        "rationale": { "type": "string", "minLength": 1 },
+        "copilot_ids": { "type": "array", "items": { "type": "integer" } },
+        "destination": { "type": ["string", "null"] },
+        "destination_sha256": { "oneOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] }
+      }
+    }
+  }
+}

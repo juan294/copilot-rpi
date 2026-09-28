@@ -1,0 +1,10 @@
+{
+  "id": "blocking_cache",
+  "request": "A cache can block deployment after a failed run.",
+  "skill": "rpi-plan",
+  "expected_artifact_fields": ["prevention criterion", "recovery path", "failure test", "reentry test"],
+  "required_clauses": ["prevention", "recovery", "re-entry"],
+  "positive_example": "The plan tests both prevention and recovery from an already blocked state.",
+  "negative_example": "The plan only prevents new cache failures and leaves existing blockage unresolved.",
+  "prohibited_claims": ["Prevented means recovered", "The stale cache cannot recur"]
+}

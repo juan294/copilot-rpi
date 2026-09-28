@@ -1,0 +1,10 @@
+{
+  "id": "stale_handoff",
+  "request": "Resume from a handoff whose recorded commit differs from the worktree.",
+  "skill": "rpi-implement",
+  "expected_artifact_fields": ["recorded identity", "actual identity", "changed inputs", "invalidated checks"],
+  "required_clauses": ["handoff", "revalidate", "actual worktree"],
+  "positive_example": "The agent inspects actual refs and files before reusing prior test evidence.",
+  "negative_example": "The agent trusts the old green receipt and starts a dependent phase.",
+  "prohibited_claims": ["Prior checks are current", "No recheck needed"]
+}

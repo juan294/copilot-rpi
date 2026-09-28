@@ -10,10 +10,10 @@
 4. **[agent-design.md](agent-design.md)** — Documentarian rule, tool restrictions, research catalog, parallel work patterns, autonomy principles.
 5. **[pseudocode-notation.md](pseudocode-notation.md)** — Compact notation for writing implementation plans.
 6. **[testing.md](testing.md)** — Automated-first verification hierarchy, TDD protocol, and success criteria format.
-7. **[push-accountability.md](push-accountability.md)** — Post-push CI ownership: background polling, fix-and-repush cycle.
+7. **[push-accountability.md](push-accountability.md)** — Exact-commit CI verification after an authorized push, with local diagnosis of failures.
 8. **[ci-and-guardrails.md](ci-and-guardrails.md)** — Pre-commit hooks, CI workflows, development guardrails, enforcement stack.
 9. **[scheduled-agents.md](scheduled-agents.md)** — Recurring quality agents on cron/launchd, shared context system.
-10. **[cost-monitoring.md](cost-monitoring.md)** — Model economics: cost pools, model-tier binding, access tiers, and measuring cost-per-outcome.
+10. **[cost-monitoring.md](cost-monitoring.md)** — Interactive model inheritance and measured cost per outcome.
 11. **[error-success-logging.md](error-success-logging.md)** — Framework for systematic skill improvement through logging.
 
 ## The One-Paragraph Summary

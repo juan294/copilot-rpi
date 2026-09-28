@@ -128,7 +128,7 @@ This is why the RPI phases are separate conversations, not one long session.
 
 ## Research on Main, Implement in Branches
 
-Research and planning should happen on the `main`/`develop` branch — they don't modify code, so there's no risk. Implementation should happen in a feature branch, keeping the default branch clean. This also means multiple research/planning sessions can happen in parallel without conflicts.
+Research and planning use the local integration branch. Implementation uses a task worktree or temporary branch, then integrates completed work locally into `main`. This also means multiple research/planning sessions can happen in parallel without conflicts.
 
 ## Multiple Research Passes
 
@@ -220,21 +220,23 @@ Context doesn't have to be managed only through RPI phases. Copilot provides ses
 For CI pipelines, batch operations, and scaling beyond a single session:
 
 - **`copilot -p "prompt"`** — Run Copilot headlessly without an interactive session. The `@github/copilot` CLI.
-- **Fan-out pattern** — Generate a task list, then loop: `for file in $(cat files.txt); do copilot -p "Migrate $file"; done`
+- **Bounded local fan-out** — Assign independent units within one phase, with distinct file ownership, resource limits and terminal conditions. Keep at most three implementers.
 - **Writer/Reviewer pattern** — Run two sessions: one implements, another reviews the implementation in fresh context (unbiased by having written it).
-- **`@copilot` cloud agent** — Assign a GitHub Issue to the `@copilot` cloud agent for async implementation. Unique to Copilot — not possible in other tools.
+- **Optional cloud agent** — An explicitly authorized cloud profile may create an issue and PR after setup qualification. Local RPI never delegates to cloud implicitly.
 
 ## Configuration Surfaces
 
-Copilot has 7 distinct configuration files, each serving a different purpose:
+Copilot uses several configuration surfaces. Canonical workflows render as project skills; legacy Local prompts and chatmodes are optional compatibility output:
 
 | File | Scope | Purpose |
 |------|-------|---------|
 | **`AGENTS.md`** | Cross-tool (root) | Primary instruction file. Read by Copilot, Claude Code, Cursor, Gemini CLI. |
 | **`.github/copilot-instructions.md`** | Copilot-only (global) | Copilot-specific addenda. Loaded every Copilot session alongside AGENTS.md. |
 | **`.github/instructions/*.instructions.md`** | Copilot-only (path-specific) | Auto-loaded when files matching the `applyTo` glob are in context. |
-| **`.github/prompts/*.prompt.md`** | Copilot-only (commands) | Reusable prompts invoked with `/` in chat. YAML frontmatter for metadata. |
-| **`.github/chatmodes/*.chatmode.md`** | Copilot-only (personas) | Specialized chat personas with behavioral constraints and tool restrictions. |
+| **`.github/skills/*/SKILL.md`** | Copilot project workflows | Canonical workflow bodies and bundled resources. |
+| **`.github/agents/*.agent.md`** | Copilot role profiles | Scoped specialist roles selected when applicable. |
+| **`.github/prompts/*.prompt.md`** | Optional VS Code Local compatibility | Thin legacy wrappers, generated only for that profile. |
+| **`.github/chatmodes/*.chatmode.md`** | Legacy Local compatibility | Existing entries remain until migration; not the primary role profile. |
 | **`.vscode/settings.json`** | VS Code (shared) | Model selection, Copilot feature flags, editor behavior. |
 | **`.vscode/mcp.json`** | VS Code (shared) | MCP server configuration for external tool access. |
 
@@ -254,34 +256,9 @@ Configure `.vscode/settings.json` to control Copilot behavior:
 }
 ```
 
-### Model Selection — Tier Each Workflow
+### Model Selection
 
-Model choice is the biggest single lever on your inferencing bill. The same task on a frontier model can cost 10-30x what it costs on a fast model, and for most of the RPI loop the frontier model buys you nothing — `/status` does not reason, it summarizes. The discipline: **explore once at frontier cost, then run the codified loop on the cheapest model that still does the job.**
-
-Every prompt in this blueprint declares a **model tier** on the line directly under its frontmatter (e.g. `Model tier: **sonnet**`). Three tiers:
-
-| Tier | Use for | Prompts | Why |
-|------|---------|---------|-----|
-| **opus** (frontier) | Deep reasoning where a bad output amplifies downstream | `/research`, `/plan`, `/pre-launch` | A bad line of research → thousands of bad lines of code. Spend here. |
-| **sonnet** (mid) | Building and executing against a reviewed plan | `/implement`, `/validate`, `/quality-review`, `/remediate`, `/fix-ci`, `/triage`, `/bootstrap`, `/adopt`, `/detach`, `/release`, `/update-docs`, `/update` | The plan already removed the ambiguity; this tier executes it reliably. |
-| **haiku** (floor) | Mechanical read-and-summarize, no judgment | `/status`, `/describe-pr` | Deterministic-ish output. Frontier models are pure waste here. |
-
-**The blueprint pins the tier; you bind the concrete model.** Tier names (opus/sonnet/haiku) keep the prompt files portable across orgs and survive model renames. On adoption, map each tier to a concrete model your org has access to, and bind it so the choice is enforced rather than left to whatever model a developer happens to have selected:
-
-| Tier | Bind to (fill in for your org) | Example |
-|------|-------------------------------|---------|
-| opus | *your most capable model* | Claude Opus 4.x · GPT-5.5 |
-| sonnet | *your mid / default coding model* | Claude Sonnet 4.x · GPT-5.4 |
-| haiku | *your cheapest versatile model* | Claude Haiku 4.x · GPT-5.4 mini |
-
-Bind it in one of two places:
-
-- **Per-prompt (strongest):** set the `model:` frontmatter field in each `.prompt.md` to your org's concrete model for that tier. The choice travels with the workflow and re-applies every time anyone runs it.
-- **Centrally:** set the default model in `.vscode/settings.json` and switch per-session to match the tier line. Lower friction, weaker enforcement.
-
-**Subagents inherit the tier.** Fan-out prompts spawn helpers — `/pre-launch`'s 8 specialists, `/remediate`'s parallel TDD agents, `/triage`'s sub-tasks. A frontier parent that spawns 8 frontier children multiplies the bill by 8. Pin spawned agents to the same tier as their workflow (or lower) unless a child genuinely needs to reason at a higher tier.
-
-**Override upward, never silently downward.** The tier is the default, not a ceiling. If a task turns out harder than its tier — gnarly `/implement` phase, a `/validate` that uncovers a design flaw — bump that session up a tier and note why. Never quietly drop a workflow below its declared tier to save tokens; that trades a small bill for a large downstream error. See [cost-monitoring.md](cost-monitoring.md) for measuring whether a tier change actually paid back.
+Interactive workflows inherit the model and effort the owner selected in the current Copilot session. Skills state the task and acceptance contract; they do not bind a model tier. A scheduled job can record an owner-selected concrete model for reproducibility, but installation never starts inference or chooses a paid model. Measure cost from observed outcomes where possible; see [cost-monitoring.md](cost-monitoring.md).
 
 ### MCP Servers
 

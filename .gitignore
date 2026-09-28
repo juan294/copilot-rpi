@@ -17,8 +17,14 @@ Desktop.ini
 
 # Node (if used for linting tools)
 node_modules/
-package-lock.json
+# The lint toolchain is pinned for repeatable local verification.
+!package-lock.json
 yarn.lock
+
+# Python development caches
+__pycache__/
+*.pyc
+.venv/
 
 # Environment
 .env
@@ -28,9 +34,13 @@ yarn.lock
 docs/agents/
 logs/
 scripts/agents/
+.rpi/local/
 
 # Internal working docs
 docs/research/
+!docs/research/
+docs/research/*
+!docs/research/2026-09-28-blueprint-sync-state.md
 docs/decisions/
 
 # Plans stay local, but the deviation log /implement writes must survive to
@@ -38,3 +48,7 @@ docs/decisions/
 # DIRECTORY is excluded, so the obvious `docs/plans/` + negation does nothing.
 docs/plans/*
 !docs/plans/*-notes.md
+!docs/plans/2026-09-28-copilot-blueprint-modernization.md
+!docs/plans/2026-09-28-copilot-blueprint-modernization-phases/
+docs/plans/2026-09-28-copilot-blueprint-modernization-phases/*
+!docs/plans/2026-09-28-copilot-blueprint-modernization-phases/phase-*.md

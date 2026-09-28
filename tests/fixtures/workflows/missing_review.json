@@ -1,0 +1,10 @@
+{
+  "id": "missing_review",
+  "request": "Implementation tests pass, but the independent reviewer did not return.",
+  "skill": "rpi-implement",
+  "expected_artifact_fields": ["candidate identity", "test results", "review status", "coverage gap"],
+  "required_clauses": ["independent review", "missing", "blocks acceptance"],
+  "positive_example": "The phase remains pending; obtain a fresh independent review before acceptance.",
+  "negative_example": "The author self-reviews and declares the phase accepted.",
+  "prohibited_claims": ["Review passed", "Phase complete"]
+}

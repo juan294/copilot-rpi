@@ -15,15 +15,15 @@ Stack: `[node]` `[python]` `[macos]` `[github]` (omitted = all stacks)
 
 ## Git
 
-5. **Pull before push** `[universal]` -- remote may have advanced from other sessions or parallel agents.
+5. **Reconcile before an authorized push** `[universal]` -- preserve local work, inspect the current remote integration ref, and reconcile divergence before publishing the completed integration branch.
 
-6. **Remove worktrees before merging PRs with `--delete-branch`** `[frequent]` -- Git can't delete a branch checked out in a worktree.
+6. **Preserve and integrate work before removing worktrees** `[frequent]` -- Git cannot delete a checked-out branch, but cleanup follows proof that task work, untracked files, and handoffs are preserved.
 
-7. **Force-remove worktrees** `[frequent]` -- worktrees have build artifacts/node_modules. Use `git worktree remove --force` with `;` not `&&` for multiple removals.
+7. **Inspect worktrees before cleanup** `[frequent]` -- preserve intended changes and unknown artifacts. Remove only task-owned worktrees after verified integration; use `--force` only after reviewing what it would discard.
 
-8. **Use `git branch -D` (uppercase) for worktree branches** `[frequent]` -- squash merges and deleted remotes make `-d` fail with "not fully merged." Full cleanup: `git worktree remove --force <path>; git branch -D <branch>`.
+8. **Delete task branches after verified integration** `[frequent]` -- try safe deletion first. Use `-D` only when squash integration is proven and the branch has no unique work.
 
-9. **Commit or stash before `git pull --rebase`** `[universal]` -- fails with a dirty working tree. Push recipe: `git add <files> && git commit -m "msg" && git pull --rebase && git push`. Single most-repeated agent error.
+9. **Commit or preserve intended work before pulling** `[universal]` -- `git pull --rebase` refuses a dirty tree. Reconcile only after inspecting both refs; push needs separate authority.
 
 10. **Push specific tags, not `--tags`** `[universal]` -- `--tags` pushes ALL local tags. If any old tag exists on remote, git exits non-zero. Use `git push origin <tag>` or `--follow-tags`.
 
@@ -41,7 +41,7 @@ Stack: `[node]` `[python]` `[macos]` `[github]` (omitted = all stacks)
 
 ## CI & Verification
 
-16. **Verify CI after every push** `[universal]` -- if CI fails, investigate and re-push. The push is not done until CI is green.
+16. **Verify CI after an authorized push** `[universal]` -- inspect every expected workflow for the exact pushed commit. Diagnose failures from logs and reproduce locally; report the failed remote result before another remote action.
 
 17. **Write tests before implementation (TDD)** `[universal]` -- Red-Green-Refactor. Bug fixes need a regression test first.
 
@@ -51,9 +51,9 @@ Stack: `[node]` `[python]` `[macos]` `[github]` (omitted = all stacks)
 
 ## Copilot-Specific
 
-20. **Include YAML frontmatter in `.prompt.md` files** `[universal]` -- prompt files without frontmatter won't appear in the `/` command menu. At minimum include `mode: agent` (or `mode: ask` for read-only prompts). The `description` field is required for discoverability.
+20. **Legacy Local prompt files need YAML frontmatter** `[situational]` -- when the optional VS Code Local prompt profile is selected, keep valid `description` and supported mode metadata. Canonical workflows use `.github/skills/`.
 
-21. **Use `${input:variableName}` for prompt parameters, not `$ARGUMENTS`** `[universal]` -- Copilot prompt files use `${input:varName}` syntax. The `$ARGUMENTS` pattern is Claude Code-specific and won't work.
+21. **Use Copilot inputs in legacy Local prompts** `[situational]` -- optional `.prompt.md` wrappers use `${input:varName}` rather than Claude Code `$ARGUMENTS`; canonical skills carry the workflow body.
 
 22. **Path-specific instruction files need `applyTo` in frontmatter** `[frequent]` -- `.github/instructions/*.instructions.md` files are ignored if they lack the `applyTo` glob pattern. No `applyTo` = never loaded.
 
@@ -61,7 +61,7 @@ Stack: `[node]` `[python]` `[macos]` `[github]` (omitted = all stacks)
 
 24. **Proactive compaction before auto-compaction** `[universal]` -- Copilot auto-compacts at ~95% context usage, but quality degrades well before that. Write a handoff document and start a new Chat window at ~60% usage.
 
-25. **Chat mode files must be in `.github/chatmodes/`** `[universal]` -- placing them anywhere else (e.g., `.github/prompts/` or project root) means they won't appear as selectable chat modes in VS Code.
+25. **Treat chatmode files as legacy Local surfaces** `[situational]` -- preserve existing `.github/chatmodes/` entries until migration and native qualification; current role profiles render as `.github/agents/`.
 
 ## Node.js / TypeScript
 
@@ -73,7 +73,7 @@ Stack: `[node]` `[python]` `[macos]` `[github]` (omitted = all stacks)
 
 28. **Designate one agent as the git committer** `[universal]` -- sub-agents write changes; the committing agent reviews, tests, and commits centrally. Prevents wrong-branch pushes and merge conflicts.
 
-29. **Only the main agent pushes -- worktree agents commit locally** `[universal]` -- N independent pushes trigger N x M CI runs. Agents commit locally, main agent batch-pushes all branches, creates PRs, monitors CI centrally.
+29. **Only the integration owner publishes** `[universal]` -- working branches stay local. After full local gates and trigger inspection, the owner makes the single authorized integration push and monitors its exact commit.
 
 44. **Parallel agents run scoped tests only -- full suite runs once at integration** `[universal]` -- N agents each running the full test suite creates N x workers processes that exhaust CPU/memory. Agents test only their changed files; limit concurrent agents to 3-4; run the full suite once after merging.
 
@@ -89,27 +89,27 @@ Stack: `[node]` `[python]` `[macos]` `[github]` (omitted = all stacks)
 
 ## Deployment & Resources
 
-30. **Merging to main IS deploying to production** `[universal]` -- in projects with CI/CD, a merge is a deployment. Dependabot PRs target main by default -- merging them deploys to production.
+30. **Inspect deployment topology before merging** `[universal]` -- a main merge can deploy production in some projects. This blueprint integrates locally to main; remote publication requires separate authority and trigger inspection.
 
 31. **Batch dependency updates into a single PR** `[frequent]` -- merging N PRs one-by-one with "require up-to-date" creates O(n^2) CI waste. Create one branch, apply all updates, run CI once.
 
 32. **Every CI run costs money -- count before triggering** `[universal]` -- estimate runs before starting. If >2-3, find a more efficient approach. Work locally until confident, push once.
 
-33. **Framework upgrades need preview verification** `[frequent]` -- CI passing is necessary but not sufficient. Build != Runtime. Deploy to a preview URL and verify the site loads before merging.
+33. **Framework upgrades need runtime verification** `[frequent]` -- CI and build checks cannot prove runtime behavior. Use local or already authorized test environments; never create a Vercel Preview for an experiment.
 
-34. **When production is down: roll back first** `[universal]` -- restore service immediately. Investigate on a non-production environment. Fix forward on develop, verify on preview, release to main.
+34. **When production is down: roll back first** `[universal]` -- restore service through the authorized recovery path, then investigate locally or in an authorized test environment.
 
 35. **Justify every external action before triggering** `[universal]` -- before any CI run, deployment, or API call: Is this needed? Is this justified? Is this verifiable? If any answer is "no", stop.
 
 52. **No CodeQL workflow without GHAS** `[github]` -- a code-scanning workflow fails CI on every push unless GitHub Advanced Security is enabled. Confirm first (`gh api repos/{owner}/{repo}/code-scanning/alerts` returns non-403) before adding the workflow. GHAS is free on public repos but a paid add-on on private repos -- on private, enabling it is a human cost decision, not an autonomous fix. Querying existing alerts (what `/triage` does) is always safe; creating the scanner is not. See [ci-and-guardrails.md](../methodology/ci-and-guardrails.md).
 
-53. **Standardize GitHub repo settings for every project** `[universal]` `[github]` -- apply the canonical configuration at setup so bootstrapped repos don't drift: squash-merge only (disable merge commits and rebase merges), auto-merge enabled, delete-branch-on-merge enabled, Dependabot alerts + security update PRs on, and the Production deployment environment restricted to protected branches only. Squash-only is why worktree cleanup needs `git branch -D` and why `develop` -> `main` release PRs must NOT use `--delete-branch`. Configure via `gh api -X PATCH repos/{owner}/{repo} -f allow_squash_merge=true -f allow_merge_commit=false -f allow_rebase_merge=false -f delete_branch_on_merge=true -f allow_auto_merge=true`.
+53. **Review GitHub repo settings per project** `[universal]` `[github]` -- inspect merge methods, branch protection, Dependabot, and deployment environments against that project's topology. Changing remote settings requires explicit authority; do not enable auto-merge as a blueprint default.
 
 ## Cost & Models
 
-46. **Pin a model tier to every workflow** `[universal]` -- model choice is the biggest lever on the inference bill. Each prompt declares a `Model tier` (opus/sonnet/haiku); bind each tier to a concrete model and run the floor by default. Frontier is for `/research` and `/plan` only. Subagents inherit their workflow's tier. Override upward when a task proves harder; never silently downward. See [cost-monitoring.md](../methodology/cost-monitoring.md).
+46. **Inherit the interactive model and effort** `[universal]` -- workflows use the owner-selected session model. Scheduled jobs may record an owner-selected model for reproducibility; installation never chooses a paid model or starts inference. See [cost-monitoring.md](../methodology/cost-monitoring.md).
 
-47. **Measure cost per outcome before betting beyond the floor** `[frequent]` -- track cost per merged PR and per workflow run, not per token. Stand up the weekly cost-report agent before investing in custom agents or large fan-outs, so you can confirm net-positive ROI instead of assuming it.
+47. **Measure cost per outcome** `[frequent]` -- use observed billing data and completed outcomes where available. Mark unavailable attribution unmeasured; require an explicit decision before paid fan-out or scheduled inference.
 
 ## Supabase
 
@@ -117,7 +117,7 @@ Stack: `[node]` `[python]` `[macos]` `[github]` (omitted = all stacks)
 
 ## Quality & Process
 
-37. **Fix everything, always** `[universal]` -- categorize by severity, but fix 100%. With AI agents, fix cost is near-zero.
+37. **Disposition every confirmed finding** `[universal]` -- resolve actionable findings, reject false positives with evidence, and record strategic decisions for owner review.
 
 54. **No emojis in documentation** `[universal]` -- use text equivalents (PASS, `[x]`, `->`), not emoji/pictographs. Arrows, dashes, and box-drawing characters are allowed. Markdown CI lints structure but does not block emoji, so this is a discipline rule -- keep docs plain text.
 
@@ -143,7 +143,7 @@ Stack: `[node]` `[python]` `[macos]` `[github]` (omitted = all stacks)
 
 43. **Use timestamp-based discovery for triage, not git status** `[universal]` -- touch `docs/agents/.last-triage` after each triage run. Next triage discovers new reports with `find docs/agents/ -name "*-report.md" -newer docs/agents/.last-triage`. On first run (no marker), process all reports.
 
-45. **Triage processes Dependabot PRs** `[frequent]` `[github]` -- `/triage` scans `gh pr list --author "app/dependabot"` in Step 1 Discovery and processes them after the triage commit is pushed. Patch and minor with green CI auto-merge via `gh pr merge --squash --auto --delete-branch`. Major bumps defer for human review. CI red with an obvious fix (snapshot/lockfile drift, generated files) gets one fix attempt before deferring. Conflicts get one rebase via `gh pr update-branch`, then re-evaluated. Dependabot processing happens last so a flaky dependency PR can't block triage code fixes.
+45. **Triage discovers Dependabot PRs** `[frequent]` `[github]` -- inspect PRs and checks read-only. Record risk and a proposed disposition; merge, rebase, issue mutation, and automatic fixes require their own authority.
 
 ---
 

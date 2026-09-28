@@ -43,7 +43,7 @@ This means the error prevention system needs three tiers, not one:
 
 Rules should graduate upward: a pattern documented in tier 3 that keeps recurring should be promoted to tier 2 (recipe) or tier 1 (hook).
 
-**Copilot-specific limitation:** Unlike some coding agents that support command-interception hooks (PreToolUse), Copilot and VS Code do not intercept terminal commands before execution. This means Tier 1 enforcement is limited to git hooks (pre-commit, pre-push) and CI — there is no agent-time interception layer. Tier 2 (recipes) is therefore more critical for Copilot users.
+**Copilot hook boundary:** Native hook support depends on the selected Copilot client, profile, registration and trust. Hooks are optional supplemental controls; a configured hook is not proven enforcement. Verify invocation and timeout behavior in the actual harness. Git hooks and CI operate at different points, and the opt-in receipt gate is not installed automatically.
 
 ### Command Recipes (Tier 2)
 
@@ -54,14 +54,15 @@ AGENTS.md should provide compound command sequences the agent copies as a unit, 
 "Always git pull --rebase before pushing"
 
 # Command recipe (agent copies this):
-git add <files> && git commit -m "msg" && git pull --rebase && git push
+git add <files> && git commit -m "msg"
+# Reconcile remote integration changes only before an authorized push.
 ```
 
 The recipe encodes the correct sequence — commit first, then pull, then push — as a single block. The agent doesn't need to remember the ordering; it copies the recipe.
 
 ## Pre-Commit Hooks
 
-Pre-commit hooks run automatically before every commit and reject the commit if any check fails.
+An installed, enabled pre-commit hook runs before a commit and can reject it when checks fail. Inspect actual registration before claiming enforcement.
 
 ### Setup
 
@@ -86,7 +87,7 @@ echo "pnpm run typecheck && pnpm run lint" > .husky/pre-commit
 
 ### Agent Interaction
 
-Agents must run the same checks pre-commit hooks run **before** attempting to commit (see [quick-reference.md rule #5](../patterns/quick-reference.md)). This avoids the wasted cycle of: commit → hook fails → fix → re-commit.
+Agents should run the applicable checks **before** attempting to commit (see [quick-reference.md rule #1](../patterns/quick-reference.md)). This avoids the wasted cycle of: commit → hook fails → fix → re-commit.
 
 ```bash
 # Agent workflow before committing:
@@ -97,7 +98,7 @@ git add <files> && git commit -m "..."         # Then commit (hook will pass)
 
 ## CI Workflows
 
-CI workflows run on every push and PR. They are the authoritative verification — if CI is green, the code is shippable.
+CI workflows run when their configured triggers fire. A green run for the exact candidate is evidence for its checks; local gates and runtime verification may still be required.
 
 ### Recommended CI Pipeline
 
@@ -145,9 +146,7 @@ Beyond automated checks, guardrails include process rules that prevent common mi
 
 ### Branch Protection
 
-- **Production branch** (`main`/`master`) — Protected. No direct pushes. PRs only, with required CI and review.
-- **Development branch** (`develop`) — Semi-protected. Agents can push directly, but push accountability monitors CI.
-- **Feature branches** — Unprotected. Agents create, push, and clean up freely.
+Inspect the target project's branch, CI, and deployment topology before publication. For this blueprint, implement in local task worktrees and integrate completed work into local `main`. Keep working branches local. A remote push, PR, release, or deployment needs authorization and trigger inspection.
 
 ### Environment Safety
 

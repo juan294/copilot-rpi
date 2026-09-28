@@ -1,160 +1,21 @@
 # Push Accountability
 
-> Every push to the development branch requires CI verification. No exceptions. No matter how small the change.
+Complete local verification on the final candidate before any publication. Inspect workflow and deployment triggers, then publish only the completed integration branch when the owner has authorized that remote action. Working branches and worktrees stay local.
 
-## The Problem
+## Exact-commit verification
 
-Without push accountability, the most common failure mode is "push and forget" — the agent pushes code, moves on to the next task, and never checks whether CI passed. By the time someone notices, multiple commits may have piled on top of a broken build.
+After an authorized push, record the pushed commit SHA and inspect every expected workflow for that SHA. A green run for another commit, a pending run, or an absent run does not prove this push passed. Read failed logs and reproduce the failure locally. Report the remote result and local diagnosis to the owner. A rerun, fix-and-repush cycle, PR, tag, release, or deployment is a new remote action and needs its own authorization.
 
-## The Protocol
+The monitor is read-only. It may use `gh run list --commit <sha>` and `gh run view <run-id> --log-failed`, then compare the expected workflow names and conclusions to the recorded push. If no workflow is expected, record the trigger inspection and mark CI N/A rather than inventing a pass.
 
-After ANY push to the development branch, the agent must verify that CI passes. This happens as a **background task** so the main terminal stays unblocked.
+## Local repair
 
-### Sequence
-
-```text
-1. Agent pushes to develop
-   └─> Immediately spawns a background verification process
-
-2. Background process polls CI status
-   └─> gh run list --branch develop --limit 5
-   └─> Repeat every 30-60 seconds until the run completes
-
-3a. CI passes
-    └─> Log success, no interruption needed
-
-3b. CI fails
-    └─> Investigate: gh run view <run-id> --log-failed
-    └─> Diagnose the root cause from the logs
-    └─> Fix the issue in the same branch
-    └─> Push the fix
-    └─> Return to step 2 (poll again)
-```
-
-### Background Process Pattern
-
-```bash
-# Spawn as a background process after every push:
-# - Polls CI until completion
-# - On failure: reads logs, fixes, re-pushes
-# - On success: logs and exits
-# - Never touches production branches
-```
-
-In GitHub Copilot CLI, this maps to a background `copilot -p` process:
-
-```bash
-# Run in a separate terminal or as a background process:
-copilot -p "Monitor CI for the latest push to develop. Poll gh run list --branch develop --limit 1 every 30 seconds until it completes. If it fails, run gh run view <id> --log-failed, diagnose the issue, fix it, and push again. If it passes, report success. Never push to main."
-```
-
-Alternatively, use a simple shell loop for CI polling and only invoke the agent for diagnosis and fixes:
-
-```bash
-# Poll CI in a shell loop, invoke agent only on failure:
-while true; do
-  STATUS=$(gh run list --branch develop --limit 1 --json conclusion,status --jq '.[0]')
-  if echo "$STATUS" | grep -q '"completed"'; then
-    if echo "$STATUS" | grep -q '"success"'; then
-      echo "CI passed"; break
-    else
-      RUN_ID=$(gh run list --branch develop --limit 1 --json databaseId --jq '.[0].databaseId')
-      copilot -p "CI failed on develop. Run: gh run view $RUN_ID --log-failed. Diagnose and fix the issue, then push the fix."
-      break
-    fi
-  fi
-  sleep 30
-done
-```
-
-## Rules
-
-1. **Every push gets a monitor.** No exceptions. Even single-line changes can break CI if they affect types, imports, or test fixtures.
-2. **Background, not blocking.** The main terminal continues working on the next task immediately. The background process owns the push outcome.
-3. **Fix and re-push.** If CI fails, the background process fixes the issue and pushes again. It doesn't report back and wait — it acts.
-4. **Never touch production.** Even if a fix seems urgent, background agents only operate on the development branch.
-5. **Conflict awareness.** If the background fix requires changes that conflict with the main terminal's current work, notify the user before applying.
-6. **Retry budget.** If CI fails 3 times after 3 fix attempts, the background agent stops and reports the issue clearly.
-
-## What CI Failure Looks Like
-
-Common CI failure categories and how to investigate:
-
-| Category | Investigation | Fix Pattern |
-|----------|--------------|-------------|
-| **Type errors** | Read the typecheck output line by line | Fix types in the reported files |
-| **Lint errors** | Read the lint output | Apply autofix or manual corrections |
-| **Test failures** | Run the specific failing test locally | Debug and fix the test or implementation |
-| **Build failures** | Read the build log for the first error | Fix import/export issues, missing deps |
-| **Dependency issues** | Check lockfile, run install | Regenerate lockfile, fix version conflicts |
-
-```bash
-# Investigation commands:
-gh run list --branch develop --limit 3 --json conclusion,status,name,databaseId
-gh run view <run-id> --log-failed 2>&1 | tail -100
-```
-
-## Self-Healing CI
-
-Push accountability's background fix loop handles simple CI failures — a single failing test, a lint error, a type mismatch. But when CI fails with multiple unrelated failures (common after config changes, dependency updates, or multi-agent work), a more aggressive approach is needed.
-
-### The Pattern
-
-Instead of fixing failures sequentially, spawn parallel fix agents — one per failure category:
-
-```text
-1. Get CI failure logs
-   └─> gh run view <run-id> --log-failed
-
-2. Parse into failure categories
-   ├─ Type errors (N files)
-   ├─ Lint errors (N files)
-   ├─ Test failures (N tests)
-   └─ Build errors
-
-3. Spawn parallel fix agents (one per category)
-   ├─ Agent 1: Fix type errors
-   ├─ Agent 2: Fix lint errors
-   ├─ Agent 3: Fix test failures (one per failing test)
-   └─ Agent 4: Fix build errors
-
-4. Combine fixes, run full suite locally
-
-5. If new failures → repeat (max 3 cycles)
-
-6. Commit and push when green
-```
-
-In Copilot, this maps to parallel `copilot -p` processes:
-
-```bash
-copilot -p "Fix the type errors in these files: [list]. Run typecheck after." &
-copilot -p "Fix the lint errors in these files: [list]. Run lint after." &
-copilot -p "Fix these failing tests: [list]. Read both the test and the source. Run each test after." &
-wait
-# Then run full suite to verify combined result
-```
-
-### Rules
-
-1. **Never weaken a test to make it pass.** Fix the source code, not the test. Deleting or weakening a test to pass CI defeats the purpose.
-2. **Fix agents read both the test and the source.** A fix agent that only reads the error message will produce shallow fixes. It must understand the intent of the failing test.
-3. **Run the full suite after combining fixes.** Individual fix agents verify their own changes, but the combined result may introduce new failures. Always run a full verification pass.
-4. **Retry budget: 3 cycles.** If the suite isn't green after 3 fix-and-verify cycles, stop and report what remains broken. Infinite loops are worse than a failing CI.
-5. **Never push to production from a fix loop.** Self-healing operates on the development branch only.
-
-### Prompt File
-
-The `/fix-ci` prompt (see `templates/prompts/fix-ci.prompt.md`) implements this pattern as a single invocation. It gets the latest CI failure, parses it, spawns fix agents, and iterates until green or the retry budget is exhausted.
-
----
+For a failed remote check, fix the diagnosed cause locally, run the complete local gate again on the changed candidate, and provide the failed run plus new local evidence. Keep the repaired candidate local until the owner authorizes another push. Do not let a background agent publish or retry by itself.
 
 ## Integration with RPI
 
-Push accountability sits between the Implement and Validate phases:
-
-1. **Implement** — Write code, run local checks, commit, push
-2. **Push accountability** — Background process verifies CI (this file)
-3. **Validate** — Human reviews the implementation against the plan
-
-The background process ensures that by the time the human reviews, CI is already green.
+1. Implement and review the phase locally.
+2. Run the local gate on the final candidate and integrate completed work locally.
+3. Inspect publication triggers and obtain the required remote authorization.
+4. After the authorized push, verify expected workflows for the exact pushed SHA.
+5. Record the result, including failures and coverage gaps, in the handoff.

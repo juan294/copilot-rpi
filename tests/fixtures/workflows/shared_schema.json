@@ -1,0 +1,10 @@
+{
+  "id": "shared_schema",
+  "request": "Change a manifest schema read by multiple workflows.",
+  "skill": "rpi-plan",
+  "expected_artifact_fields": ["schema owner", "writers", "callers", "migration acceptance"],
+  "required_clauses": ["writers", "callers", "consumer"],
+  "positive_example": "The plan names each writer and caller and verifies the changed contract end to end.",
+  "negative_example": "Only the schema definition is edited and its consumers are assumed compatible.",
+  "prohibited_claims": ["No caller impact", "A green parser test proves all consumers"]
+}

@@ -1,0 +1,492 @@
+{
+  "schema_version": 1,
+  "upstream_commit": "aa3ea57fb26ae2e1e167acada4b769e073a417f4",
+  "files": [
+    {
+      "path": ".codex/skills/codex-simplify/SKILL.md",
+      "sha256": "414ae212cd01c533e35d742292f4978fcdb4a7444dd83be57131960b3802be40"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "7784153b6b563cf7749faa3e0c24222367b4b8ffc360bb76d9b677b3baa1589d"
+    },
+    {
+      "path": "methodology/pseudocode-notation.md",
+      "sha256": "23104d62bda3299ea4e60cd4b1003ac07ee268f5be2f4683f030389e8eec3881"
+    },
+    {
+      "path": "patterns/agent-errors.md",
+      "sha256": "fc485f9de1dbc706a214601827e3bf1efbf742817f8265baf14c3a4744597eac"
+    },
+    {
+      "path": "patterns/quick-reference.md",
+      "sha256": "7b1d5b43398f0ace8c1aebc8f0fe9a00fc22e2c1104e52c46dd0c7e382eeadaa"
+    },
+    {
+      "path": "templates/adapters/claude-policy.json",
+      "sha256": "94d75d8247e87d65191a58e09317058bd3f35944e71c976b9df2b79cf4efcfaa"
+    },
+    {
+      "path": "templates/adapters/claude.json",
+      "sha256": "4cb727ff137ff6e803368ca93e13c58f71d1273b0855a5347d360fc8f46e7e4c"
+    },
+    {
+      "path": "templates/adapters/codex-hooks.json",
+      "sha256": "2ccdba1c86221ee63aeb553b7083da71f74be4e4d916d4ee13e2f84181e41210"
+    },
+    {
+      "path": "templates/adapters/codex-marketplace.json",
+      "sha256": "0bec6c044f1239a9d1adbd848db360ffa2a49265a65da50e2ef3f8d00d941a09"
+    },
+    {
+      "path": "templates/adapters/codex-permissions.rules",
+      "sha256": "9600d535733fc3a955699cec4b157eddf6ece7f2910487ef7b4dc3408ad7876a"
+    },
+    {
+      "path": "templates/adapters/codex-plugin.json",
+      "sha256": "a2ae514538d04be3d1ad804e415d1f13bfc344e312ecc0aa965e8bb2b81da682"
+    },
+    {
+      "path": "templates/adapters/codex.json",
+      "sha256": "319be40b047f3953e92d8e500e29dd482e3d096699eff33c4552d9d6b2087420"
+    },
+    {
+      "path": "templates/adapters/model-profiles.json",
+      "sha256": "f90a6aa69e80d1f65db48892fd44e2036f155d234b818857770dba49da7e68cc"
+    },
+    {
+      "path": "templates/distribution.json",
+      "sha256": "6ab6b24255380c7105412ddd101a1c455343b4154b7de89b3deddea781a026a0"
+    },
+    {
+      "path": "templates/e2e-pro-playbook-template.md",
+      "sha256": "13d2c12f46e48777e38e76f6c756cf2849b6b39269c919194a78a03d186f2194"
+    },
+    {
+      "path": "templates/hooks/guard-bash.sh",
+      "sha256": "69a49a2eece8a57fe1ff234f6d0e06e0013b9f20bdc0bdd6f1335576bcd7f419"
+    },
+    {
+      "path": "templates/hooks/verify-edit.sh",
+      "sha256": "f8bcec0eef0b62e3b0cb67a8b18f52527b9d0349210e25a347f60ef05d9d636d"
+    },
+    {
+      "path": "templates/instructions/rule-map.md",
+      "sha256": "4e0143c0c9dc7846ef73e2fe04ee70020da391c0f5b7244aa2186c7b7e41d516"
+    },
+    {
+      "path": "templates/references/dispatch.md",
+      "sha256": "60311b06204d30e2a3d980133f5b3e8a81265f2516fdc00f807d87286e727e16"
+    },
+    {
+      "path": "templates/references/handoff.md",
+      "sha256": "be95cbc66b3bcdbd256decddd759cee282ab5b5c2ab82069c392ec1b2b135aa6"
+    },
+    {
+      "path": "templates/references/triage-state.md",
+      "sha256": "9dac64bae51f6e725d1ebe7432290a171f6300178bc903e8ad495f8799df6d01"
+    },
+    {
+      "path": "templates/rules/deployment-safety.md",
+      "sha256": "fb05dc4d4a9e3c1f3061d3d591817a6a234632f25d91afda43d061992911f106"
+    },
+    {
+      "path": "templates/rules/push-accountability.md",
+      "sha256": "9cc0f3a17b160ae13a5c25591845ec6044ef15857c818c4ed244d528db200b22"
+    },
+    {
+      "path": "templates/rules/rpi-details.md",
+      "sha256": "08993d048a7fe9cfc33f753b43a8d550d8ed5900092901e4a79d3a7f254d0cf7"
+    },
+    {
+      "path": "templates/rules/supabase.md",
+      "sha256": "c96fc92a476c32a11662d08bf34151d21b61004b42a59a336a4e453699b87aed"
+    },
+    {
+      "path": "templates/rules/testing.md",
+      "sha256": "73b56819c1ade9d9b7349452d448d543d0b97ac4377938ee258689db2ccbc270"
+    },
+    {
+      "path": "templates/rules/webmcp.md",
+      "sha256": "c6e6ee4e798c31158b7697012afe63d73652bf74485b0529d0c0c2c981bf22c1"
+    },
+    {
+      "path": "templates/scripts/rpi-candidate.py",
+      "sha256": "d9b423274ad75770274fea52926a67595876386c21af2bbe2e27e42a1c46743f"
+    },
+    {
+      "path": "templates/scripts/rpi-config.py",
+      "sha256": "51f5ec49a680c5d772f0b9c223e3d0e83d76e1e9ea3d881a82e08b179709817a"
+    },
+    {
+      "path": "templates/scripts/rpi-diagnostics.py",
+      "sha256": "3439b78d081ef11bb91083336c734145616686b34811b7756e8c2183bb2f4c73"
+    },
+    {
+      "path": "templates/scripts/rpi-dispatch.py",
+      "sha256": "18b91c4db6b54591849fb25ad6b41c9d81e9d822a76a92dc25f54cc9689029e9"
+    },
+    {
+      "path": "templates/scripts/rpi-distribution.py",
+      "sha256": "2f4eb75a032064ccab38ce3cdb95b2680d7a712197eff8b0be375ef299d27689"
+    },
+    {
+      "path": "templates/scripts/rpi-lifecycle.py",
+      "sha256": "9bf4c821becb0fe344d33e0d7d8bfa270ba235beca5b9fe2dd1ce0652d578da2"
+    },
+    {
+      "path": "templates/scripts/rpi-models.py",
+      "sha256": "c183f406e0bb9876c8bcb39b5b244a4d5c14e7b3dacd451214c6695a29646c7c"
+    },
+    {
+      "path": "templates/scripts/rpi-package.py",
+      "sha256": "0e4dc8aa15b48980d7b789c574e84ab85acf22f26b940ba97f76a8b3d4cb75b6"
+    },
+    {
+      "path": "templates/scripts/rpi-policy.py",
+      "sha256": "8eb9dbd2f7dd5ee5bce57c2e508ebd4d5a191bd43a183ecb1b6dd8dee6c029f5"
+    },
+    {
+      "path": "templates/scripts/rpi-prepush.py",
+      "sha256": "8815e263e5d5f01ba4dc19e461fcdb47578701f277bc76594a3523a6d3464915"
+    },
+    {
+      "path": "templates/scripts/rpi-triage-state.py",
+      "sha256": "cd66ae06436452190eac245399746bf80087faa0c3b1b9782bd267cfc006fcc7"
+    },
+    {
+      "path": "templates/scripts/rpi-verify.py",
+      "sha256": "8e7073db4a3757dff6bfd045719132cab75fbfdc8247e665528e680b06237925"
+    },
+    {
+      "path": "templates/scripts/validate-findings.py",
+      "sha256": "da9a4705c92c59f8284a936012f18d1bbedb7bc9fa591725a6435fc1a97f90c5"
+    },
+    {
+      "path": "templates/skills/ci-workflow/SKILL.md",
+      "sha256": "ee12fdecb83cac9d80903e82ae32b6188ccb881e8d88aec1246a01cef6772d7a"
+    },
+    {
+      "path": "templates/skills/deployment-safety/SKILL.md",
+      "sha256": "b0f6b826b7c2e91ced87d58c3766342b1a7b5b0a5cdde118179add24ed12f938"
+    },
+    {
+      "path": "templates/skills/error-patterns/SKILL.md",
+      "sha256": "23984b36ecea1abe76d64e5da237212f53244a3ba8e22f7d387960c63a4a885a"
+    },
+    {
+      "path": "templates/skills/error-patterns/references/error-catalog.md",
+      "sha256": "98c8f539bb36a335d34eb27585bc84f8f8113a005a81e5e33482a4e53d871b14"
+    },
+    {
+      "path": "templates/skills/git-workflow/SKILL.md",
+      "sha256": "32528609d4e0b4a6053ee03be786fe7c65177ab0c553be1b2978d1aff6cab68c"
+    },
+    {
+      "path": "templates/skills/github-cli/SKILL.md",
+      "sha256": "a90bb082cdec25fc70f9ea5f134ff4474bf3f6ee648641856d2f20230b022db9"
+    },
+    {
+      "path": "templates/skills/macos-rules/SKILL.md",
+      "sha256": "36027fda2740d7481724e6a50ff3de7bcd7d87968b5f25bf7f8524905ed5b37c"
+    },
+    {
+      "path": "templates/skills/multi-agent/SKILL.md",
+      "sha256": "a1ccd932c0f1f246296c01718418b8e319ec66864e064bc81dfaf40834cbcb67"
+    },
+    {
+      "path": "templates/skills/python-rules/SKILL.md",
+      "sha256": "d3fa772339a9df72223d96d8e31cd284094c71131c9fbfb30b2236362517aa2a"
+    },
+    {
+      "path": "templates/skills/rpi-adopt/SKILL.md",
+      "sha256": "d796fc551be5da52e387dfe01d29cd91619dd115fa2f456f4a2854dc67fceeb5"
+    },
+    {
+      "path": "templates/skills/rpi-assess/SKILL.md",
+      "sha256": "8dce5b2d090b96741ef61009a9b8f1504a407432931270c786939281946b3ee4"
+    },
+    {
+      "path": "templates/skills/rpi-bootstrap/SKILL.md",
+      "sha256": "062854885d0b2dfc8e165129b1b92ec3ee44318d0a94ec82ac950422bdb13be4"
+    },
+    {
+      "path": "templates/skills/rpi-bootstrap/references/lifecycle-contract.md",
+      "sha256": "00a060b9da9831ba8c2120c0876757f5e555a02b69dce1c2abd4755b59f6c2f3"
+    },
+    {
+      "path": "templates/skills/rpi-brainstorm/SKILL.md",
+      "sha256": "4b9dfe53c32345632369adcf2495a94dbb9cc15b4aa4c3517ed9da4c68e55c04"
+    },
+    {
+      "path": "templates/skills/rpi-describe-pr/SKILL.md",
+      "sha256": "a3e9972d2d371b35fe6d3b9ea4672f851821383a0994ce498922fe14a0242e5e"
+    },
+    {
+      "path": "templates/skills/rpi-detach/SKILL.md",
+      "sha256": "c96681ff3c14344ce1aac32c726a95aaff2d0008c479b91768bd3138166becec"
+    },
+    {
+      "path": "templates/skills/rpi-explore-release/SKILL.md",
+      "sha256": "617cd83f14a86c21af537b9ca97de2a61116689386b4b7cde6598300f5699eb4"
+    },
+    {
+      "path": "templates/skills/rpi-fix-ci/SKILL.md",
+      "sha256": "8be8e40497d644367604364c010d7d509342c12c9231577d19644107b8002251"
+    },
+    {
+      "path": "templates/skills/rpi-implement/SKILL.md",
+      "sha256": "5d7568a3727f8eda01da0dffb185da45cdf11cfd08abc303a12d4093fce650c5"
+    },
+    {
+      "path": "templates/skills/rpi-plan/SKILL.md",
+      "sha256": "a24f7d4dfca20e94bec01f29286df34c4223959cdbd8ab3eeb8a7988751539b9"
+    },
+    {
+      "path": "templates/skills/rpi-pre-launch/SKILL.md",
+      "sha256": "76ef9f4eae4496854edb0c6426290e2927099060b4379063cd7add112a56951f"
+    },
+    {
+      "path": "templates/skills/rpi-release/SKILL.md",
+      "sha256": "9fd86222693d1bb7413d1c5f729b0eabc3110b7633cc5d026fc8dd642d31cbd5"
+    },
+    {
+      "path": "templates/skills/rpi-remediate/SKILL.md",
+      "sha256": "434e1deada8102f93b0758af9103f395d8ffd9198ee7a5da25d42f4007f1c82a"
+    },
+    {
+      "path": "templates/skills/rpi-research/SKILL.md",
+      "sha256": "2e7ef9a0825acd290201113ba086f0da6680765657c6ff620b8ed243040dc833"
+    },
+    {
+      "path": "templates/skills/rpi-research/references/research-contract.md",
+      "sha256": "93c304a71fa7039ee3b246328f34c181b90c990c03ff594a924eae9ba8509bf6"
+    },
+    {
+      "path": "templates/skills/rpi-status/SKILL.md",
+      "sha256": "56e684456e9aa07475182db3998e204f4e45702176026af3813dcdc4855220e5"
+    },
+    {
+      "path": "templates/skills/rpi-tool-design/SKILL.md",
+      "sha256": "e5a66ab7a3c08a8a7b2d54abb3aee8ae8ba46940a795a94b0e36641825275b47"
+    },
+    {
+      "path": "templates/skills/rpi-triage/SKILL.md",
+      "sha256": "fa7327f388155b0ab9ef334225d9ea8d350649600e3d7ef8bbdefa66293c2e56"
+    },
+    {
+      "path": "templates/skills/rpi-update-docs/SKILL.md",
+      "sha256": "d92562693934304b24a8a3d9e805abeadb987f073e289a48dd3baf584fe44ea7"
+    },
+    {
+      "path": "templates/skills/rpi-update/SKILL.md",
+      "sha256": "59e49b5edae8dd9eb7c433f3ed2a90dec52c6fd611a8ce39097c852ea1d72d9e"
+    },
+    {
+      "path": "templates/skills/rpi-validate/SKILL.md",
+      "sha256": "d2fe550984bee352825e5e46c2de2eba00bdd7469dc0d710dde904e94b242e27"
+    },
+    {
+      "path": "templates/skills/shell-tools/SKILL.md",
+      "sha256": "908cb8633fda8d51fa7bd58be9973fdaca704bfc3ddff5944e794372f2fd75f6"
+    },
+    {
+      "path": "templates/skills/supabase/SKILL.md",
+      "sha256": "eb7f3cf20164a40c9322298f3b989b88a50d7037f43b565823ee14ec59f0e375"
+    },
+    {
+      "path": "templates/skills/systematic-debugging/SKILL.md",
+      "sha256": "1fcc82ae237e69135ec3b79f5201e7ee6b6c2fa495b3030b747bbd5ac37eb834"
+    },
+    {
+      "path": "templates/skills/webmcp/SKILL.md",
+      "sha256": "9bb3096d0174679a48fac1a3866b02f33e8dda5a30f6f84ec5f98e1139e8cbfd"
+    },
+    {
+      "path": "templates/skills/webmcp/references/tool-design-framework.md",
+      "sha256": "c802cc226b94e16df3b3978df190271f364fe38d00108574c3940ed288531def"
+    }
+  ],
+  "links": [
+    {
+      "path": "templates/skills/rpi-adopt/references/e2e-pro-playbook.md",
+      "target": "../../../e2e-pro-playbook-template.md",
+      "resolved": "templates/e2e-pro-playbook-template.md"
+    },
+    {
+      "path": "templates/skills/rpi-adopt/references/lifecycle-contract.md",
+      "target": "../../rpi-bootstrap/references/lifecycle-contract.md",
+      "resolved": "templates/skills/rpi-bootstrap/references/lifecycle-contract.md"
+    },
+    {
+      "path": "templates/skills/rpi-assess/references/handoff.md",
+      "target": "../../../references/handoff.md",
+      "resolved": "templates/references/handoff.md"
+    },
+    {
+      "path": "templates/skills/rpi-bootstrap/references/e2e-pro-playbook.md",
+      "target": "../../../e2e-pro-playbook-template.md",
+      "resolved": "templates/e2e-pro-playbook-template.md"
+    },
+    {
+      "path": "templates/skills/rpi-describe-pr/references/handoff.md",
+      "target": "../../../references/handoff.md",
+      "resolved": "templates/references/handoff.md"
+    },
+    {
+      "path": "templates/skills/rpi-detach/references/lifecycle-contract.md",
+      "target": "../../rpi-bootstrap/references/lifecycle-contract.md",
+      "resolved": "templates/skills/rpi-bootstrap/references/lifecycle-contract.md"
+    },
+    {
+      "path": "templates/skills/rpi-explore-release/references/e2e-pro-playbook.md",
+      "target": "../../../e2e-pro-playbook-template.md",
+      "resolved": "templates/e2e-pro-playbook-template.md"
+    },
+    {
+      "path": "templates/skills/rpi-fix-ci/references/handoff.md",
+      "target": "../../../references/handoff.md",
+      "resolved": "templates/references/handoff.md"
+    },
+    {
+      "path": "templates/skills/rpi-implement/references/dispatch.md",
+      "target": "../../../references/dispatch.md",
+      "resolved": "templates/references/dispatch.md"
+    },
+    {
+      "path": "templates/skills/rpi-implement/references/handoff.md",
+      "target": "../../../references/handoff.md",
+      "resolved": "templates/references/handoff.md"
+    },
+    {
+      "path": "templates/skills/rpi-implement/scripts/rpi-dispatch.py",
+      "target": "../../../scripts/rpi-dispatch.py",
+      "resolved": "templates/scripts/rpi-dispatch.py"
+    },
+    {
+      "path": "templates/skills/rpi-implement/scripts/validate-findings.py",
+      "target": "../../../scripts/validate-findings.py",
+      "resolved": "templates/scripts/validate-findings.py"
+    },
+    {
+      "path": "templates/skills/rpi-plan/references/handoff.md",
+      "target": "../../../references/handoff.md",
+      "resolved": "templates/references/handoff.md"
+    },
+    {
+      "path": "templates/skills/rpi-plan/references/pseudocode-notation.md",
+      "target": "../../../../methodology/pseudocode-notation.md",
+      "resolved": "methodology/pseudocode-notation.md"
+    },
+    {
+      "path": "templates/skills/rpi-pre-launch/references/dispatch.md",
+      "target": "../../../references/dispatch.md",
+      "resolved": "templates/references/dispatch.md"
+    },
+    {
+      "path": "templates/skills/rpi-pre-launch/references/handoff.md",
+      "target": "../../../references/handoff.md",
+      "resolved": "templates/references/handoff.md"
+    },
+    {
+      "path": "templates/skills/rpi-pre-launch/scripts/rpi-dispatch.py",
+      "target": "../../../scripts/rpi-dispatch.py",
+      "resolved": "templates/scripts/rpi-dispatch.py"
+    },
+    {
+      "path": "templates/skills/rpi-pre-launch/scripts/validate-findings.py",
+      "target": "../../../scripts/validate-findings.py",
+      "resolved": "templates/scripts/validate-findings.py"
+    },
+    {
+      "path": "templates/skills/rpi-release/references/e2e-pro-playbook.md",
+      "target": "../../../e2e-pro-playbook-template.md",
+      "resolved": "templates/e2e-pro-playbook-template.md"
+    },
+    {
+      "path": "templates/skills/rpi-release/references/handoff.md",
+      "target": "../../../references/handoff.md",
+      "resolved": "templates/references/handoff.md"
+    },
+    {
+      "path": "templates/skills/rpi-remediate/references/dispatch.md",
+      "target": "../../../references/dispatch.md",
+      "resolved": "templates/references/dispatch.md"
+    },
+    {
+      "path": "templates/skills/rpi-remediate/references/handoff.md",
+      "target": "../../../references/handoff.md",
+      "resolved": "templates/references/handoff.md"
+    },
+    {
+      "path": "templates/skills/rpi-remediate/scripts/rpi-dispatch.py",
+      "target": "../../../scripts/rpi-dispatch.py",
+      "resolved": "templates/scripts/rpi-dispatch.py"
+    },
+    {
+      "path": "templates/skills/rpi-remediate/scripts/validate-findings.py",
+      "target": "../../../scripts/validate-findings.py",
+      "resolved": "templates/scripts/validate-findings.py"
+    },
+    {
+      "path": "templates/skills/rpi-research/references/handoff.md",
+      "target": "../../../references/handoff.md",
+      "resolved": "templates/references/handoff.md"
+    },
+    {
+      "path": "templates/skills/rpi-tool-design/references/webmcp/DOMAIN.md",
+      "target": "../../../webmcp/SKILL.md",
+      "resolved": "templates/skills/webmcp/SKILL.md"
+    },
+    {
+      "path": "templates/skills/rpi-tool-design/references/webmcp/references/tool-design-framework.md",
+      "target": "../../../../webmcp/references/tool-design-framework.md",
+      "resolved": "templates/skills/webmcp/references/tool-design-framework.md"
+    },
+    {
+      "path": "templates/skills/rpi-triage/references/handoff.md",
+      "target": "../../../references/handoff.md",
+      "resolved": "templates/references/handoff.md"
+    },
+    {
+      "path": "templates/skills/rpi-triage/references/triage-state.md",
+      "target": "../../../references/triage-state.md",
+      "resolved": "templates/references/triage-state.md"
+    },
+    {
+      "path": "templates/skills/rpi-triage/scripts/rpi-triage-state.py",
+      "target": "../../../scripts/rpi-triage-state.py",
+      "resolved": "templates/scripts/rpi-triage-state.py"
+    },
+    {
+      "path": "templates/skills/rpi-update-docs/references/handoff.md",
+      "target": "../../../references/handoff.md",
+      "resolved": "templates/references/handoff.md"
+    },
+    {
+      "path": "templates/skills/rpi-update/references/lifecycle-contract.md",
+      "target": "../../rpi-bootstrap/references/lifecycle-contract.md",
+      "resolved": "templates/skills/rpi-bootstrap/references/lifecycle-contract.md"
+    },
+    {
+      "path": "templates/skills/rpi-validate/references/dispatch.md",
+      "target": "../../../references/dispatch.md",
+      "resolved": "templates/references/dispatch.md"
+    },
+    {
+      "path": "templates/skills/rpi-validate/references/handoff.md",
+      "target": "../../../references/handoff.md",
+      "resolved": "templates/references/handoff.md"
+    },
+    {
+      "path": "templates/skills/rpi-validate/scripts/rpi-dispatch.py",
+      "target": "../../../scripts/rpi-dispatch.py",
+      "resolved": "templates/scripts/rpi-dispatch.py"
+    },
+    {
+      "path": "templates/skills/rpi-validate/scripts/validate-findings.py",
+      "target": "../../../scripts/validate-findings.py",
+      "resolved": "templates/scripts/validate-findings.py"
+    }
+  ]
+}

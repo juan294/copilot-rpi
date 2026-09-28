@@ -1,5 +1,7 @@
 # Known Agent Errors — Universal Catalog
 
+Historical symptoms below remain evidence of failures. Corrective examples follow the current local integration and remote authority contract: preserve work, verify locally, publish only an authorized integration result, then inspect exact-commit CI. Never use a catalog example to authorize a working-branch push, preview deployment, automatic PR, or fix-and-repush loop.
+
 Documented from real recurring issues across projects. Each entry includes the symptom, root cause, and the correct approach to use from the start.
 
 **How to use this file:** This is a debugging reference -- consult when encountering unexpected behavior, tool errors, or CI failures. Not required for onboarding. The operational rules in `patterns/quick-reference.md` provide the essential condensed reference for everyday work.
@@ -139,12 +141,7 @@ const output = execSync('some command').trim();  // ← TypeError
 
 **Root cause:** The remote branch has commits the local branch doesn't. The agent pushed without pulling first.
 
-**Correct approach — always do this:**
-
-```bash
-# ALWAYS pull before pushing:
-git pull --rebase origin <branch> && git push origin <branch>
-```
+**Correct approach:** Preserve intended local changes, inspect both refs, and reconcile remote integration changes locally before an authorized push. Do not pull through a dirty tree or publish the working branch merely to resolve divergence.
 
 ---
 
@@ -175,12 +172,7 @@ gh run list --branch <branch> --limit 1 --json conclusion,status,name
 
 **Root cause:** Worktrees always have untracked files (build artifacts, node_modules). The default `git worktree remove` refuses to delete them.
 
-**Correct approach — always do this:**
-
-```bash
-# ALWAYS use --force and ; (not &&):
-git worktree remove --force .worktrees/foo; git worktree remove --force .worktrees/bar; git branch -D branch1 branch2
-```
+**Correct approach:** Inspect dirty and untracked files in each task-owned worktree. Preserve intended work and verify integration before cleanup. Remove only the worktree whose contents are understood; use `--force` only for reviewed disposable artifacts. A failed removal does not justify deleting another branch.
 
 ---
 
@@ -190,14 +182,7 @@ git worktree remove --force .worktrees/foo; git worktree remove --force .worktre
 
 **Root cause:** The agent treats `git push` as the end of the workflow. There's no accountability loop.
 
-**Correct approach — always do this:**
-
-```bash
-# After every push, verify CI:
-gh run list --branch develop --limit 1 --json conclusion,status,databaseId
-# If it fails: gh run view <run-id> --log-failed 2>&1 | tail -100
-# Fix and re-push
-```
+**Correct approach:** After an authorized push, record the exact SHA and inspect every expected workflow for that commit. Read failure logs, reproduce and fix locally, rerun local gates, and report the failed remote result. A rerun or another push needs new authorization.
 
 ---
 
@@ -242,22 +227,17 @@ Only suggest manual intervention when genuinely required.
 
 **Symptom:** After removing a worktree, `git branch -d <branch>` fails with "the branch is not fully merged."
 
-**Root cause:** Worktree branches are almost never "fully merged" (squash merges, deleted remotes, abandoned work). Lowercase `-d` safety check fails.
+**Root cause:** A squash merge can preserve all intended work without making the task branch an ancestor of the integration branch. Lowercase `-d` then refuses deletion; the refusal may also indicate unique work that must be preserved.
 
-**Correct approach — always do this:**
-
-```bash
-# ALWAYS use -D (uppercase, force) for worktree branches:
-git worktree remove --force /path/to/worktree; git branch -D <branch-name>
-```
+**Correct approach:** Inspect dirty and untracked files, preserve handoffs, and prove the task branch was integrated before removing its worktree. Try `git branch -d` first. If squash integration is proven and no unique work remains, `git branch -D` can remove the task-owned branch.
 
 ---
 
-## Error #13: Missing YAML frontmatter in `.prompt.md` files
+## Error #13: Missing YAML frontmatter in legacy Local `.prompt.md` files
 
 **Symptom:** Prompt file doesn't appear in the Copilot `/` command menu in VS Code. Running `/my-prompt` does nothing or shows "command not found."
 
-**Root cause:** `.github/prompts/*.prompt.md` files require valid YAML frontmatter at the top of the file. Without `mode:` and `description:` fields, Copilot ignores the file.
+**Root cause:** The optional VS Code Local prompt profile needs valid frontmatter. Its prompt wrappers are compatibility output; canonical workflows use `.github/skills/`.
 
 **Correct approach — always do this:**
 
@@ -273,7 +253,7 @@ description: "Brief description shown in the / menu"
 
 ---
 
-## Error #14: Using `$ARGUMENTS` instead of `${input:variableName}` in prompts
+## Error #14: Using `$ARGUMENTS` instead of `${input:variableName}` in legacy Local prompts
 
 **Symptom:** The `$ARGUMENTS` placeholder in a prompt file is passed through literally instead of being replaced with user input. The agent receives the string "$ARGUMENTS" rather than what the user typed.
 
@@ -318,11 +298,11 @@ applyTo: "**/*.test.{ts,tsx}"
 
 ---
 
-## Error #16: Chat mode file in wrong directory
+## Error #16: Legacy Local chat mode file in wrong directory
 
 **Symptom:** A `.chatmode.md` file exists but doesn't appear as a selectable chat mode in VS Code's Copilot panel.
 
-**Root cause:** Chat mode files must be in `.github/chatmodes/`. Placing them in `.github/prompts/`, `.github/instructions/`, or project root has no effect.
+**Root cause:** The legacy Local chatmode surface expects `.github/chatmodes/`. New role profiles use `.github/agents/`; keep this historical error for migration and compatibility checks.
 
 **Correct approach — always do this:**
 
@@ -683,47 +663,7 @@ pnpm run typecheck 2>&1; pnpm run lint 2>&1; pnpm run test 2>&1
 
 **Root cause:** Each agent autonomously pushes on commit, triggering CI. No central coordination of push timing. The agent treats "commit and push" as a single atomic operation instead of separating local commits from remote pushes.
 
-**Correct approach — always do this:**
-
-```bash
-# 1. Spawn agents in worktrees (each gets its own branch)
-# Main agent creates worktrees via git worktree add
-
-# 2. Agents commit locally only — never push or create PRs
-# Agent deliverable is a local commit on their branch
-
-# 3. Main agent reviews all worktrees after agents complete
-git -C /path/to/worktree-1 log --oneline -3
-git -C /path/to/worktree-2 log --oneline -3
-
-# 4. Batch push all branches in one command
-git push origin branch-1 branch-2 branch-3
-
-# 5. Create all PRs sequentially
-gh pr create --head branch-1 --title "..." --body "..."
-gh pr create --head branch-2 --title "..." --body "..."
-
-# 6. Single background agent monitors all CI runs
-gh run list --branch branch-1 --branch branch-2 --limit 10
-```
-
-**Never do this:**
-
-```bash
-# Don't let each agent push independently:
-# Agent 1: git push origin branch-1  <- triggers CI
-# Agent 1: (fix) git push origin branch-1  <- triggers CI again
-# Agent 2: git push origin branch-2  <- triggers CI
-# Agent 2: (fix) git push origin branch-2  <- triggers CI again
-# = 4 push events x M workflows each = CI explosion
-
-# Don't let agents create their own PRs:
-# Agent 1: gh pr create --head branch-1
-# Agent 2: gh pr create --head branch-2
-# <- No central review, wrong-branch risk, API rate limits
-```
-
-**Key detail:** The savings compound with retries. If each of 8 agents pushes 3 times (initial + 2 fixes), that's 24 push events x 4 workflows = 96 CI runs. With batch push, the main agent pushes once (8 branches), monitors, and re-pushes only the 2 that failed = 10 push events x 4 workflows = 40 CI runs. The pattern also eliminates the class of bugs where an agent pushes to the wrong branch because only one agent touches the remote.
+**Correct approach:** Agents work in local, disjoint worktrees and run scoped checks. The integration owner reviews and combines completed work locally, runs the complete gate, inspects triggers, and publishes only the completed integration branch when authorized. Monitor the exact pushed commit. Working branches and experimental PRs stay local.
 
 ---
 
@@ -852,10 +792,9 @@ git checkout -- file1.tsx file2.tsx file3.tsx
 git merge --no-commit --no-ff <branch> 2>&1 | grep "error:"
 # Or just attempt the merge and read the error output
 
-# 2. Remove or move the conflicting untracked files:
-rm docs/plans/phase2.md docs/plans/phase3.md
-# Or move them to a backup:
+# 2. Preserve conflicting untracked files and compare their content:
 mkdir -p /tmp/merge-backup && mv <conflicting-files> /tmp/merge-backup/
+# Keep the backup until its intended contents are integrated or explicitly discarded.
 
 # 3. Then retry the merge:
 git merge <branch> --no-edit
@@ -970,27 +909,7 @@ gh pr merge 170 --squash   # <- triggers rebase again
 
 **Root cause:** The agent treats CI passing as sufficient evidence that code is production-ready. But CI tests build correctness, not runtime correctness on the target platform. Build success != runtime success. Local success != production success. Platform-specific behaviors (serverless cold starts, container startup, edge runtimes, module resolution) can cause failures that no local test or CI check would catch.
 
-**Correct approach — always do this:**
-
-```bash
-# For framework upgrades and risky changes:
-# 1. Push to a non-main branch to trigger a staging/preview deployment
-git push -u origin chore/framework-upgrade
-
-# 2. Wait for the staging deployment to complete
-# (Most platforms create preview/staging URLs for non-main branches)
-
-# 3. Verify the staging deployment:
-# - Site loads, API routes respond, key pages render
-# - Health checks pass, serverless functions execute
-curl -s -o /dev/null -w "%{http_code}" https://staging-url.example.com
-
-# 4. Only after staging verification passes, create PR to main
-gh pr create --base main --title "chore: upgrade framework to X.Y.Z"
-
-# For low-risk changes (dev dependency patches):
-# CI passing is sufficient — no staging verification needed
-```
+**Correct approach:** Run local runtime and packaging preflights for a framework upgrade. If target-platform behavior needs an external environment, use an already authorized test environment or obtain authorization for the concrete deployment. Do not create a Vercel Preview or publish a working branch for experimentation.
 
 **Never do this:**
 

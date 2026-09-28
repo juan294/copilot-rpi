@@ -37,20 +37,20 @@ User
 
 | Concept | GitHub Copilot Equivalent |
 |---------|--------------------------|
-| Command definitions | Prompt files via `.github/prompts/*.prompt.md` (invoked with `/` in chat) |
+| Canonical workflow definitions | Project skills in `.github/skills/`; optional legacy Local prompt wrappers are compatibility output |
 | Codebase exploration | `#codebase` reference in chat + `#file:path` for specific files |
 | Background research | `copilot -p "prompt"` in a separate terminal |
 | Parallel investigation | Multiple `copilot -p` processes running simultaneously |
 | Todo tracking | Markdown checklists in plan files (no built-in task tool) |
 | Thoughts directory | Any project-local docs directory (e.g., `docs/`, `plans/`) |
-| Specialized personas | Chat modes via `.github/chatmodes/*.chatmode.md` |
+| Role profiles | Custom agents in `.github/agents/`; legacy chatmodes are optional Local compatibility output |
 | Terminal commands | `#tool:terminal` reference in agent mode |
 
 ---
 
 ## Phase Handoffs
 
-Each RPI phase runs in its own conversation with a fresh context window. Context does NOT carry over automatically — the handoff artifact is what transfers knowledge between phases.
+Each RPI phase has a fresh acceptance boundary and handoff. A separate conversation helps context management; explicit all-phase authorization can continue sequentially in one task after each complete gate. Revalidate the actual candidate when resuming.
 
 ### What Carries Over vs What Starts Fresh
 
@@ -274,24 +274,17 @@ A plan is **NOT done** if:
 
 **Process:**
 
-1. Read the plan completely. Check for existing checkmarks.
-2. Use `#codebase` to gather relevant context for the current phase.
-3. For each phase:
-   - Implement the changes as specified.
-   - Self-review: re-read the changes critically before declaring done.
-   - Run ALL automated verification via `#tool:terminal`.
-   - Mark phase complete in the plan file.
-   - **STOP. Wait for human confirmation before next phase.**
+1. Read the approved plan, current phase, controlling instructions, directly mentioned files, and prior handoff. Revalidate current files and candidate identity.
+2. Implement with TDD for behavior changes in a local task worktree. Use bounded independent units only within this phase.
+3. Obtain independent plan-compliance review. Repair confirmed findings and preserve dispositions.
+4. Run a separate simplify pass for reuse, quality and efficiency. Verify changed inputs.
+5. Run all required local checks sequentially, preserving every exit and binding evidence to the final candidate.
+6. Record the phase handoff and integrate completed work locally. Stop at the phase boundary unless the owner explicitly authorized continuation. Continue authorized later phases only after this boundary is complete.
 
 **The atomic loop:**
 
 ```text
-Implement (atomic change)
-    → Self-review (re-read changes)
-    → Fix if needed
-    → Run verification
-    → Mark complete
-    → STOP — wait for human
+Implement -> independent review -> repair -> simplify -> complete local verification -> handoff
 ```
 
 **If stuck:**
@@ -333,10 +326,10 @@ An implementation phase is **done** when:
 
 - [ ] All files listed in the phase plan are created/modified
 - [ ] Every automated success criterion passes (typecheck, lint, tests)
-- [ ] Changes have been self-reviewed
+- [ ] Independent plan-compliance review and simplify findings are resolved
 - [ ] Checkboxes in the plan file are updated
 - [ ] No unrelated changes are included (atomic scope)
-- [ ] Human has confirmed and approved before next phase
+- [ ] The owner accepted the phase or explicitly authorized sequential continuation across phases
 
 An implementation phase is **NOT done** if:
 
@@ -441,27 +434,9 @@ Mismatch discovered mid-implementation
         The plan needs revision before more code is written.
 ```
 
-### CI Fails After Push (Background Process)
+### CI Fails After an Authorized Push
 
-```text
-CI failure detected
-├── Attempt 1: Read the failure log
-│   ├── Lint/format error → fix and re-push
-│   ├── Type error → fix and re-push
-│   ├── Test failure (test is correct) → fix the code and re-push
-│   └── Test failure (test is wrong) → fix the test and re-push
-├── Attempt 2: Different failure after fix?
-│   └── Read the new failure. Fix and re-push.
-├── Attempt 3: Still failing?
-│   └── STOP. Report to the user:
-│       - What failed (exact error)
-│       - What you tried (all 3 attempts)
-│       - Why you think it's stuck
-│       Do NOT retry a 4th time. Do NOT force-push.
-└── Failure is in unrelated code (not your changes)?
-    └── Report to the user. Don't fix code you didn't change
-        unless the user explicitly asks.
-```
+Read the failed run for the exact pushed commit and reproduce the cause locally. Repair the local candidate and rerun the complete gate. Report the failed remote result and new local evidence. Reruns and another push require a new remote authorization; background agents do not publish fixes.
 
 ### Scheduled Agent Crashes
 

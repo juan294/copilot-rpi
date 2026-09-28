@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "entries": [
+    {
+      "id": "ask-4",
+      "pointer": [
+        "permissions",
+        "ask"
+      ],
+      "mode": "entry",
+      "value": "Bash(gh release create:*)"
+    },
+    {
+      "id": "ask-5",
+      "pointer": [
+        "permissions",
+        "ask"
+      ],
+      "mode": "entry",
+      "value": "Bash(gh release edit:*)"
+    },
+    {
+      "id": "ask-6",
+      "pointer": [
+        "permissions",
+        "ask"
+      ],
+      "mode": "entry",
+      "value": "Bash(gh release upload:*)"
+    },
+    {
+      "id": "ask-7",
+      "pointer": [
+        "permissions",
+        "ask"
+      ],
+      "mode": "entry",
+      "value": "Bash(vercel:*)"
+    },
+    {
+      "id": "ask-8",
+      "pointer": [
+        "permissions",
+        "ask"
+      ],
+      "mode": "entry",
+      "value": "Bash(vc:*)"
+    },
+    {
+      "id": "ask-9",
+      "pointer": [
+        "permissions",
+        "ask"
+      ],
+      "mode": "entry",
+      "value": "Bash(npx *vercel*)"
+    },
+    {
+      "id": "ask-10",
+      "pointer": [
+        "permissions",
+        "ask"
+      ],
+      "mode": "entry",
+      "value": "Bash(pnpm *vercel*)"
+    },
+    {
+      "id": "deny-0",
+      "pointer": [
+        "permissions",
+        "deny"
+      ],
+      "mode": "entry",
+      "value": "Bash(vercel)"
+    },
+    {
+      "id": "deny-1",
+      "pointer": [
+        "permissions",
+        "deny"
+      ],
+      "mode": "entry",
+      "value": "Bash(vc)"
+    },
+    {
+      "id": "deny-3",
+      "pointer": [
+        "permissions",
+        "deny"
+      ],
+      "mode": "entry",
+      "value": "Bash(git push --mirror:*)"
+    },
+    {
+      "id": "pre-tool-policy",
+      "pointer": [
+        "hooks",
+        "PreToolUse"
+      ],
+      "mode": "entry",
+      "value": {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "rpi_root=\"$PWD\"; while [ ! -f \"$rpi_root/.claude/hooks/guard-bash.sh\" ] && [ \"$rpi_root\" != / ]; do rpi_root=${rpi_root%/*}; rpi_root=${rpi_root:-/}; done; if [ ! -f \"$rpi_root/.claude/hooks/guard-bash.sh\" ]; then printf \"%s\\n\" \"RPI POLICY SKIPPED: no installed policy wrapper above the hook cwd.\" >&2; exit 0; fi; exec bash \"$rpi_root/.claude/hooks/guard-bash.sh\" claude"
+          }
+        ]
+      }
+    },
+    {
+      "id": "post-edit-quality",
+      "pointer": [
+        "hooks",
+        "PostToolUse"
+      ],
+      "mode": "entry",
+      "value": {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/verify-edit.sh"
+          }
+        ]
+      }
+    }
+  ]
+}

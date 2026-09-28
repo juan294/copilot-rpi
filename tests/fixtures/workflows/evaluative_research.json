@@ -1,0 +1,10 @@
+{
+  "id": "evaluative_research",
+  "request": "Research whether the current design is the best choice.",
+  "skill": "rpi-research",
+  "expected_artifact_fields": ["research question", "observed behavior", "file:line evidence", "assessment handoff"],
+  "required_clauses": ["descriptive", "rpi-assess", "file:line"],
+  "positive_example": "Research records observed behavior with file:line citations and routes the comparison to rpi-assess.",
+  "negative_example": "Research recommends a replacement design as though the evaluation were observation.",
+  "prohibited_claims": ["Research proves the best design", "Uncited comparison is a source fact"]
+}

@@ -13,10 +13,10 @@ Thank you for your interest in contributing! This project improves through commu
 ### Submitting Changes
 
 1. Fork the repository.
-2. Create a feature branch from `main` (`git checkout -b feature/your-change`).
+2. Create a local task worktree or temporary branch from `main`.
 3. Make your changes following the guidelines below.
 4. Commit with a clear message describing what and why.
-5. Open a pull request against `main`.
+5. Integrate completed work into local `main` after review and verification. A maintainer publishes only with explicit authorization. External contributors may propose a pull request; agents do not publish working branches for experiments.
 
 ### What We're Looking For
 
@@ -36,14 +36,13 @@ Thank you for your interest in contributing! This project improves through commu
 
 The corpus has an intake path — "New error patterns" above — but without an exit path it only ever grows. This section is the exit path.
 
-A rule or error is a retirement candidate only on one of four grounds:
+A rule or error is a retirement candidate only on one of three grounds:
 
 1. **Superseded** — another rule covers it completely; name the successor.
 2. **Tool-enforced** — CI, a git hook, or a `.github/instructions/` glob now catches it mechanically; the rule becomes an annotation on the enforcement rather than prose.
-3. **Model-native** — current frontier models handle it by judgment, and the rule states no environment fact the model cannot observe.
-4. **Merged** — folded into a broader rule; name the absorbing rule.
+3. **Merged** — folded into a broader rule; name the absorbing rule.
 
-Rules that state an environment fact or an exact command are NOT retirement candidates on capability grounds. Model improvement does not make a CLI flag or a frontmatter key knowable.
+Rules that state an environment fact or an exact command are NOT retirement candidates on capability grounds. Model improvement alone never proves an error fixed or justifies retirement.
 
 Retirement procedure:
 

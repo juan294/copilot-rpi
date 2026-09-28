@@ -4,13 +4,13 @@
 
 1. **Research before you act.** Never modify code you haven't thoroughly read and understood. Every change begins with research.
 2. **Plan before you implement.** Create explicit, phase-based plans with success criteria before writing a single line of production code.
-3. **Human-in-the-loop at every gate.** The agent stops at phase boundaries and waits for human confirmation. No auto-proceeding.
+3. **Honor phase acceptance.** Complete review and verification at each phase boundary. Stop there unless the owner explicitly authorized continuation across phases.
 4. **Documentarians, not critics.** During research, agents describe what *is* — they never suggest improvements, identify problems, or critique code quality unless explicitly asked.
 5. **Automated verification first.** Manual testing is a last resort, reserved for cases that genuinely require human senses or privileges (sudo, hardware, visual UI validation).
 6. **Atomic changes with review loops.** Implement, review, fix, approve, then move on. Never batch multiple unreviewed phases.
 7. **Context is your only lever.** At every turn, a coding agent is a stateless function: context window in, next action out. The quality of the context window is the ONLY thing you can control to affect output quality.
 8. **Specs are the new code.** Plans and research documents are the real "source code" of AI-assisted development. The generated code is more like a compiled artifact. Treat specs with the same rigor you'd treat source files.
-9. **Fix everything.** Categorize by severity, but fix 100%. With AI agents, the cost of fixing is near-zero — the old prioritization model (defer low-priority items) exists because human developer time is expensive. That constraint no longer applies. Never tell the user "nothing urgent" or suggest deferring findings to a later session. The quality bar is the highest possible, always.
+9. **Disposition every confirmed finding.** Resolve actionable findings in authorized scope, reject false positives with evidence, and record strategic findings needing a new architectural decision for owner review. Verification and risk still constrain each fix.
 
 ## The Error Amplification Principle
 
@@ -58,7 +58,7 @@ Research documents and plans become the primary mechanism for keeping team membe
 
 4. **The reviewer subagent in implementation** catches issues that the implementer misses. The reviewer can also add tests, which is a powerful quality mechanism.
 
-5. **Phase gates with human confirmation** prevent runaway implementations that drift from intent. The cost of stopping is low; the cost of an incorrect multi-phase implementation is high.
+5. **Phase acceptance evidence** prevents implementation from drifting across boundaries. Explicit all-phase authorization allows sequential continuation after each complete gate.
 
 6. **Maximum 3 clarification markers** in plans forces the planner to make informed decisions rather than deferring everything to the user.
 
@@ -82,4 +82,4 @@ Research documents and plans become the primary mechanism for keeping team membe
 
 16. **Deep engagement is required.** You must actively read and critically evaluate every research document and every plan. Blindly approving output defeats the entire purpose.
 
-17. **Fix everything, always.** Traditional prioritization exists because human developer time is expensive — you can't fix everything, so you triage. With AI agents, fixing takes seconds. Categorize findings by severity (that's useful information), but the attitude is always "let me get to work on all of them." Never suggest deferring items or say "nothing urgent." The quality bar is 100%.
+17. **Disposition every finding.** Categorize by severity and resolve confirmed actionable findings in the authorized scope. Reject false positives with evidence. Record strategic findings that need a new decision for owner review; never silently discard them.
