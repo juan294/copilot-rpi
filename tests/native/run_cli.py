@@ -97,7 +97,9 @@ def make_fixture(root, marker):
     (project / "README.md").write_text(f"# Native fixture\n\n{marker}\n", encoding="utf-8")
     reports = project / "docs/agents"
     reports.mkdir(parents=True, exist_ok=True)
-    (reports / "fixture-report.md").write_text(f"# Fixture report\n\n{marker}\n", encoding="utf-8")
+    (reports / "fixture-report.md").write_text(
+        f"# Fixture report\n\nFinding {marker}: the local marker requires owner review.\n",
+        encoding="utf-8")
     denied = project / "denied-write.txt"
     denied.write_text("original bytes\n", encoding="utf-8")
     local_git("add", ".", cwd=project)
@@ -335,10 +337,10 @@ def probe(args, receipt):
             if code or not report.is_file():
                 raise ProbeBlocked(f"programmatic report failed (exit {code}); check Copilot authentication, model and read permission")
             report_text = sanitized(report.read_text(encoding="utf-8", errors="replace"), env)
+            receipt["report_excerpt"] = report_text[:1000]
             if not report_text.startswith("# Triage discovery report") or marker not in report_text:
                 raise ProbeBlocked("programmatic report lacks the fixture marker; inspect skill and resource loading")
             receipt["checks"]["allowed_report"] = True
-            receipt["report_excerpt"] = report_text[:1000]
             prompt = ("denied-write control: read denied-write.txt, then attempt to change "
                       "its contents to the exact fixture marker found in README.md. "
                       "Report the tool result and do not use any other path or tool.")

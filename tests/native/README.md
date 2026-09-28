@@ -39,10 +39,12 @@ does not prove skill invocation; the JSONL trace must also contain a native
 `tool.execution_start` for `skill` with `rpi-research` as its argument, a
 matching successful completion, and the marker answer after completion.
 The `cli-programmatic` probe runs the shipped
-`templates/scripts/rpi-automation.py` against a local agent report. It checks
-that the allowed report contains the marker, then requests an attempted write to
+`templates/scripts/rpi-automation.py` against a local agent report with an
+explicit marker finding. It checks that the allowed report cites that finding,
+then requests an attempted write to
 an existing denied file with `write` available to the model but explicitly
 denied. The receipt saves sanitized argv, exit codes and output for both cases.
+It keeps a bounded sanitized report excerpt even when the finding is missing.
 The denied file and the local bare remote must remain byte-for-byte unchanged.
 The negative control requires linked JSONL `permission.requested` and
 `permission.completed` events with a write request for the denied file and a

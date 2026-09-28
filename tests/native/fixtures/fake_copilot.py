@@ -13,6 +13,8 @@ HELP = "-p -s --no-ask-user --available-tools --allow-tool --deny-tool --model -
 mode = os.environ.get("RPI_NATIVE_FAKE_MODE", "ok")
 if os.environ.get("COPILOT_GITHUB_TOKEN") == "force-missing-auth":
     mode = "missing-auth"
+elif os.environ.get("COPILOT_GITHUB_TOKEN") == "force-omit-marker":
+    mode = "omit-marker"
 args = sys.argv[1:]
 if args == ["--version"]:
     print("fake-copilot 1.2.3" + ("x" * 5000 if mode == "long-version" else ""))
@@ -68,4 +70,4 @@ else:
         if mode != "answer-before-skill-complete":
             print(answer)
     else:
-        print("Ready plan: " + marker + ". No changes made.")
+        print("Ready plan: " + ("no findings" if mode == "omit-marker" else marker) + ". No changes made.")

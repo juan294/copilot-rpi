@@ -72,6 +72,14 @@ class NativeRunnerTests(unittest.TestCase):
         self.assertIn("--available-tools=view,grep,glob,create,edit,apply_patch,skill", denied_argv)
         self.assertIn("--deny-tool=write", denied_argv)
 
+    def test_programmatic_marker_gap_preserves_sanitized_report_excerpt(self):
+        result = self.invoke(extra_env={"COPILOT_GITHUB_TOKEN": "force-omit-marker"})
+        self.assertNotEqual(result.returncode, 0)
+        receipt = self.receipt()
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("no findings", receipt["report_excerpt"])
+        self.assertNotIn(receipt["fixture"]["marker"], receipt["report_excerpt"])
+
     def test_cli_profile_uses_explicit_skill_and_read_only_tools(self):
         result = self.invoke("cli")
         self.assertEqual(result.returncode, 0, result.stderr)
