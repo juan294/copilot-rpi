@@ -30,14 +30,14 @@ class ProbeBlocked(Exception):
     """A missing prerequisite or inconclusive native result."""
 
 
-def sanitized(value, env):
+def sanitized(value, env, limit=4000):
     value = re.sub(r"\x1b\[[0-9;]*[A-Za-z]", "", value)
     value = "".join(ch for ch in value if ch in "\n\t" or ord(ch) >= 32)
     for key in SECRET_KEYS:
         secret = env.get(key)
         if secret:
             value = value.replace(secret, "[REDACTED]")
-    return value[:4000]
+    return value[:limit] if limit is not None else value
 
 
 def run_process(argv, *, cwd, env, deadline, commands, label, capture=True):
@@ -61,11 +61,11 @@ def run_process(argv, *, cwd, env, deadline, commands, label, capture=True):
         code = 124
     else:
         code = process.returncode
-    output = sanitized(out.decode("utf-8", "replace"), env)
-    error = sanitized(err.decode("utf-8", "replace"), env)
+    output = sanitized(out.decode("utf-8", "replace"), env, limit=None)
+    error = sanitized(err.decode("utf-8", "replace"), env, limit=None)
     if capture:
         commands.append({"label": label, "argv": [sanitized(str(a), env) for a in argv],
-                         "exit": code, "stdout": output, "stderr": error})
+                         "exit": code, "stdout": output[:4000], "stderr": error[:4000]})
     if code == 124:
         raise ProbeBlocked(f"wall timeout during {label}; child process group was stopped")
     return code, output, error
@@ -235,7 +235,7 @@ def probe(args, receipt):
             if code:
                 raise ProbeBlocked(f"Copilot {flag} failed (exit {code}); repair CLI or authentication")
             if flag == "--version":
-                receipt["client_version"] = output.strip() or error.strip()
+                receipt["client_version"] = (output.strip() or error.strip())[:4000]
             else:
                 required = COMMON_FLAGS + (PROGRAMMATIC_FLAGS if args.profile == "cli-programmatic" else ())
                 missing = [item for item in required if item not in output + error]

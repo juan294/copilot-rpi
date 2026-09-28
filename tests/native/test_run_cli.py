@@ -133,6 +133,22 @@ class NativeRunnerTests(unittest.TestCase):
         self.assertEqual([command["argv"][1] for command in receipt["commands"]],
                          ["--version", "--help"])
 
+    def test_process_checks_full_output_while_receipt_stays_bounded(self):
+        commands = []
+        code, output, error = native.run_process(
+            [sys.executable, "-c", "print('x' * 5000 + '--no-auto-update')"],
+            cwd=self.directory, env=os.environ.copy(),
+            deadline=time.monotonic() + 10, commands=commands, label="long help")
+        self.assertEqual(code, 0)
+        self.assertEqual(error, "")
+        self.assertIn("--no-auto-update", output)
+        self.assertLessEqual(len(commands[0]["stdout"]), 4000)
+
+    def test_verbose_version_does_not_expand_receipt(self):
+        result = self.invoke("cli", mode="long-version")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertLessEqual(len(self.receipt("cli")["client_version"]), 4000)
+
     def test_missing_auth_is_a_blocker_without_report_success(self):
         result = self.invoke(mode="missing-auth", extra_env={"COPILOT_GITHUB_TOKEN": "force-missing-auth"})
         self.assertNotEqual(result.returncode, 0)

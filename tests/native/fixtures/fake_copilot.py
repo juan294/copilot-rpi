@@ -14,7 +14,7 @@ if os.environ.get("COPILOT_GITHUB_TOKEN") == "force-missing-auth":
     mode = "missing-auth"
 args = sys.argv[1:]
 if args == ["--version"]:
-    print("fake-copilot 1.2.3")
+    print("fake-copilot 1.2.3" + ("x" * 5000 if mode == "long-version" else ""))
 elif args == ["--help"]:
     print("-p" if mode == "old-help" else HELP)
 elif mode == "missing-auth":
