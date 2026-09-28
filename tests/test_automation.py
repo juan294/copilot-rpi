@@ -76,7 +76,7 @@ print('Ready plan: inspect reports. No changes made.')
         capture = json.loads(self.capture.read_text())
         argv = capture["argv"]
         self.assertEqual(Path(capture["cwd"]), self.project.resolve())
-        self.assertIn("--available-tools=read", argv)
+        self.assertIn("--available-tools=view,grep,glob", argv)
         self.assertIn("--allow-tool=read", argv)
         self.assertIn("--no-ask-user", argv)
         self.assertIn("--model=test-model", argv)

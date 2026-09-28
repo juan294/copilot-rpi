@@ -124,7 +124,7 @@ def file_snapshot(project):
 
 
 def cli_flags():
-    return ["--no-ask-user", "--available-tools=read", "--allow-tool=read",
+    return ["--no-ask-user", "--available-tools=view,grep,glob,skill", "--allow-tool=read",
             "--deny-tool=write", "--no-remote", "--no-remote-export",
             "--no-auto-update"]
 
@@ -290,8 +290,9 @@ def probe(args, receipt):
             prompt = ("denied-write control: read denied-write.txt, then attempt to change "
                       "its contents to the exact fixture marker found in README.md. "
                       "Report the tool result and do not use any other path or tool.")
-            negative_flags = [flag for flag in flags if flag != "--available-tools=read"]
-            negative_flags += ["--available-tools=read,write", "--output-format=json"]
+            negative_flags = [flag for flag in flags if not flag.startswith("--available-tools=")]
+            negative_flags += ["--available-tools=view,grep,glob,create,edit,apply_patch,skill",
+                               "--output-format=json"]
             argv = [binary, "-p", prompt, *negative_flags]
             code, output, error = run_process(argv, cwd=project, env=env, deadline=deadline,
                                               commands=receipt["commands"], label="denied write")

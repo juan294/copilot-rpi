@@ -184,7 +184,7 @@ def run_job(*, job, project, blueprint, report, binary, model, timeout, environ=
         json.dump({"pid": os.getpid(), "token": token, "started": int(time.time())}, lock)
         lock.flush()
         os.fsync(lock.fileno())
-        argv = [binary, "-p", prompt, "-s", "--no-ask-user", "--available-tools=read",
+        argv = [binary, "-p", prompt, "-s", "--no-ask-user", "--available-tools=view,grep,glob",
                 "--allow-tool=read", f"--model={model.strip()}", "--no-remote",
                 "--no-remote-export", "--no-auto-update"]
         secrets = [key for key in ("COPILOT_GITHUB_TOKEN", "GH_TOKEN", "GITHUB_TOKEN",

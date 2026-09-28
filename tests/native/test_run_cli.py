@@ -64,9 +64,13 @@ class NativeRunnerTests(unittest.TestCase):
         self.assertEqual(receipt["commands"][0]["argv"], [str(FAKE), "--version"])
         runner_calls = receipt["runner_copilot_argv"]
         self.assertEqual([call for call in runner_calls if call == ["--version"]], [["--version"]])
-        self.assertTrue(any("-p" in call and "--available-tools=read" in call
+        self.assertTrue(any("-p" in call and "--available-tools=view,grep,glob" in call
                             and "--allow-tool=read" in call for call in runner_calls))
         self.assertNotIn("fixture-secret-value", json.dumps(receipt))
+        denied_argv = next(command["argv"] for command in receipt["commands"]
+                           if command["label"] == "denied write")
+        self.assertIn("--available-tools=view,grep,glob,create,edit,apply_patch,skill", denied_argv)
+        self.assertIn("--deny-tool=write", denied_argv)
 
     def test_cli_profile_uses_explicit_skill_and_read_only_tools(self):
         result = self.invoke("cli")
@@ -81,7 +85,8 @@ class NativeRunnerTests(unittest.TestCase):
                               if command["label"] == "cli skill")
         self.assertIn("/rpi-research", " ".join(prompt_command))
         self.assertNotIn(receipt["fixture"]["marker"], " ".join(prompt_command))
-        self.assertIn("--available-tools=read", prompt_command)
+        self.assertIn("--available-tools=view,grep,glob,skill", prompt_command)
+        self.assertIn("--allow-tool=read", prompt_command)
 
     def test_prompt_echo_cannot_pass_skill_loading(self):
         result = self.invoke("cli", mode="prompt-echo")
