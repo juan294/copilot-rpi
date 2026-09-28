@@ -202,5 +202,15 @@ receipt, so it is not used as acceptance evidence. The `codex-simplify` reuse,
 quality and efficiency pass found no further safe code reduction then. A full
 rerun after the skill repairs found stale destination hashes in the upstream
 lock; those two hashes were updated, and the standalone pinned-intake check
-passed. The current candidate still needs a complete passing portable gate and
-affected native requalification before Phase 5 acceptance.
+passed. Commit `5d1666d` then passed a saved complete portable gate: 174
+Python tests, all 10 checks and 179 internal links, with unchanged candidate
+identity in the receipt.
+
+Native CLI requalification on `5d1666d` observed the automatic model return
+the fixture marker without a native skill tool event. The harness correctly
+blocked the run. A failing fake-client control modeled this gap when the prompt
+did not explicitly request a skill tool call. The prompt now requests that call
+before file reads; the focused fake test and a real diagnostic CLI run passed.
+This later harness and note change invalidates
+the `5d1666d` acceptance package. The repaired candidate still needs the full
+portable gate and both native CLI entry points before Phase 5 acceptance.

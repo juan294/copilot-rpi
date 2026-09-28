@@ -134,6 +134,12 @@ class NativeRunnerTests(unittest.TestCase):
                           if command["label"].startswith("skill list")],
                          ["skill list positive", "skill list negative"])
 
+    def test_cli_skill_prompt_explicitly_requests_native_tool_call(self):
+        result = self.invoke("cli", mode="requires-tool-first")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        receipt = self.receipt("cli")
+        self.assertTrue(receipt["checks"]["skill_answer_after_invocation"])
+
     def test_prompt_echo_cannot_pass_skill_loading(self):
         result = self.invoke("cli", mode="prompt-echo")
         self.assertNotEqual(result.returncode, 0)

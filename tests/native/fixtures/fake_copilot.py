@@ -62,7 +62,9 @@ else:
         suffix = ("; unrelated_present=" + str("UNRELATED_SECRET" in os.environ).lower()) if mode == "env-check" else ""
         answer = json.dumps({"type": "assistant.message", "data": {
             "content": "Research result: " + marker + "; no product files changed" + suffix}})
-        if mode != "no-skill-event":
+        missing_explicit_call = (mode == "requires-tool-first"
+                                 and "First invoke the skill tool" not in prompt)
+        if mode != "no-skill-event" and not missing_explicit_call:
             print(json.dumps({"type": "tool.execution_start", "data": {
                 "toolCallId": "fake-skill-call", "toolName": "skill", "arguments": {"skill": "rpi-research"}}}))
             if mode == "answer-before-skill-complete":
