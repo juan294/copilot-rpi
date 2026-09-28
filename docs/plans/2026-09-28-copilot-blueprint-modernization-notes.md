@@ -214,3 +214,11 @@ before file reads; the focused fake test and a real diagnostic CLI run passed.
 This later harness and note change invalidates
 the `5d1666d` acceptance package. The repaired candidate still needs the full
 portable gate and both native CLI entry points before Phase 5 acceptance.
+
+The first full gate on the prompt repair failed one elapsed-time assertion:
+fixture rendering and local Git setup exceeded the test's five-second total
+bound, while the one-second native child timeout was recorded correctly. The
+test now checks the blocked receipt independently of setup duration. A direct
+one-second process test verifies process termination and that a descendant never
+writes its delayed marker after process-group cleanup. Both focused tests pass;
+the complete gate must be rerun on the final commit.

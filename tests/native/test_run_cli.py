@@ -246,13 +246,32 @@ class NativeRunnerTests(unittest.TestCase):
         self.assertFalse(receipt["checks"]["denied_write_unchanged"])
 
     def test_wall_timeout_is_bounded_and_recorded(self):
-        start = time.monotonic()
         result = self.invoke("cli", mode="sleep", timeout=1)
-        self.assertLess(time.monotonic() - start, 5)
         self.assertNotEqual(result.returncode, 0)
         receipt = self.receipt("cli")
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("timeout", receipt["recovery"].lower())
+
+    def test_process_group_timeout_stops_descendant(self):
+        commands = []
+        started = self.directory / "descendant-started"
+        marker = self.directory / "descendant-survived"
+        descendant = ("import time; from pathlib import Path; "
+                      f"Path({str(started)!r}).write_text('started'); "
+                      f"time.sleep(2); Path({str(marker)!r}).write_text('survived')")
+        parent = ("import subprocess, sys, time; "
+                  "subprocess.Popen([sys.executable, '-c', sys.argv[1]]); time.sleep(20)")
+        start = time.monotonic()
+        with self.assertRaisesRegex(native.ProbeBlocked, "wall timeout during sleeper"):
+            native.run_process(
+                [sys.executable, "-c", parent, descendant],
+                cwd=self.directory, env=os.environ.copy(),
+                deadline=time.monotonic() + 1, commands=commands, label="sleeper")
+        self.assertLess(time.monotonic() - start, 4)
+        self.assertEqual(commands[0]["exit"], 124)
+        self.assertTrue(started.exists(), "descendant did not start before timeout")
+        time.sleep(2.2)
+        self.assertFalse(marker.exists(), "timed-out descendant survived the process-group stop")
 
     def test_inner_runner_timeout_finishes_before_outer_cleanup(self):
         start = time.monotonic()
