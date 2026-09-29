@@ -140,10 +140,12 @@ fi
 #                      validates those separately against real releases
 #   docs/           -- plans and deviation logs describe the release they
 #                      shipped in
+#   tests/test_legacy_migration.py -- actual prior-release sync metadata is a
+#                      historical migration fixture, not a current claim
 if [[ -n "$PREV_VERSION" ]]; then
   STALE="$(git grep -n -F "$PREV_VERSION" -- \
              ':!CHANGELOG.md' ':!CONTRIBUTING.md' \
-             ':!docs/' ':!*.lock' 2>/dev/null || true)"
+             ':!docs/' ':!*.lock' ':!tests/test_legacy_migration.py' 2>/dev/null || true)"
   if [[ -n "$STALE" ]]; then
     emit_block "Previous version $PREV_VERSION still appears outside $CHANGELOG:
 $(printf '%s' "$STALE" | sed 's/^/  /')" \

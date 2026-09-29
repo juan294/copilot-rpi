@@ -6,8 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
-Proposed Copilot RPI 2.0 migration. Release and native profile qualification
-remain subject to the final candidate gates.
+## [2.0.0] - 2026-09-29
+
+Breaking layout migration to native Copilot skills and ownership-aware
+installation.
 
 ### Added
 
@@ -33,6 +35,11 @@ remain subject to the final candidate gates.
   require a selected model and do not start during installation.
 - Local release verification runs a sequential portable gate and records the
   tested candidate. Native CLI and VS Code results are separate evidence.
+
+### Fixed
+
+- A failed scheduled-report publication preserves the prior current report and
+  last-good copy, including when the second write runs out of space.
 
 ### Migration
 

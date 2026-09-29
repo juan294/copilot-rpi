@@ -13,6 +13,14 @@ hook boundaries.
 | `vscode-local` | `.github/prompts/rpi-*.prompt.md` thin wrappers with `agent: agent`; bundled resources are under `.github/prompts/<name>/`. The invocation text supplies the task or path; the wrapper does not install a same-name skill. | Local agent permission and selected role tool controls apply. Optional `.github/hooks/rpi-policy-local.json` is preview-only until `rpi-hook.py install --profile vscode-local --activate`; native loading and denial remain unqualified. | Select Local in VS Code, inspect chat customization diagnostics and command picker, then inspect wrapper resource reads. Check profile/receipt and re-plan if the installed surface is wrong. | Optional profile needs its own native probes before a support claim. |
 | Cloud agent | No cloud-specific package or default job. | Hosted permissions and setup are outside the local package; no cloud hook or job is activated here. | Use a separately authorized hosted setup and failure fixture; preserve the returned evidence. | Unqualified until a hosted fixture runs. |
 
+For 2.0.0, VS Code 1.139.1 with GitHub Copilot Chat 0.67.0 ran the
+`copilotcli` Agent Host provider in native sessions. Skill and resource loading,
+a renamed-skill negative control, a restricted research role, delegation,
+model inheritance and six independently scored workflow fixtures were observed.
+The selected harness and skill inventory were not visually inspected in VS Code;
+the owner accepted these native session results as the specific release evidence
+substitution on 2026-09-29. This result does not qualify other client builds.
+
 The direct-install artifact is the rendered `package_dir` directory. It
 contains `.rpi/copilot-render.json`, a receipt listing each file, component
 and SHA-256 hash, plus `.rpi/copilot/runtime/` with the standalone lifecycle

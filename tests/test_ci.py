@@ -28,8 +28,8 @@ class CIContractTests(unittest.TestCase):
             (project / "templates/scripts").mkdir(parents=True)
             script = project / "templates/scripts/verify-version.sh"
             script.write_bytes((ROOT / "templates/scripts/verify-version.sh").read_bytes())
-            (project / "CHANGELOG.md").write_text("## [Unreleased]\n\n## [2.0.0] - 2026-09-28\n")
-            (project / "pyproject.toml").write_text('[project]\nversion = "1.18.0"\n')
+            (project / "CHANGELOG.md").write_text("## [Unreleased]\n\n## [2.0.0] - 2026-09-29\n")
+            (project / "pyproject.toml").write_text('[project]\nversion = "1.19.0"\n')
             subprocess.run(["git", "init", "-q", project], check=True)
             result = subprocess.run(["bash", script], cwd=project, capture_output=True, text=True)
             self.assertNotEqual(0, result.returncode)

@@ -49,7 +49,7 @@ def fixture(root):
     )
     manifest = {
         "schema_version": 1,
-        "version": "1.18.0",
+        "version": "2.0.0",
         "root_budget_bytes": 8192,
         "adapter": "templates/adapters/copilot.json",
         "profiles": {

@@ -654,7 +654,7 @@
       "disposition": "adapted",
       "rationale": "Pinned upstream distribution contract has a Copilot-owned Phase 2 implementation.",
       "destination": "templates/distribution.json",
-      "destination_sha256": "72c581438b8d6d0c3084ba448f51adddfd5771703d0c4a73f5c0f1be99fd7581",
+      "destination_sha256": "3ed226e4cfafdfbf57234e30b106f724207067a8a919dfa162671db76f34c6c4",
       "adaptation_note": "Component identity and resource declarations adapted to Copilot skills, agents, Local wrappers and optional examples."
     },
     {

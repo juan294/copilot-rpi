@@ -123,7 +123,7 @@ evidence; no native Copilot inference or scheduled service was activated.
 
 ## Phase 5 local preparation
 
-The current package keeps its released version at 1.18.0 and places the
+The package initially kept its released version at 1.18.0 and placed the
 proposed breaking changes under `Unreleased`. Compatibility, migration,
 upstream intake and native-policy guides now describe the selected profiles,
 ownership lifecycle, opt-in controls and recovery. The active guide and
@@ -184,11 +184,9 @@ The initial VS Code UI observation used the Local extension host, so it is
 optional compatibility evidence only. The computer-use native pipe then failed
 repeatedly, including after a reset. The selected Agent Host UI, visual
 discovery inventory and Local-to-Agent-Host handoff could not be inspected.
-Native session state and `code agent ps` prove Agent Host execution but do not
-satisfy the plan's visual acceptance step. Phase 5 remains open, and the
-approved version bump, merge, push, tag and release are deferred until the
-mandatory primary profile is qualified or the owner explicitly changes that
-acceptance requirement.
+Native session state and `code agent ps` prove Agent Host execution, while the
+visual acceptance step remains unobserved. The owner subsequently accepted
+the specific native-session evidence substitution recorded below.
 
 The ownership engine self-applied 31 exact canonical components in the task
 worktree with zero file actions and conflicts; its `check` reported healthy.
@@ -249,8 +247,34 @@ new data write during rollback. A third red/green test covers that case.
 Independent re-review found no remaining scoped issue, and all 19 automation
 tests pass. The complete gate remains pending on this new candidate.
 
-The computer-use pipe still fails to start, so the required visual Agent Host
-selection, discovery inventory and Local-to-Agent-Host handoff remain
-unobserved. Permission to try macOS accessibility scripting for those UI-only
-checks was requested from the owner and is pending. No version bump,
-integration, push, tag or release has occurred.
+## Phase 5 acceptance deviation and release preparation
+
+The plan required visual Agent Host selection, discovery inventory and a
+Local-to-Agent-Host handoff before release. The computer-use pipe repeatedly
+failed or timed out, even after the console was unlocked. Several VS Code
+windows were open, so further UI attempts would have disrupted the owner's
+desktop. The owner explicitly accepted a substitution on 2026-09-29 and
+instructed continuation of the release. Native Agent Host sessions with
+provider `copilotcli` loaded the rendered skill and resource, rejected a
+renamed skill, enforced the selected research role, passed the repaired
+research and missing-review retests, and completed six independently scored
+workflow fixtures. These observations qualify the native Agent Host behavior
+for this release. The visual picker, inventory and UI handoff remain
+unobserved; their behavior is not claimed as tested for this VS Code build.
+
+The owner separately accepted the documented limit that a local actor can edit
+both a pre-push hook and its receipt. Exact-commit GitHub CI remains the remote
+publication check. The release preparation sets version 2.0.0 in the changelog
+and package manifests; final candidate gates and publication outcomes must be
+recorded from their actual runs.
+
+The first versioned portable gate passed its tests, generated-output check,
+ShellCheck, Markdown lint and internal links, then found that the pinned
+destination hash for `templates/distribution.json` still described the prior
+version. The destination hash was updated without changing the pinned upstream
+source. A post-fix Wave B automation charter passed all eight maneuvers on the
+unchanged runner source, including both report-write failure orders. Its
+disposable fixture was removed. An independent release diff review found no
+material issue, and the reuse, quality and efficiency simplify pass found no
+safe further reduction in the version/documentation changes. The final
+committed candidate still requires a complete gate and publication checks.
