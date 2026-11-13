@@ -1,6 +1,7 @@
 """CI must exercise the same portable gate and Markdown scope as local work."""
 
 from pathlib import Path
+import re
 import subprocess
 import tempfile
 import unittest
@@ -17,6 +18,15 @@ class CIContractTests(unittest.TestCase):
         commands = [step.get("run", "") for job in workflow["jobs"].values()
                     for step in job["steps"]]
         self.assertTrue(any("bash scripts/verify-local.sh" in command for command in commands))
+
+    def test_node_line_comes_from_nvmrc_not_a_literal(self):
+        workflow = yaml.safe_load((ROOT / ".github/workflows/validate.yml").read_text())
+        setups = [step for job in workflow["jobs"].values() for step in job["steps"]
+                  if str(step.get("uses", "")).startswith("actions/setup-node@")]
+        self.assertEqual(1, len(setups))
+        self.assertEqual(".nvmrc", setups[0]["with"].get("node-version-file"))
+        self.assertNotIn("node-version", setups[0]["with"])
+        self.assertRegex((ROOT / ".nvmrc").read_text(), r"\A24\n?\Z")
 
     def test_markdown_lint_excludes_immutable_source_snapshots(self):
         workflow = yaml.safe_load((ROOT / ".github/workflows/markdown-lint.yml").read_text())

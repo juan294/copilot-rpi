@@ -4,6 +4,8 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -103,6 +105,41 @@ class VerificationTest(unittest.TestCase):
         self.assertNotEqual(0, result.returncode)
         self.assertFalse(self.report()["environment_unchanged"])
         self.assertEqual("1.0", self.report()["environment"]["tool_versions"]["shellcheck"])
+
+    def fake_node(self, version):
+        fake_bin = self.root / ".rpi/local/bin"
+        fake_bin.mkdir(parents=True, exist_ok=True)
+        node = fake_bin / "node"
+        node.write_text(f"#!/bin/sh\necho {version}\n")
+        node.chmod(0o755)
+        return {**os.environ, "PATH": str(fake_bin) + os.pathsep + os.environ["PATH"]}
+
+    def test_receipt_records_the_node_version_the_gate_ran_with(self):
+        env = self.fake_node("v99.1.2")
+        self.assertEqual(0, self.verify([self.check("good")], env=env).returncode)
+        self.assertEqual("v99.1.2", self.report()["environment"]["tool_versions"]["node"])
+
+    def test_receipt_accepts_a_node_version_that_differs_between_runs(self):
+        first = self.verify([self.check("good")], env=self.fake_node("v99.1.2"))
+        self.assertEqual(0, first.returncode, first.stdout + first.stderr)
+        second = self.verify([self.check("good")], env=self.fake_node("v99.1.3"))
+        self.assertEqual(0, second.returncode, second.stdout + second.stderr)
+        self.assertTrue(self.report()["passed"])
+        self.assertEqual("v99.1.3", self.report()["environment"]["tool_versions"]["node"])
+
+    def test_receipt_node_version_equals_running_node_version(self):
+        node = shutil.which("node")
+        if node is None:
+            self.skipTest("node is not installed")
+        running = subprocess.run([node, "--version"], capture_output=True, text=True, check=True).stdout.strip()
+        self.assertEqual(0, self.verify([self.check("good")]).returncode)
+        self.assertEqual(running, self.report()["environment"]["tool_versions"]["node"])
+
+    def test_verifier_sources_hold_no_node_version_constant(self):
+        for name in ("rpi-verify.py", "rpi-candidate.py", "rpi-prepush.py"):
+            with self.subTest(source=name):
+                text = (VERIFIER.parent / name).read_text()
+                self.assertIsNone(re.search(r"(?i)node[^\n]{0,40}\bv?\d+\.\d+\.\d+", text))
 
     def test_project_policy_selects_its_complete_check_inventory(self):
         policy = self.root / ".rpi/policy.json"
