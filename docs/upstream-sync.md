@@ -51,3 +51,13 @@ snapshots, destination hashes and affected Copilot code/docs, then run
 `bash scripts/verify-local.sh` and review the candidate receipt. See the
 [catalog crosswalk](upstream-catalog-crosswalk.md) and
 [contribution rules](../CONTRIBUTING.md).
+
+## Reference-only intake
+
+A reference refresh may update the pinned snapshots while deferring incoming
+behavior. Record each incoming delta as deferred in the reviewed decisions.
+Preserve existing component dispositions and native destination bytes/hashes;
+for an adapted component, explain that its older Copilot implementation is
+retained. New deferred components have no native destination. Refresh source
+hashes and provenance anchors, then verify both the offline archive and the
+exact clean source checkout. This does not install newer upstream behavior.

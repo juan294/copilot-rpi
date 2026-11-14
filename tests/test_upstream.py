@@ -30,7 +30,7 @@ class UpstreamCheckerTests(unittest.TestCase):
     def test_offline_default_checks_every_recorded_item(self):
         result = run_check("--lock", LOCK, "--inventory", INVENTORY, "--check")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("61 components", result.stdout)
+        self.assertIn("62 components", result.stdout)
         inventory = json.loads(INVENTORY.read_text())
         self.assertEqual(len(inventory["links"]), 36)
         self.assertIn(
