@@ -2,22 +2,22 @@
   "schema_version": 1,
   "upstream": {
     "repository": "cc-rpi",
-    "commit": "aa3ea57fb26ae2e1e167acada4b769e073a417f4",
+    "commit": "5920376165d8dec6d35baa0d273a0b3fc9ee1f81",
     "version": "2.1.0",
     "license": "LICENSE",
-    "note": "Pinned source commit, not a published 2.1.0 release tag."
+    "note": "Reference-only security intake from a committed cc-rpi source, not a release tag. Native Copilot destinations retain their prior implementations; incoming behavioral deltas are deferred in the reviewed 2026-11-14 intake decisions."
   },
   "components": [
     {
       "id": "skill:rpi-adopt",
       "kind": "skill",
       "source": "templates/skills/rpi-adopt",
-      "source_sha256": "f4d67d484fe3adaa325ed8aba326b1994772ef791de9a2e03116906fd808cc30",
+      "source_sha256": "e1704cd87db6ff58e1dba93bd6a4008bafc37271e7cc53e458c3ee97545838b7",
       "disposition": "adapted",
-      "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1.",
+      "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1. Reference refresh 2026-11-14: Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction.",
       "destination": "templates/skills/rpi-adopt",
       "destination_sha256": "3724c5c41a97935cc217c5afc5d1bcb8f7bec1d8ad37f1cec1f877579e6ace37",
-      "adaptation_note": "Copilot project skill location and explicit adopter lifecycle authority."
+      "adaptation_note": "Copilot project skill location and explicit adopter lifecycle authority. Incoming source changes at 5920376165d8dec6d35baa0d273a0b3fc9ee1f81 remain deferred; the existing native destination is unchanged."
     },
     {
       "id": "skill:rpi-assess",
@@ -45,12 +45,12 @@
       "id": "skill:rpi-bootstrap",
       "kind": "skill",
       "source": "templates/skills/rpi-bootstrap",
-      "source_sha256": "aa78f5941ab911717a733b88432989a9a3de98e3ec9595c3723ed9bf4d0ce010",
+      "source_sha256": "d8e7dfea5256be537f8b7e024e7de4f3a9b96336183cbc6b824e8c0704a1f605",
       "disposition": "adapted",
-      "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1.",
+      "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1. Reference refresh 2026-11-14: Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction.",
       "destination": "templates/skills/rpi-bootstrap",
       "destination_sha256": "e4dd1c05a44cb919fe45b210850b24cf152eaedf0d54d65ffc5d4e3bb9c49ab5",
-      "adaptation_note": "Copilot project skill location and explicit bootstrap lifecycle authority."
+      "adaptation_note": "Copilot project skill location and explicit bootstrap lifecycle authority. Incoming source changes at 5920376165d8dec6d35baa0d273a0b3fc9ee1f81 remain deferred; the existing native destination is unchanged."
     },
     {
       "id": "skill:rpi-describe-pr",
@@ -78,12 +78,12 @@
       "id": "skill:rpi-explore-release",
       "kind": "skill",
       "source": "templates/skills/rpi-explore-release",
-      "source_sha256": "403148f5e8ed126c71ed3a722a3596a845ff1fbca5bf792ef442ee5fdc205cae",
+      "source_sha256": "4b0c44fe855c0f0da0617f53944226a6ab61b4fa99f5e2a59469d7fc7646e88e",
       "disposition": "adapted",
-      "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1.",
+      "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1. Reference refresh 2026-11-14: Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction.",
       "destination": "templates/skills/rpi-explore-release",
       "destination_sha256": "60a8d9d8aa54555fe092bef3a9f5c3c18b1595c6fdc75b253d127f342756965c",
-      "adaptation_note": "Copilot skill metadata, explicit local authority and native path wording while retaining the portable workflow contract."
+      "adaptation_note": "Copilot skill metadata, explicit local authority and native path wording while retaining the portable workflow contract. Incoming source changes at 5920376165d8dec6d35baa0d273a0b3fc9ee1f81 remain deferred; the existing native destination is unchanged."
     },
     {
       "id": "skill:rpi-fix-ci",
@@ -122,34 +122,34 @@
       "id": "skill:rpi-pre-launch",
       "kind": "skill",
       "source": "templates/skills/rpi-pre-launch",
-      "source_sha256": "63dcc413baeef53887630d153fe2389e084c60a15776d3e1f34abbc79640a110",
+      "source_sha256": "5ea2b9d77fc1282a5e756e3bde786cad76a93201f34f351d6f7e2cd7bca02a36",
       "disposition": "adapted",
-      "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1.",
+      "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1. Reference refresh 2026-11-14: Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction.",
       "destination": "templates/skills/rpi-pre-launch",
       "destination_sha256": "34368b5e911c4d084955e06ed5781fb4a3589f9d1779ba8a592835751b9be966",
-      "adaptation_note": "Copilot skill metadata, explicit local authority and native path wording while retaining the portable workflow contract."
+      "adaptation_note": "Copilot skill metadata, explicit local authority and native path wording while retaining the portable workflow contract. Incoming source changes at 5920376165d8dec6d35baa0d273a0b3fc9ee1f81 remain deferred; the existing native destination is unchanged."
     },
     {
       "id": "skill:rpi-release",
       "kind": "skill",
       "source": "templates/skills/rpi-release",
-      "source_sha256": "def0f1c576a73d8efba2d503241e8c69457c5320907f70b39458eb89e0f0ddaa",
+      "source_sha256": "9edabbf4414e30562acad5b3e3e76c17e424501c760230bd30c148be78480c83",
       "disposition": "adapted",
-      "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1.",
+      "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1. Reference refresh 2026-11-14: Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction.",
       "destination": "templates/skills/rpi-release",
       "destination_sha256": "8c98eb421303879f537adadac347f3bee995c4490be5cd8dbb17036c9c8f9fe1",
-      "adaptation_note": "Copilot invocation with local candidate proof and separately authorized publication."
+      "adaptation_note": "Copilot invocation with local candidate proof and separately authorized publication. Incoming source changes at 5920376165d8dec6d35baa0d273a0b3fc9ee1f81 remain deferred; the existing native destination is unchanged."
     },
     {
       "id": "skill:rpi-remediate",
       "kind": "skill",
       "source": "templates/skills/rpi-remediate",
-      "source_sha256": "c6ee055e5772b24ca61422f90813803fc39d6b777e35872c6783c746f9f1f534",
+      "source_sha256": "4bdc123dbddce713e48448be8dca6f9c83f6273ae064b2b02878158ac1761b46",
       "disposition": "adapted",
-      "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1.",
+      "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1. Reference refresh 2026-11-14: Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction.",
       "destination": "templates/skills/rpi-remediate",
       "destination_sha256": "c273ca321cfdb9f585202609d6b9f8d2dc805c77577fb59414cc9bee9b6e5d6c",
-      "adaptation_note": "Copilot skill metadata, explicit local authority and native path wording while retaining the portable workflow contract."
+      "adaptation_note": "Copilot skill metadata, explicit local authority and native path wording while retaining the portable workflow contract. Incoming source changes at 5920376165d8dec6d35baa0d273a0b3fc9ee1f81 remain deferred; the existing native destination is unchanged."
     },
     {
       "id": "skill:rpi-research",
@@ -221,12 +221,12 @@
       "id": "skill:rpi-validate",
       "kind": "skill",
       "source": "templates/skills/rpi-validate",
-      "source_sha256": "076e7ad0e57232d971997aed3be61f1b245fdfa9113ddf9b865bdff7748926e4",
+      "source_sha256": "71189d43ce9bb25802ffa4236f5c758d1551f2a1d237178e9eb15607cec7a521",
       "disposition": "adapted",
-      "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1.",
+      "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1. Reference refresh 2026-11-14: Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction.",
       "destination": "templates/skills/rpi-validate",
       "destination_sha256": "4eedd22bc74d4445b069b3b858d84cc839be2a59866cf1a96a9ad751af35a11f",
-      "adaptation_note": "Copilot skill metadata, explicit local authority and native path wording while retaining the portable workflow contract."
+      "adaptation_note": "Copilot skill metadata, explicit local authority and native path wording while retaining the portable workflow contract. Incoming source changes at 5920376165d8dec6d35baa0d273a0b3fc9ee1f81 remain deferred; the existing native destination is unchanged."
     },
     {
       "id": "skill:ci-workflow",
@@ -265,9 +265,9 @@
       "id": "skill:git-workflow",
       "kind": "skill",
       "source": "templates/skills/git-workflow",
-      "source_sha256": "b0031988771eb474890e58d91a948c18a7b0127eb593519f74288a7759d34d12",
+      "source_sha256": "4a00d4351fbb24cc0d86c855f220f269f7d076fe3cf15da76ab94180e45cb97a",
       "disposition": "deferred",
-      "rationale": "Portable domain content is under applicability review; Copilot installation is selected by project scope.",
+      "rationale": "Portable domain content is under applicability review; Copilot installation is selected by project scope. Reference refresh 2026-11-14: Archive the newer upstream source for reference only. Continue the existing applicability disposition without installing or registering this incoming behavior.",
       "destination": null,
       "destination_sha256": null,
       "adaptation_note": null
@@ -287,9 +287,9 @@
       "id": "skill:macos-rules",
       "kind": "skill",
       "source": "templates/skills/macos-rules",
-      "source_sha256": "ec9519eecc88fbe01a5a4e328f0237f5e2ae01e9359bada1a4f067b72830465f",
+      "source_sha256": "0d2cc1bc923ff5ed38243f0ab4374e5642516911c7824ec78200bd6b49ff4006",
       "disposition": "deferred",
-      "rationale": "Portable domain content is under applicability review; Copilot installation is selected by project scope.",
+      "rationale": "Portable domain content is under applicability review; Copilot installation is selected by project scope. Reference refresh 2026-11-14: Refresh reference text to remove runnable installation examples with invented package names. This deferred domain skill remains unregistered in Copilot.",
       "destination": null,
       "destination_sha256": null,
       "adaptation_note": null
@@ -397,9 +397,20 @@
       "id": "rule:rpi-details",
       "kind": "rule",
       "source": "templates/rules/rpi-details.md",
-      "source_sha256": "08993d048a7fe9cfc33f753b43a8d550d8ed5900092901e4a79d3a7f254d0cf7",
+      "source_sha256": "6ab64736bee508b4402e20f34ec2ac565b4c8727242b6a2b822cf1fd4b1fad70",
       "disposition": "deferred",
-      "rationale": "Rule concept is under Copilot native instruction adaptation and applicability review.",
+      "rationale": "Rule concept is under Copilot native instruction adaptation and applicability review. Reference refresh 2026-11-14: Archive the newer upstream source for reference only. Continue the existing applicability disposition without installing or registering this incoming behavior.",
+      "destination": null,
+      "destination_sha256": null,
+      "adaptation_note": null
+    },
+    {
+      "id": "rule:resource-lifecycle",
+      "kind": "rule",
+      "source": "templates/rules/resource-lifecycle.md",
+      "source_sha256": "5f2a945dd44c6dd17811358177d83dcba4aeecce9e146b2474e1006576a851c6",
+      "disposition": "deferred",
+      "rationale": "Archive the new upstream resource-ownership rule for reference; installing or adapting it is outside this package-example correction.",
       "destination": null,
       "destination_sha256": null,
       "adaptation_note": null
@@ -408,9 +419,9 @@
       "id": "rule:supabase",
       "kind": "rule",
       "source": "templates/rules/supabase.md",
-      "source_sha256": "c96fc92a476c32a11662d08bf34151d21b61004b42a59a336a4e453699b87aed",
+      "source_sha256": "01497b78927359396e114fca7e221d79468f39af6c1e93bc03ce1b07f5d7711e",
       "disposition": "deferred",
-      "rationale": "Rule concept is under Copilot native instruction adaptation and applicability review.",
+      "rationale": "Rule concept is under Copilot native instruction adaptation and applicability review. Reference refresh 2026-11-14: Archive the newer upstream source for reference only. Continue the existing applicability disposition without installing or registering this incoming behavior.",
       "destination": null,
       "destination_sha256": null,
       "adaptation_note": null
@@ -441,9 +452,9 @@
       "id": "instruction:rule-map",
       "kind": "instruction",
       "source": "templates/instructions/rule-map.md",
-      "source_sha256": "4e0143c0c9dc7846ef73e2fe04ee70020da391c0f5b7244aa2186c7b7e41d516",
+      "source_sha256": "4642badb06854acd70f94864b7ff4ec4ebfdb5b670aaf5ca9fdaad5a02897d68",
       "disposition": "deferred",
-      "rationale": "Native adapter awaits the phase that qualifies and renders the Copilot surface.",
+      "rationale": "Native adapter awaits the phase that qualifies and renders the Copilot surface. Reference refresh 2026-11-14: Archive the newer upstream source for reference only. Continue the existing applicability disposition without installing or registering this incoming behavior.",
       "destination": null,
       "destination_sha256": null,
       "adaptation_note": null
@@ -452,9 +463,9 @@
       "id": "hook:guard-bash",
       "kind": "hook",
       "source": "templates/hooks/guard-bash.sh",
-      "source_sha256": "69a49a2eece8a57fe1ff234f6d0e06e0013b9f20bdc0bdd6f1335576bcd7f419",
+      "source_sha256": "baeb396ccfda294fff7f82db7234c90df36710d5e5f5ec482f88b31faec5dc0d",
       "disposition": "deferred",
-      "rationale": "Native adapter awaits the phase that qualifies and renders the Copilot surface.",
+      "rationale": "Native adapter awaits the phase that qualifies and renders the Copilot surface. Reference refresh 2026-11-14: Archive the newer upstream source for reference only. Continue the existing applicability disposition without installing or registering this incoming behavior.",
       "destination": null,
       "destination_sha256": null,
       "adaptation_note": null
@@ -507,31 +518,31 @@
       "id": "resource:policy-engine",
       "kind": "resource",
       "source": "templates/scripts/rpi-policy.py",
-      "source_sha256": "8eb9dbd2f7dd5ee5bce57c2e508ebd4d5a191bd43a183ecb1b6dd8dee6c029f5",
+      "source_sha256": "052f6e23bf7fc60378f3fa5038291bad11e9380b1b479fc45dd03d57826a9928",
       "disposition": "adapted",
-      "rationale": "Pinned portable control is adapted for the Copilot Phase 4 runtime.",
+      "rationale": "Pinned portable control is adapted for the Copilot Phase 4 runtime. Reference refresh 2026-11-14: Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction.",
       "destination": "templates/scripts/rpi-hook.py",
       "destination_sha256": "825126920ab810f256efa0fd73045584b95214bd07c2e89434fcced027b5a38f",
-      "adaptation_note": "Copilot native hook policy uses preview-only activation and fail-closed local checks."
+      "adaptation_note": "Copilot native hook policy uses preview-only activation and fail-closed local checks. Incoming source changes at 5920376165d8dec6d35baa0d273a0b3fc9ee1f81 remain deferred; the existing native destination is unchanged."
     },
     {
       "id": "resource:prepush-gate",
       "kind": "resource",
       "source": "templates/scripts/rpi-prepush.py",
-      "source_sha256": "8815e263e5d5f01ba4dc19e461fcdb47578701f277bc76594a3523a6d3464915",
+      "source_sha256": "b12d4f885fb3801e692c3264e03132af316bacab287e3026abe321ab146de0b0",
       "disposition": "adapted",
-      "rationale": "Pinned portable control is adapted for the Copilot Phase 4 runtime.",
+      "rationale": "Pinned portable control is adapted for the Copilot Phase 4 runtime. Reference refresh 2026-11-14: Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction.",
       "destination": "templates/scripts/rpi-prepush.py",
       "destination_sha256": "0a6df1ad9396b8983fe310702d72fcfc975fcec7bfc233088aa8ba1cda543907",
-      "adaptation_note": "Copilot opt-in pre-push receipt gate validates the tested candidate."
+      "adaptation_note": "Copilot opt-in pre-push receipt gate validates the tested candidate. Incoming source changes at 5920376165d8dec6d35baa0d273a0b3fc9ee1f81 remain deferred; the existing native destination is unchanged."
     },
     {
       "id": "resource:diagnostics",
       "kind": "resource",
       "source": "templates/scripts/rpi-diagnostics.py",
-      "source_sha256": "3439b78d081ef11bb91083336c734145616686b34811b7756e8c2183bb2f4c73",
+      "source_sha256": "ddd56f0311a836187671c04352551756ecedaf717b740a6561a7a0e229cefd23",
       "disposition": "deferred",
-      "rationale": "Portable resource or lifecycle algorithm awaits the phase that adapts it for Copilot.",
+      "rationale": "Portable resource or lifecycle algorithm awaits the phase that adapts it for Copilot. Reference refresh 2026-11-14: Archive the newer upstream source for reference only. Continue the existing applicability disposition without installing or registering this incoming behavior.",
       "destination": null,
       "destination_sha256": null,
       "adaptation_note": null
@@ -606,42 +617,42 @@
       "id": "resource:distribution-engine",
       "kind": "resource",
       "source": "templates/scripts/rpi-distribution.py",
-      "source_sha256": "2f4eb75a032064ccab38ce3cdb95b2680d7a712197eff8b0be375ef299d27689",
+      "source_sha256": "eecc115547742e1de634df797cb2610d441b361fed9ca62d27005ebac33ec09f",
       "disposition": "adapted",
-      "rationale": "Pinned upstream distribution contract has a Copilot-owned Phase 2 implementation.",
+      "rationale": "Pinned upstream distribution contract has a Copilot-owned Phase 2 implementation. Reference refresh 2026-11-14: Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction.",
       "destination": "templates/scripts/rpi-distribution.py",
       "destination_sha256": "2f4d343a9abc894a7aff5e6a70658c97d3f379928b8cf8ace791d35b83caa6b8",
-      "adaptation_note": "Path safety, manifest validation, resource accounting and deterministic rendering adapted to Copilot profiles and metadata."
+      "adaptation_note": "Path safety, manifest validation, resource accounting and deterministic rendering adapted to Copilot profiles and metadata. Incoming source changes at 5920376165d8dec6d35baa0d273a0b3fc9ee1f81 remain deferred; the existing native destination is unchanged."
     },
     {
       "id": "resource:lifecycle-engine",
       "kind": "resource",
       "source": "templates/scripts/rpi-lifecycle.py",
-      "source_sha256": "9bf4c821becb0fe344d33e0d7d8bfa270ba235beca5b9fe2dd1ce0652d578da2",
+      "source_sha256": "0b3588595ac3b08e4ee60985a7b3e195bd0e9c91ef359dc68a2ecddac39ead5a",
       "disposition": "adapted",
-      "rationale": "Pinned upstream lifecycle and configuration algorithms are adapted for the Copilot project-local ownership engine.",
+      "rationale": "Pinned upstream lifecycle and configuration algorithms are adapted for the Copilot project-local ownership engine. Reference refresh 2026-11-14: Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction.",
       "destination": "templates/scripts/rpi-lifecycle.py",
       "destination_sha256": "118938943f34515619ce855d6a9c026c5c539243ab65b4d769a7e35dc074036f",
-      "adaptation_note": "Adapted for verified standalone Copilot render packages, namespaced ownership and recovery, exact historical-byte migration, safe state validation and JSONC field reconciliation."
+      "adaptation_note": "Adapted for verified standalone Copilot render packages, namespaced ownership and recovery, exact historical-byte migration, safe state validation and JSONC field reconciliation. Incoming source changes at 5920376165d8dec6d35baa0d273a0b3fc9ee1f81 remain deferred; the existing native destination is unchanged."
     },
     {
       "id": "resource:configuration-engine",
       "kind": "resource",
       "source": "templates/scripts/rpi-config.py",
-      "source_sha256": "51f5ec49a680c5d772f0b9c223e3d0e83d76e1e9ea3d881a82e08b179709817a",
+      "source_sha256": "ae6d9c7d149c84bc8b4634bc2171e21680ea91c5e1048589e76d7245e82bc8a3",
       "disposition": "adapted",
-      "rationale": "Pinned upstream lifecycle and configuration algorithms are adapted for the Copilot project-local ownership engine.",
+      "rationale": "Pinned upstream lifecycle and configuration algorithms are adapted for the Copilot project-local ownership engine. Reference refresh 2026-11-14: Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction.",
       "destination": "templates/scripts/rpi-config.py",
       "destination_sha256": "00fa7bb74b714a8ba7dfd4c19c0e2feda9e418eecfd481b784576b8921b721bc",
-      "adaptation_note": "Adapted for verified standalone Copilot render packages, namespaced ownership and recovery, exact historical-byte migration, safe state validation and JSONC field reconciliation."
+      "adaptation_note": "Adapted for verified standalone Copilot render packages, namespaced ownership and recovery, exact historical-byte migration, safe state validation and JSONC field reconciliation. Incoming source changes at 5920376165d8dec6d35baa0d273a0b3fc9ee1f81 remain deferred; the existing native destination is unchanged."
     },
     {
       "id": "resource:package-engine",
       "kind": "resource",
       "source": "templates/scripts/rpi-package.py",
-      "source_sha256": "0e4dc8aa15b48980d7b789c574e84ab85acf22f26b940ba97f76a8b3d4cb75b6",
+      "source_sha256": "3077b2a2d4ae65015c6748ba2676a2d3e63f04d7633d696bed58bd7c26751661",
       "disposition": "deferred",
-      "rationale": "Portable resource or lifecycle algorithm awaits the phase that adapts it for Copilot.",
+      "rationale": "Portable resource or lifecycle algorithm awaits the phase that adapts it for Copilot. Reference refresh 2026-11-14: Archive the newer upstream source for reference only. Continue the existing applicability disposition without installing or registering this incoming behavior.",
       "destination": null,
       "destination_sha256": null,
       "adaptation_note": null
@@ -650,12 +661,12 @@
       "id": "resource:distribution-manifest",
       "kind": "resource",
       "source": "templates/distribution.json",
-      "source_sha256": "6ab6b24255380c7105412ddd101a1c455343b4154b7de89b3deddea781a026a0",
+      "source_sha256": "7721d05b911e4965320c62acdaebc5f4b58db31d29797700b3329a70be2eb478",
       "disposition": "adapted",
-      "rationale": "Pinned upstream distribution contract has a Copilot-owned Phase 2 implementation.",
+      "rationale": "Pinned upstream distribution contract has a Copilot-owned Phase 2 implementation. Reference refresh 2026-11-14: Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction.",
       "destination": "templates/distribution.json",
       "destination_sha256": "3ed226e4cfafdfbf57234e30b106f724207067a8a919dfa162671db76f34c6c4",
-      "adaptation_note": "Component identity and resource declarations adapted to Copilot skills, agents, Local wrappers and optional examples."
+      "adaptation_note": "Component identity and resource declarations adapted to Copilot skills, agents, Local wrappers and optional examples. Incoming source changes at 5920376165d8dec6d35baa0d273a0b3fc9ee1f81 remain deferred; the existing native destination is unchanged."
     },
     {
       "id": "resource:claude-adapter",
@@ -2566,6 +2577,6 @@
   ],
   "crosswalk": {
     "path": "docs/upstream-catalog-crosswalk.json",
-    "sha256": "a085a6ea9d09752e4ca4198e8fdc435260dad2cc6c55831448345364a866706b"
+    "sha256": "692c545cf6b2ab11f710656e3dd74fdfcbf8f3f9dbadbd84c70a8c0213c84de0"
   }
 }

@@ -1,0 +1,116 @@
+{
+  "source_sha": "5920376165d8dec6d35baa0d273a0b3fc9ee1f81",
+  "changes_sha256": "4eeccc15bb093407a6c026685d1f381e7df0ab45cfc4c8342b0eaa5647f602c8",
+  "decisions": [
+    {
+      "id": "component:hook:guard-bash",
+      "disposition": "deferred",
+      "rationale": "Archive the newer upstream source for reference only. Continue the existing applicability disposition without installing or registering this incoming behavior."
+    },
+    {
+      "id": "component:instruction:rule-map",
+      "disposition": "deferred",
+      "rationale": "Archive the newer upstream source for reference only. Continue the existing applicability disposition without installing or registering this incoming behavior."
+    },
+    {
+      "id": "component:resource:configuration-engine",
+      "disposition": "deferred",
+      "rationale": "Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction."
+    },
+    {
+      "id": "component:resource:diagnostics",
+      "disposition": "deferred",
+      "rationale": "Archive the newer upstream source for reference only. Continue the existing applicability disposition without installing or registering this incoming behavior."
+    },
+    {
+      "id": "component:resource:distribution-engine",
+      "disposition": "deferred",
+      "rationale": "Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction."
+    },
+    {
+      "id": "component:resource:distribution-manifest",
+      "disposition": "deferred",
+      "rationale": "Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction."
+    },
+    {
+      "id": "component:resource:lifecycle-engine",
+      "disposition": "deferred",
+      "rationale": "Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction."
+    },
+    {
+      "id": "component:resource:package-engine",
+      "disposition": "deferred",
+      "rationale": "Archive the newer upstream source for reference only. Continue the existing applicability disposition without installing or registering this incoming behavior."
+    },
+    {
+      "id": "component:resource:policy-engine",
+      "disposition": "deferred",
+      "rationale": "Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction."
+    },
+    {
+      "id": "component:resource:prepush-gate",
+      "disposition": "deferred",
+      "rationale": "Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction."
+    },
+    {
+      "id": "component:rule:resource-lifecycle",
+      "disposition": "deferred",
+      "rationale": "Archive the new upstream resource-ownership rule for reference; installing or adapting it is outside this package-example correction."
+    },
+    {
+      "id": "component:rule:rpi-details",
+      "disposition": "deferred",
+      "rationale": "Archive the newer upstream source for reference only. Continue the existing applicability disposition without installing or registering this incoming behavior."
+    },
+    {
+      "id": "component:rule:supabase",
+      "disposition": "deferred",
+      "rationale": "Archive the newer upstream source for reference only. Continue the existing applicability disposition without installing or registering this incoming behavior."
+    },
+    {
+      "id": "component:skill:git-workflow",
+      "disposition": "deferred",
+      "rationale": "Archive the newer upstream source for reference only. Continue the existing applicability disposition without installing or registering this incoming behavior."
+    },
+    {
+      "id": "component:skill:macos-rules",
+      "disposition": "deferred",
+      "rationale": "Refresh reference text to remove runnable installation examples with invented package names. This deferred domain skill remains unregistered in Copilot."
+    },
+    {
+      "id": "component:skill:rpi-adopt",
+      "disposition": "deferred",
+      "rationale": "Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction."
+    },
+    {
+      "id": "component:skill:rpi-bootstrap",
+      "disposition": "deferred",
+      "rationale": "Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction."
+    },
+    {
+      "id": "component:skill:rpi-explore-release",
+      "disposition": "deferred",
+      "rationale": "Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction."
+    },
+    {
+      "id": "component:skill:rpi-pre-launch",
+      "disposition": "deferred",
+      "rationale": "Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction."
+    },
+    {
+      "id": "component:skill:rpi-release",
+      "disposition": "deferred",
+      "rationale": "Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction."
+    },
+    {
+      "id": "component:skill:rpi-remediate",
+      "disposition": "deferred",
+      "rationale": "Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction."
+    },
+    {
+      "id": "component:skill:rpi-validate",
+      "disposition": "deferred",
+      "rationale": "Archive the newer upstream source for comparison only. Preserve the existing Copilot adaptation and its destination hash; adopting this incoming behavior is outside this package-example correction."
+    }
+  ]
+}

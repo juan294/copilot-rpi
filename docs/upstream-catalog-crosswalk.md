@@ -1,6 +1,6 @@
 # Copilot catalog crosswalk to cc-rpi 2.1.0
 
-The [machine-readable crosswalk](upstream-catalog-crosswalk.json) accounts for all 40 Copilot error IDs, 55 Copilot rule IDs, 64 pinned upstream errors, and 92 active upstream rules. The upstream source is cc-rpi commit `aa3ea57fb26ae2e1e167acada4b769e073a417f4`, version 2.1.0. Copilot IDs and cc-rpi IDs are independent; an equal meaning does not renumber Copilot's catalog.
+The [machine-readable crosswalk](upstream-catalog-crosswalk.json) accounts for all 40 Copilot error IDs, 55 Copilot rule IDs, 64 pinned upstream errors, and 92 active upstream rules. The upstream source is cc-rpi commit `5920376165d8dec6d35baa0d273a0b3fc9ee1f81`, version 2.1.0. Copilot IDs and cc-rpi IDs are independent; an equal meaning does not renumber Copilot's catalog.
 
 Each local row records its title, upstream meaning match, disposition, and reason. Each upstream row records the reverse link. `adopted` means the meaning is already present; `adapted` means Copilot wording or authority changed; `deferred` means no equivalent observed Copilot catalog item has yet earned a new permanent ID. Deferred upstream items remain visible for future review, including tool, platform, and domain cases. They are not silently discarded or declared fixed. The cc-rpi retired rule IDs 67, 69, and 80 are recorded separately and never reused here.
 
@@ -15,3 +15,12 @@ Each local row records its title, upstream meaning match, disposition, and reaso
 ## Future intake
 
 A new upstream item requires a reviewed source identity and an explicit applicability decision. Add a new Copilot ID only for a distinct failure or rule that the product needs. Preserve existing IDs and add a versioned retirement ledger entry only after checking inbound references. The JSON crosswalk is the machine input for the upstream lock; the authored catalog files remain the local source of truth.
+
+## Reference security intake, 2026-11-14
+
+The upstream snapshots now include the package-example correction.
+The [reviewed intake decisions](decisions/2026-11-14-upstream-security-reference-intake.json)
+defer all incoming behavioral changes. Existing native Copilot destinations,
+their hashes and the permanent catalog IDs are unchanged. Previously adapted
+components retain their implementations; the new resource-lifecycle rule
+and the macOS domain skill remain unregistered.

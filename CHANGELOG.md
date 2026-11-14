@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+### Fixed
+
+- Refresh the pinned upstream reference archive to remove invented package
+  installation examples. Defer incoming upstream behavior and preserve all
+  native Copilot destinations and their hashes.
+
 ## [2.0.0] - 2026-09-29
 
 Breaking layout migration to native Copilot skills and ownership-aware

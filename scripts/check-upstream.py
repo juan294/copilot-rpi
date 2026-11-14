@@ -10,10 +10,10 @@ from pathlib import Path
 
 
 STATUSES = {"adopted", "adapted", "deferred", "inapplicable"}
-PIN = "aa3ea57fb26ae2e1e167acada4b769e073a417f4"
-PINNED_INVENTORY_SHA = "e07f9cfdb6d8400e5bc337562cddc71d40f29f5b2c01e029467cc3d26fb5cfec"
+PIN = "5920376165d8dec6d35baa0d273a0b3fc9ee1f81"
+PINNED_INVENTORY_SHA = "ca148a3550e256b91497513cbe6d7e758fc3cbc57db9f112a650a12dd9310bc9"
 PINNED_ANCHORS = {
-    "templates/distribution.json": "6ab6b24255380c7105412ddd101a1c455343b4154b7de89b3deddea781a026a0",
+    "templates/distribution.json": "7721d05b911e4965320c62acdaebc5f4b58db31d29797700b3329a70be2eb478",
     "patterns/agent-errors.md": "fc485f9de1dbc706a214601827e3bf1efbf742817f8265baf14c3a4744597eac",
     "patterns/quick-reference.md": "7b1d5b43398f0ace8c1aebc8f0fe9a00fc22e2c1104e52c46dd0c7e382eeadaa",
     "LICENSE": "7784153b6b563cf7749faa3e0c24222367b4b8ffc360bb76d9b677b3baa1589d",
