@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "version": "2.1.0",
+  "version": "2.2.0",
   "root_budget_bytes": 8192,
   "profiles": {
     "cli": {
@@ -17,43 +17,14 @@
   "self_application": {
     "profile": "cli",
     "preserve": [
-      "root:agents",
-      "skill:process-errors"
+      "root:agents"
     ],
     "legacy_active": [
       ".github/prompts/remediate.prompt.md",
-      ".github/prompts/triage.prompt.md",
-      ".github/prompts/process-errors.prompt.md"
+      ".github/prompts/triage.prompt.md"
     ]
   },
   "components": [
-    {
-      "id": "skill:process-errors",
-      "kind": "skill",
-      "source": "templates/skills/process-errors",
-      "destination": ".github/skills/process-errors",
-      "profiles": [
-        "cli",
-        "agent-host"
-      ],
-      "resources": [],
-      "former_paths": [
-        ".github/prompts/process-errors.prompt.md"
-      ]
-    },
-    {
-      "id": "prompt:process-errors",
-      "kind": "prompt",
-      "source": "templates/skills/process-errors",
-      "destination": ".github/prompts/process-errors.prompt.md",
-      "profiles": [
-        "vscode-local"
-      ],
-      "resources": [],
-      "former_paths": [
-        ".github/prompts/process-errors.prompt.md"
-      ]
-    },
     {
       "id": "skill:rpi-adopt",
       "kind": "skill",

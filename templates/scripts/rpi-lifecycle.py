@@ -363,6 +363,7 @@ def historical_bytes(request, relative):
         return None
     if relative.startswith('.github/chatmodes/') and Path(relative).parent.as_posix() != '.github/chatmodes':
         return None
+    # The retired process-errors prompt was self-applied, never a templates/prompts file.
     if relative.startswith('.github/prompts/') and Path(relative).name != 'process-errors.prompt.md':
         path = 'templates/prompts/' + Path(relative).name
     elif relative.startswith('.github/chatmodes/'):
@@ -405,8 +406,10 @@ def make_plan(request):
     old = {item['destination']: item for item in (previous or {}).get('entries', [])}
     unknown_old = {item['component_id'] for item in old.values()} - available - retired_review
     if unknown_old:
-        raise Conflict('persisted ownership names components absent from this package: ' + ', '.join(sorted(unknown_old)) +
+        exc = Conflict('persisted ownership names components absent from this package: ' + ', '.join(sorted(unknown_old)) +
                        '; inspect the manifest, or explicitly review retirement with --retired-component')
+        exc.retired = sorted(unknown_old | retired_review)
+        raise exc
     if retired_review - {item['component_id'] for item in old.values()}:
         raise ValueError('--retired-component names no recorded component')
     desired = {} if request['action'] == 'detach' else {path: item for path, item in package_contents.items() if item['component_id'] in selected}
@@ -1130,7 +1133,10 @@ def command(argv=None):
             output = getattr(args, 'output', None) or Path(args.target) / LOCAL / 'plans/reconciled.json'
             if output.exists():
                 output = output.with_name(output.stem + '-retry.json')
-            fix = 'repair the named input, then rerun ' + engine_command('plan', '--package', args.package, '--target', args.target, '--profile', args.profile, '--output', output)
+            retired = [part for cid in getattr(exc, 'retired', ()) for part in ('--retired-component', cid)]
+            fix = ('confirm the package retired each named component, then rerun ' if retired else
+                   'repair the named input, then rerun ') + engine_command(
+                'plan', '--package', args.package, '--target', args.target, '--profile', args.profile, '--output', output, *retired)
         fix = fix or 'inspect the named journal or plan and rerun with a fresh review artifact'
         print('BLOCKED / WHY: ' + str(exc) + ' / FIX: ' + fix, file=sys.stderr)
         return 2

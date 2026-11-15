@@ -5,8 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 Copilot RPI is a standalone, repository-installed blueprint for Research,
-Plan, Implement and Validate. It provides 22 canonical RPI skills plus one
-local maintenance skill, three
+Plan, Implement and Validate. It provides 22 canonical RPI skills, three
 specialist agents, six scoped instruction templates, an ownership-aware
 installer, and catalogs of 40 known agent errors and 55 operational rules.
 The source lives in `templates/`; rendered files are installed in a target

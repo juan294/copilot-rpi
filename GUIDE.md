@@ -116,7 +116,6 @@ wrapper, an old receipt or a test on another commit cannot establish success.
 | `rpi-pre-launch`, `rpi-remediate` | Audit eight launch domains and disposition every confirmed finding. |
 | `rpi-update-docs`, `rpi-explore-release`, `rpi-release` | Prepare documentation, exploratory evidence and an authorized publication. |
 | `rpi-triage`, `rpi-status`, `rpi-describe-pr` | Read operational reports, orient a session or draft a change description. |
-| `process-errors` | Maintain the local error corpus; this is a Copilot RPI maintenance skill. |
 
 `rpi-describe-pr` drafts text from the actual diff and verification. It does
 not publish a PR by invocation. `rpi-triage` stops at a read-only briefing;

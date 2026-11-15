@@ -159,6 +159,51 @@ class LifecycleTest(unittest.TestCase):
         self.plan_path.unlink()
         self.assertEqual("ready", self.plan()["status"])
 
+    def install_with_retired_skill(self):
+        retired = b"---\nname: process-errors\ndescription: Old\n---\n\nold maintenance skill\n"
+        destination = ".github/skills/process-errors/SKILL.md"
+        (self.package / destination).parent.mkdir(parents=True, exist_ok=True)
+        (self.package / destination).write_bytes(retired)
+        hello = (self.package / ".github/skills/hello/SKILL.md").read_bytes()
+        self.set_package(hello, extra=[{"path": destination, "component": "skill:process-errors",
+                                        "sha256": hashlib.sha256(retired).hexdigest()}])
+        self.plan()
+        self.apply()
+        shutil.rmtree(self.package / ".github/skills/process-errors")
+        self.set_package(hello)
+        self.plan_path.unlink()
+        return self.target / destination, retired
+
+    def test_retired_component_needs_review_and_removes_only_unchanged_bytes(self):
+        installed, retired = self.install_with_retired_skill()
+        blocked = self.plan(expected=2)
+        self.assertIn("absent from this package: skill:process-errors", blocked.stderr)
+        self.assertIn("--retired-component skill:process-errors", blocked.stderr)
+        self.assertEqual(retired, installed.read_bytes())
+        self.assertFalse(self.plan_path.exists())
+        result = self.plan(retired_component="skill:process-errors")
+        self.assertEqual("ready", result["status"])
+        self.assertIn({"destination": ".github/skills/process-errors/SKILL.md",
+                       "component_id": "skill:process-errors", "action": "remove"}, result["actions"])
+        self.apply()
+        self.assertFalse(installed.exists())
+        manifest = json.loads((self.target / ".rpi/copilot/manifest.json").read_text())
+        self.assertNotIn("skill:process-errors", {entry["component_id"] for entry in manifest["entries"]})
+        self.plan_path.unlink()
+        self.assertEqual("noop", self.plan()["status"])
+
+    def test_retired_component_keeps_owner_edited_bytes(self):
+        installed, retired = self.install_with_retired_skill()
+        edited = retired + b"\n# Owner note\n"
+        installed.write_bytes(edited)
+        result = self.plan(retired_component="skill:process-errors")
+        self.assertEqual("ready", result["status"])
+        self.assertIn({"destination": ".github/skills/process-errors/SKILL.md",
+                       "component_id": "skill:process-errors",
+                       "reason": "modified owned content retained on removal"}, result["retained"])
+        self.apply()
+        self.assertEqual(edited, installed.read_bytes())
+
     def test_interrupted_apply_requires_rollback_then_replan(self):
         self.plan()
         result = self.run_cli("apply", "--plan", self.plan_path, "--fail-after", "1", expected=2)

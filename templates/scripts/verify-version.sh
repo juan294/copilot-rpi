@@ -166,11 +166,17 @@ fi
 #   *.lock, package-lock.json -- dependency versions and ranges in lockfiles
 #                      belong to other packages; check 1 already requires the
 #                      two package-lock.json root fields to equal $VERSION
+#   upstream/       -- the pinned cc-rpi lock and inventory name upstream
+#                      releases, which can share a number with this project
+# A line that names "cc-rpi <version>" or "cc-rpi source <version>" is an
+# upstream provenance note for the same reason, so it is ignored too.
 if [[ -n "$PREV_VERSION" ]]; then
+  PREV_PATTERN="${PREV_VERSION//./\\.}"
   STALE="$(git grep -n -F "$PREV_VERSION" -- \
              ':!CHANGELOG.md' ':!CONTRIBUTING.md' \
-             ':!docs/' ':!*.lock' ':!package-lock.json' \
-             ':!tests/test_legacy_migration.py' 2>/dev/null || true)"
+             ':!docs/' ':!*.lock' ':!package-lock.json' ':!upstream/' \
+             ':!tests/test_legacy_migration.py' 2>/dev/null \
+           | grep -v -E "cc-rpi (source )?v?${PREV_PATTERN}([^0-9]|\$)" || true)"
   if [[ -n "$STALE" ]]; then
     emit_block "Previous version $PREV_VERSION still appears outside $CHANGELOG:
 $(printf '%s' "$STALE" | sed 's/^/  /')" \

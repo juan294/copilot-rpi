@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-11-15
+
+### Removed
+
+- **`process-errors`.** The skill (`cli`, `agent-host`) and its prompt wrapper (`vscode-local`) are retired. They read error screenshots from `~/Desktop/agent-errors/` and added catalog entries. Current models make far fewer of these tool errors, and the intake had not been used for months. The error and rule catalogs in `patterns/` stay, with their permanent IDs. Copilot RPI's own legacy `.github/prompts/process-errors.prompt.md` is removed too.
+
+### Changed
+
+- When a package no longer contains a recorded component, `plan` still stops, and its FIX is now a runnable command with one `--retired-component <id>` per named component. The lifecycle contract and [the v2 guide](docs/migrations/v2.md) describe the review.
+
+### Migration
+
+- Updating from 2.0.0 or 2.1.0 stops once with `persisted ownership names components absent from this package: skill:process-errors` (`prompt:process-errors` for `vscode-local`). Replan with the printed command, which adds `--retired-component skill:process-errors` (or `prompt:process-errors`), then apply and run `check`. The plan removes the unchanged file and retains a copy you edited. An empty `.github/skills/process-errors/` directory can remain; Git does not track it, and you can delete it.
+
 ## [2.1.0] - 2026-11-15
 
 Sync with cc-rpi v2.2.0 (`cec458a`): project overlays, a read-only `diagnose` command and proportional release verification, adapted to Copilot.

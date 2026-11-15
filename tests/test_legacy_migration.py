@@ -274,28 +274,28 @@ class LegacyMigrationTests(unittest.TestCase):
             self.assertEqual(custom_path.read_bytes(), customized)
             self.assertTrue(owned_path.is_file())
 
-    def test_self_applied_process_errors_retires_only_exact_old_prompt(self):
+    def test_retired_process_errors_prompt_is_removed_only_with_exact_old_bytes(self):
         old_path = self.target / ".github/prompts/process-errors.prompt.md"
         modified = old_bytes("process_errors") + b"\n# Owner note\n"
         write(old_path, modified)
-        refused, unsafe_preview, unsafe_path = self.plan("modified-process-errors")
-        self.assertEqual(refused.returncode, 2, refused.stdout + refused.stderr)
-        self.assert_path_reported(unsafe_preview["legacy"], ".github/prompts/process-errors.prompt.md")
+        kept, kept_preview, kept_path = self.plan("modified-process-errors")
+        self.assertEqual(kept.returncode, 0, kept.stdout + kept.stderr)
+        self.assertIn({"destination": ".github/prompts/process-errors.prompt.md", "status": "retained-unproven",
+                       "reason": "sync metadata or filename is not ownership proof"}, kept_preview["legacy"])
         self.assertFalse(any(action.get("destination") == ".github/prompts/process-errors.prompt.md"
-                             and action.get("action") == "remove" for action in unsafe_preview["actions"]))
-        self.assertIn("plan --package", refused.stdout + refused.stderr)
-        self.assertEqual(old_path.read_bytes(), modified)
-        unsafe_apply = self.apply(unsafe_path)
-        self.assertNotEqual(unsafe_apply.returncode, 0)
+                             for action in kept_preview["actions"]))
+        applied = self.apply(kept_path)
+        self.assertEqual(applied.returncode, 0, applied.stdout + applied.stderr)
         self.assertEqual(old_path.read_bytes(), modified)
         write(old_path, old_bytes("process_errors"))
         result, preview, plan_path = self.plan("reviewed-process-errors")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assert_path_reported(preview["legacy"], ".github/prompts/process-errors.prompt.md")
+        self.assertIn({"destination": ".github/prompts/process-errors.prompt.md", "status": "exact-historical",
+                       "reason": "exact immutable source bytes"}, preview["legacy"])
         applied = self.apply(plan_path)
         self.assertEqual(applied.returncode, 0, applied.stdout + applied.stderr)
         self.assertFalse(old_path.exists())
-        self.assertTrue((self.target / ".github/skills/process-errors/SKILL.md").is_file())
+        self.assertFalse((self.target / ".github/skills/process-errors").exists())
 
     def test_cc_rpi_state_coexists_with_copilot_namespace(self):
         cc_manifest = self.target / ".rpi/manifest.json"

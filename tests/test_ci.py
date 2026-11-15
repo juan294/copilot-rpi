@@ -40,6 +40,7 @@ class CIContractTests(unittest.TestCase):
             script.parent.mkdir(parents=True)
             script.write_bytes((ROOT / "templates/scripts/verify-version.sh").read_bytes())
             for name, text in files.items():
+                (project / name).parent.mkdir(parents=True, exist_ok=True)
                 (project / name).write_text(text)
             subprocess.run(["git", "init", "-q", project], check=True)
             subprocess.run(["git", "-C", project, "add", "."], check=True)
@@ -86,6 +87,22 @@ class CIContractTests(unittest.TestCase):
                 self.assertEqual(expected, result.returncode, result.stdout)
                 if expected:
                     self.assertIn("package-lock.json", result.stdout)
+
+    def test_release_gate_ignores_upstream_cc_rpi_versions_equal_to_previous_release(self):
+        files = {
+            "CHANGELOG.md": "## [Unreleased]\n\n## [9.1.0] - 2026-11-15\n\n## [9.0.0] - 2026-09-29\n",
+            "package.json": '{\n  "name": "fixture",\n  "version": "9.1.0"\n}\n',
+            "tool.py": '"""Adapted from pinned cc-rpi 9.0.0 at abc.\nAdapted from cc-rpi source 9.0.0 at `abc`."""\n',
+            "upstream/cc-rpi.lock.json": '{"rationale": "no Copilot item in source 9.0.0"}\n',
+        }
+        clean = self.run_release_gate(files)
+        self.assertEqual(0, clean.returncode, clean.stdout)
+        files["README.md"] = "Copilot RPI 9.0.0 is current.\n"
+        result = self.run_release_gate(files)
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("README.md", result.stdout)
+        self.assertNotIn("tool.py", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

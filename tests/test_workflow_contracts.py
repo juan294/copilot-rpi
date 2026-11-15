@@ -31,7 +31,15 @@ class WorkflowContracts(unittest.TestCase):
         skills = {path.parent.name.removeprefix("rpi-") for path in
                   SKILLS.glob("rpi-*/SKILL.md")}
         self.assertEqual(NEW_WORKFLOWS, skills)
-        self.assertTrue((SKILLS / "process-errors" / "SKILL.md").is_file())
+        self.assertEqual(NEW_WORKFLOWS, {path.parent.name.removeprefix("rpi-") for path in SKILLS.glob("*/SKILL.md")})
+
+    def test_screenshot_intake_is_retired(self):
+        manifest = json.loads((ROOT / "templates" / "distribution.json").read_text())
+        ids = {item["id"] for item in manifest["components"]}
+        self.assertFalse({"skill:process-errors", "prompt:process-errors"} & ids)
+        self.assertNotIn("skill:process-errors", manifest["self_application"]["preserve"])
+        self.assertNotIn(".github/prompts/process-errors.prompt.md", manifest["self_application"]["legacy_active"])
+        self.assertFalse((ROOT / ".github" / "prompts" / "process-errors.prompt.md").exists())
 
     def test_skill_metadata_and_local_resources(self):
         for path in SKILLS.glob("*/SKILL.md"):

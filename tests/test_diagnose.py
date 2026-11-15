@@ -71,7 +71,7 @@ class DiagnoseTest(unittest.TestCase):
             if authored:
                 record["authored_sha256"] = sha(source)
             records.append(record)
-        receipt = {"schema_version": 1, "source_version": "2.1.0", "profile": profile, "managed_root_bytes": 0,
+        receipt = {"schema_version": 1, "source_version": "1.2.3", "profile": profile, "managed_root_bytes": 0,
                    "files": records, "preserved": []}
         (package / ".rpi").mkdir(parents=True, exist_ok=True)
         (package / ".rpi/copilot-render.json").write_text(json.dumps(receipt, indent=2) + "\n")
@@ -121,7 +121,7 @@ class DiagnoseTest(unittest.TestCase):
                 self.overlay("rpi-plan.md", overlay_text("rpi-plan", expected, "# Plan overlay\n\n## Procedure\n\nStep.\n"))
                 report = self.diagnose()
                 self.assertEqual({"status": "present", "manifest": ".rpi/copilot/manifest.json", "profile": profile,
-                                  "source_version": "2.1.0", "drift": [], "reason": None, "fix": None},
+                                  "source_version": "1.2.3", "drift": [], "reason": None, "fix": None},
                                  report["installation"])
                 self.assertEqual([{"file": ".rpi/project/rpi-plan.md", "skill": "rpi-plan", "status": "present",
                                    "reason": None, "fix": None, "written_against": expected, "current": expected,

@@ -1,6 +1,6 @@
 {
   "name": "copilot-rpi-development",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "private": true,
   "devDependencies": {
     "markdownlint-cli2": "0.23.3"
