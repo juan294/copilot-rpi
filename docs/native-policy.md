@@ -58,7 +58,7 @@ python3 "$package_dir/.rpi/copilot/runtime/rpi-prepush.py" install \
   --target "$project_dir" --checks "$checks_file" --activate
 ```
 
-The wrapper runs `.rpi/copilot/runtime/rpi-prepush.py` from the target, so activation also copies `rpi-prepush.py`, `rpi-candidate.py` and `rpi-verify.py` from the running package runtime there and writes `.rpi/copilot/runtime/rpi-prepush.install.json` with their hashes, the wrapper hash and whether it saved a prior hook. The gate requires a clean candidate, so commit or ignore `.rpi/copilot/` (this repository ignores it). Deactivate before detach:
+The wrapper runs `.rpi/copilot/runtime/rpi-prepush.py` from the target, so activation also copies `rpi-prepush.py`, `rpi-candidate.py` and `rpi-verify.py` from the running package runtime there and writes `.rpi/copilot/runtime/rpi-prepush.install.json` with their hashes, the wrapper hash and whether it saved a prior hook. The gate requires a clean candidate, so add `.rpi/copilot/` to `.gitignore` (this repository does). Do not commit it: the manifest and the activation records hold absolute paths for this checkout, so a committed copy breaks `check` and activation in other clones. Deactivate before detach:
 
 ```bash
 python3 "$package_dir/.rpi/copilot/runtime/rpi-prepush.py" install \

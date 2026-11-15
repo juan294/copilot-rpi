@@ -31,9 +31,21 @@ Sync with cc-rpi v2.2.0 (`cec458a`): project overlays, a read-only `diagnose` co
 ### Fixed
 
 - `rpi-hook.py install --activate` failed after a real install with "The packaged hook runtime is missing", because the hook configuration runs `.rpi/copilot/runtime/rpi-hook.py` from the target and apply never installs runtime files (since 2.0.0). Activation now installs a recorded copy of the running hook runtime there, refreshes it from a newer package, and refuses symlinks and unrecorded or edited bytes. A new `--deactivate` removes the runtime copy, the record and a configuration that activation wrote, when their bytes are unchanged. Deactivate before lifecycle detach, which leaves these files in place; `rpi-detach` now says so.
-- The opt-in pre-push gate had the same defect: its wrapper runs `.rpi/copilot/runtime/rpi-prepush.py`, which apply never installs (since 2.0.0). Activation now installs recorded copies of `rpi-prepush.py`, `rpi-candidate.py` and `rpi-verify.py`, and a new `--deactivate` restores the saved prior hook or removes the wrapper and the copies when their bytes are unchanged. Commit or ignore `.rpi/copilot/`, because the gate requires a clean candidate.
+- The opt-in pre-push gate had the same defect: its wrapper runs `.rpi/copilot/runtime/rpi-prepush.py`, which apply never installs (since 2.0.0). Activation now installs recorded copies of `rpi-prepush.py`, `rpi-candidate.py` and `rpi-verify.py`, and a new `--deactivate` restores the saved prior hook or removes the wrapper and the copies when their bytes are unchanged. Add `.rpi/copilot/` to `.gitignore`, because the gate requires a clean candidate; do not commit it, since its manifest and activation records hold absolute paths for one checkout.
 - Scheduled jobs failed closed on Copilot CLI 1.0.112, which removed `--no-remote` (since 2.0.0). `rpi-automation.py`, the agent installer preflight and the native harness now pass `--no-remote --no-remote-export` when the client advertises them and `--sync-session=off` when it advertises only `--sync-session`, and block with the client version when it advertises neither.
 - The pinned upstream reference archive refresh of 2026-11-14 removes invented package installation examples from the reference snapshots. That refresh changed no native Copilot destination.
+
+### Known issues
+
+One Wave B round (two fresh-context charters on candidate `59bc3ff`) found no S1 or S2 issue. These lower-severity findings are accepted for this release, under the owner's rule that S3 and S4 findings do not block a release, and are planned for a later release:
+
+- S3 (since 2.0.0): if the scheduled runner is killed mid-run, the Copilot client keeps running without a time limit, and a rerun can start a second client beside it. Stop the orphaned `copilot` process by hand.
+- S3 (since 2.0.0): a relative `--project` for `rpi-automation.py run` doubles the default report path. Pass an absolute path; `schedule-preview` already prints one.
+- S3 (since 2.0.0): if another local process replaces the report directory with a symlink during a run, the report can land outside the project.
+- S3: remote-flag detection treats a flag mentioned only in help prose or an example as supported. Current clients (1.0.88 and 1.0.112) are detected correctly.
+- S3: an interrupted pre-push activation or deactivation can leave a backup that makes both `--activate` and `--deactivate` refuse; remove `pre-push.rpi-new` and the record by hand, or run `--activate` then `--deactivate` after an interrupted deactivation.
+- S3: `diagnose` does not report an interrupted lifecycle transaction; run `check`, which names the `rollback --journal` command.
+- S4: the installer preflight in `agent-utils.sh` checks fewer flags than the runner and has no help timeout; several FIX texts are advice rather than runnable commands; the concurrent-apply refusal shows a raw errno; a second `--deactivate` fails instead of reporting inactive; `rpi-prepush.py --help` prints nothing; activation replaces the runtime copy from any package with different bytes, not only a newer one; redaction does not catch encoded secrets; detach leaves baselines and empty `.github` directories (as in 2.0.0).
 
 ### Migration
 
