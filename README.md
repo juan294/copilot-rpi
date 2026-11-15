@@ -7,7 +7,7 @@
 Copilot RPI is a standalone, repository-installed blueprint for Research,
 Plan, Implement and Validate. It provides 22 canonical RPI skills plus one
 local maintenance skill, three
-specialist agents, five scoped instruction templates, an ownership-aware
+specialist agents, six scoped instruction templates, an ownership-aware
 installer, and catalogs of 40 known agent errors and 55 operational rules.
 The source lives in `templates/`; rendered files are installed in a target
 repository. Native client qualification is recorded separately from static
@@ -47,7 +47,7 @@ legacy prompts by filename.
 | `AGENTS.md`, `.github/copilot-instructions.md` | Short repository guidance |
 | `.github/instructions/*.instructions.md` | Rules selected by path and task |
 | `.github/prompts/rpi-*.prompt.md` | Thin wrappers only in the `vscode-local` profile |
-| `.rpi/copilot/` | Per-project ownership manifest and standalone runtime |
+| `.rpi/copilot/` | Per-project ownership manifest and content-addressed baselines; the standalone runtime stays in the rendered package |
 
 Use `/rpi-research`, `/rpi-plan`, `/rpi-implement` and `/rpi-validate` in a
 qualified client. Native `/plan` and `/status` are distinct commands. The

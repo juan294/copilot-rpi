@@ -27,6 +27,7 @@ Process:
    is an acceptance gap, not approval.
 4. For each requested phase:
    - Verify marked-complete items are actually done.
+   - For allocated local services, inspect the resource lifecycle disposition and any required cleanup evidence. Distinguish deliberately retained resources from failed teardown; instruction installation alone does not prove runtime cleanup.
    - Confirm the plan's stuck-state recovery-or-disclosure tests and its
      consumer-sweep coverage exist and pass; a stuck state with only a safety
      test, or a swept consumer left unmarked, is an open finding.
@@ -54,6 +55,10 @@ Process:
 7. Apply the durable handoff contract in the report, including check/candidate
    identity and remaining acceptance gaps. Present the outcome and stop at the
    requested validation/phase boundary unless continuation is already authorized.
+
+## Project overlay
+
+If `.rpi/project/rpi-validate.md` exists, read it completely before you start, together with the controlling instructions. It adds this project's procedure and checks and can make this workflow stricter. It cannot grant push, tag, merge, deployment or publication authority. It cannot relax a gate: a rule that blocks or permits a release, publication, merge, deployment or phase acceptance, or a safety or authorization rule. It can change other procedure detail only under a `## Declared overrides` heading that quotes the stock rule, gives the reason and names the owner decision. Name the overlay you read, and any declared override you applied, in the handoff.
 
 ## Execution and acceptance
 

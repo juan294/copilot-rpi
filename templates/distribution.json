@@ -781,6 +781,19 @@
       "former_paths": []
     },
     {
+      "id": "instruction:resource-lifecycle",
+      "kind": "instruction",
+      "source": "templates/github/instructions/resource-lifecycle.instructions.md.template",
+      "destination": ".github/instructions/resource-lifecycle.instructions.md",
+      "profiles": [
+        "cli",
+        "agent-host",
+        "vscode-local"
+      ],
+      "resources": [],
+      "former_paths": []
+    },
+    {
       "id": "instruction:supabase",
       "kind": "instruction",
       "source": "templates/github/instructions/supabase.instructions.md.template",

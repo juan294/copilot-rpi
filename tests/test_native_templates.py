@@ -62,7 +62,8 @@ class NativeTemplateContracts(unittest.TestCase):
             "api": ("validation", "authorization", "error"),
             "migrations": ("existing migration", "rollback", "data"),
             "deployment-safety": ("local", "preview", "authorization"),
-            "supabase": ("rls", "privilege", "local"),
+            "supabase": ("rls", "privilege", "local", "resource-lifecycle"),
+            "resource-lifecycle": ("ownership", "disposable", "retained", "no deletion authority"),
         }
         files = {path.name.removesuffix(".instructions.md.template"): path for path in
                  INSTRUCTIONS.glob("*.instructions.md.template")}
@@ -82,6 +83,9 @@ class NativeTemplateContracts(unittest.TestCase):
         copilot = (TEMPLATES / "github" / "copilot-instructions.md.template").read_text()
         self.assertLessEqual(len((agents + copilot).encode()), 8192)
         self.assertIn("rpi-implement", agents)
+        self.assertIn(".github/instructions/resource-lifecycle.instructions.md", agents)
+        self.assertIn("release profile selects", agents)
+        self.assertIn("publisher against the official documentation", agents)
         self.assertIn("AGENTS.md", copilot)
         self.assertIn(".github/skills/", copilot)
         self.assertNotIn("~60%", agents + copilot)

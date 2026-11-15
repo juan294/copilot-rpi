@@ -373,6 +373,25 @@ class DiagnoseTest(unittest.TestCase):
         self.assertLessEqual(set(module.OVERLAY_SKILLS) | set(module.LIFECYCLE_SKILLS), skills)
         self.assertFalse(set(module.OVERLAY_SKILLS) & set(module.LIFECYCLE_SKILLS))
 
+    def test_overlay_skills_are_exactly_the_skills_with_the_overlay_section(self):
+        module = load_lifecycle()
+        sections = {}
+        for path in (ROOT / "templates/skills").glob("rpi-*/SKILL.md"):
+            data = path.read_bytes()
+            if module.OVERLAY_SECTION.search(data):
+                sections[path.parent.name] = data.decode()
+        self.assertEqual(set(module.OVERLAY_SKILLS), set(sections))
+        for name in module.LIFECYCLE_SKILLS:
+            with self.subTest(lifecycle=name):
+                self.assertNotIn(name, sections)
+        for name, text in sections.items():
+            with self.subTest(skill=name):
+                self.assertEqual(1, text.count("\n## Project overlay\n"))
+                headings = [line for line in text.splitlines() if line.startswith("## ")]
+                self.assertEqual("## Project overlay", headings[0])
+                self.assertIn(f"If `.rpi/project/{name}.md` exists, read it completely before you start", text)
+                self.assertIn("It cannot relax a gate", text)
+
 
 if __name__ == "__main__":
     unittest.main()

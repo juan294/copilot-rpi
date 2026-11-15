@@ -127,11 +127,11 @@ version and release candidate before any tag or GitHub publication.
 
 The root `AGENTS.md` and `.github/copilot-instructions.md` carry short shared
 guidance. Files in `.github/instructions/` use `applyTo` globs for tests, APIs,
-migrations, deployment and selected stack rules. Research, planning and audit
+migrations, deployment, local resource lifecycle and selected stack rules. Research, planning and audit
 agents in `.github/agents/` declare their tool scopes; a read-only role reports
 findings to a parent that can write the authorized artifact. Verify discovery,
 resource loading and tool restrictions in the actual client.
-The blueprint provides 5 instruction templates for these scoped topics.
+The blueprint provides 6 instruction templates for these scoped topics.
 The 55 operational rules in [the quick reference](patterns/quick-reference.md)
 are read when a task matches their scope.
 A project adds its own steps to a workflow skill in a [project overlay](docs/project-overlay.md), `.rpi/project/<skill>.md`. An overlay can make a workflow stricter; it cannot grant push, tag, merge, deployment or publication authority, or relax a gate.
@@ -156,7 +156,7 @@ prove that a write was prevented.
 | Layer | When to use it | Location |
 | --- | --- | --- |
 | Root guidance | Short project facts and universal rules for every task | `AGENTS.md` and `.github/copilot-instructions.md` |
-| Scoped guidance | Tests, API, migrations, deployment or selected stack paths | `.github/instructions/*.instructions.md` with `applyTo` |
+| Scoped guidance | Tests, API, migrations, deployment, local resources or selected stack paths | `.github/instructions/*.instructions.md` with `applyTo` |
 | Catalogs | Exact error or rule when relevant to a task | `patterns/agent-errors.md`, `patterns/quick-reference.md` |
 
 Review the actual `applyTo` glob against the target paths. A file on disk
@@ -219,7 +219,7 @@ your-project/
   .github/agents/rpi-*.agent.md
   .github/instructions/*.instructions.md
   .rpi/copilot/manifest.json
-  .rpi/copilot/runtime/
+  .rpi/copilot/baselines/
   docs/research/
   docs/plans/
 ```
