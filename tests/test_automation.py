@@ -1,6 +1,8 @@
 """Scheduled Copilot automation: fake only the external CLI boundary."""
 
+import contextlib
 import importlib.util
+import io
 import fcntl
 import errno
 import json
@@ -42,7 +44,9 @@ if '--version' in sys.argv: print('copilot 1.2.3'); sys.exit(0)
 mode_file = Path(os.environ['COPILOT_HOME'], 'mode')
 mode = mode_file.read_text() if mode_file.exists() else 'ok'
 if '--help' in sys.argv:
- print('-p --prompt -s --silent --no-ask-user --available-tools --allow-tool --model --no-remote --no-remote-export --no-auto-update --secret-env-vars' if mode != 'old-cli' else '-p'); sys.exit(0)
+ base = '-p --prompt -s --silent --no-ask-user --available-tools --allow-tool --model --no-auto-update --secret-env-vars'
+ remote = {'old-cli': None, 'cli-1.0.112': ' --sync-session[=<on|off>]', 'no-remote-controls': ''}.get(mode, ' --no-remote --no-remote-export')
+ print('-p' if remote is None else base + remote); sys.exit(0)
 if mode == 'timeout': print('partial', flush=True); time.sleep(30)
 if mode == 'deny': print('tool permission denied', file=sys.stderr); sys.exit(2)
 if mode == 'empty': sys.exit(0)
@@ -85,6 +89,32 @@ print('Ready plan: inspect reports. No changes made.')
         self.assertNotIn("UNRELATED_SECRET", capture["env"])
         self.assertFalse(any("claude" in part.lower() or "push" in part.lower() for part in argv if part.startswith("--")))
         self.assertIn("Ready plan", self.report.read_text())
+
+    def test_legacy_cli_keeps_no_remote_flags(self):
+        self.assertEqual(self.run_job(), 0)
+        argv = json.loads(self.capture.read_text())["argv"]
+        self.assertIn("--no-remote", argv)
+        self.assertIn("--no-remote-export", argv)
+        self.assertFalse(any(part.startswith("--sync-session") for part in argv))
+
+    def test_cli_without_no_remote_turns_session_sync_off(self):
+        self.assertEqual(self.run_job(mode="cli-1.0.112"), 0)
+        argv = json.loads(self.capture.read_text())["argv"]
+        self.assertIn("--sync-session=off", argv)
+        self.assertNotIn("--no-remote", argv)
+        self.assertNotIn("--no-remote-export", argv)
+        self.assertIn("Ready plan", self.report.read_text())
+
+    def test_cli_without_any_remote_control_blocks_with_version(self):
+        stderr = io.StringIO()
+        with contextlib.redirect_stderr(stderr):
+            self.assertEqual(self.run_job(mode="no-remote-controls"), 2)
+        message = stderr.getvalue()
+        for text in ("BLOCKED:", "copilot 1.2.3", "--no-remote", "--sync-session", "WHY:", "FIX:"):
+            self.assertIn(text, message)
+        self.assertFalse(self.report.exists())
+        argv = json.loads(self.capture.read_text())["argv"]
+        self.assertEqual(argv, ["--help"])
 
     def test_failure_and_partial_output_preserve_last_good(self):
         self.assertEqual(self.run_job(), 0)
@@ -243,6 +273,22 @@ print('Ready plan: inspect reports. No changes made.')
         self.assertIn("rpi-automation.py run --job triage", proc.stdout)
         self.assertFalse((self.project / ".rpi").exists())
         self.assertFalse(self.capture.exists())
+
+    def test_agent_preflight_accepts_either_remote_control_flag_set(self):
+        lib = ROOT / "templates/scripts/agents/lib/agent-utils.sh"
+        script_dir = self.project / "scripts/agents"
+        script_dir.mkdir(parents=True)
+        for mode, expected in (("ok", 0), ("cli-1.0.112", 0), ("no-remote-controls", 1)):
+            with self.subTest(mode=mode):
+                (self.root / "mode").write_text(mode)
+                env = dict(os.environ, COPILOT_BIN=str(self.bin), COPILOT_HOME=str(self.root),
+                           SCRIPT_DIR=str(script_dir), LIB=str(lib))
+                proc = subprocess.run(["bash", "-c", 'source "$LIB"; preflight_copilot'],
+                                      env=env, capture_output=True, text=True)
+                self.assertEqual(proc.returncode, expected, proc.stderr)
+                if expected:
+                    self.assertIn("--sync-session", proc.stderr)
+                    self.assertIn("copilot 1.2.3", proc.stderr)
 
     def test_launchd_installer_previews_and_preserves_unrelated_plist(self):
         agent_dir = self.project / "scripts/agents"

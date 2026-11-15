@@ -30,6 +30,8 @@ Sync with cc-rpi v2.2.0 (`cec458a`): project overlays, a read-only `diagnose` co
 
 ### Fixed
 
+- `rpi-hook.py install --activate` failed after a real install with "The packaged hook runtime is missing", because the hook configuration runs `.rpi/copilot/runtime/rpi-hook.py` from the target and apply never installs runtime files (since 2.0.0). Activation now installs a recorded copy of the running hook runtime there, refreshes it from a newer package, and refuses symlinks and unrecorded or edited bytes. A new `--deactivate` removes the configuration, runtime copy and record when their bytes are unchanged. Deactivate before lifecycle detach, which leaves these files in place.
+- Scheduled jobs failed closed on Copilot CLI 1.0.112, which removed `--no-remote` (since 2.0.0). `rpi-automation.py`, the agent installer preflight and the native harness now pass `--no-remote --no-remote-export` when the client advertises them and `--sync-session=off` when it advertises only `--sync-session`, and block with the client version when it advertises neither.
 - The pinned upstream reference archive refresh of 2026-11-14 removes invented package installation examples from the reference snapshots. That refresh changed no native Copilot destination.
 
 ### Migration
@@ -48,11 +50,6 @@ Sync with cc-rpi v2.2.0 (`cec458a`): project overlays, a read-only `diagnose` co
 ### Retirement review
 
 - No rule or error ID was retired in this release.
-
-### Known issues
-
-- `rpi-hook.py install --activate` needs `.rpi/copilot/runtime/rpi-hook.py` in the target, but apply does not install runtime files, so activation after a real install exits 2 with "The packaged hook runtime is missing". This defect exists since 2.0.0 and awaits an owner decision.
-- The scheduled runner (`templates/scripts/rpi-automation.py`) and `templates/scripts/agents/lib/agent-utils.sh` require `--no-remote` and `--no-remote-export`, so scheduled jobs fail closed on Copilot CLI 1.0.112, which removed `--no-remote`. This exists since 2.0.0 and awaits an owner decision.
 
 ## [2.0.0] - 2026-09-29
 

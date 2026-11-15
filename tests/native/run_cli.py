@@ -22,8 +22,7 @@ RENDERER = ROOT / "templates/scripts/rpi-distribution.py"
 AUTOMATION = ROOT / "templates/scripts/rpi-automation.py"
 SECRET_KEYS = ("COPILOT_GITHUB_TOKEN", "GH_TOKEN", "GITHUB_TOKEN", "COPILOT_PROVIDER_API_KEY")
 COMMON_FLAGS = ("-p", "--no-ask-user", "--available-tools", "--allow-tool",
-                "--deny-tool", "--no-remote", "--no-remote-export", "--no-auto-update",
-                "--output-format")
+                "--deny-tool", "--no-auto-update", "--output-format")
 PROGRAMMATIC_FLAGS = ("-s", "--model", "--secret-env-vars")
 
 
@@ -168,10 +167,16 @@ def file_snapshot(project):
     return result
 
 
-def cli_flags():
+def cli_flags(receipt):
     return ["--no-ask-user", "--available-tools=view,grep,glob,skill", "--allow-tool=read",
-            "--deny-tool=write", "--no-remote", "--no-remote-export",
-            "--no-auto-update"]
+            "--deny-tool=write", *receipt["remote_flags"], "--no-auto-update"]
+
+
+def load_script(name, path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def skill_discovered(output, project):
@@ -313,10 +318,7 @@ def native_denial_observation(output, denied_path):
 
 
 def source_identity():
-    spec = importlib.util.spec_from_file_location("native_candidate", ROOT / "templates/scripts/rpi-candidate.py")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module.identity(ROOT)
+    return load_script("native_candidate", ROOT / "templates/scripts/rpi-candidate.py").identity(ROOT)
 
 
 ALLOWED_ENV = ("PATH", "TERM", "COPILOT_GITHUB_TOKEN", "GH_TOKEN", "GITHUB_TOKEN",
@@ -363,6 +365,13 @@ def preflight(binary, project, env, receipt, profile):
             missing = [item for item in required if item not in output + error]
             if missing:
                 raise ProbeBlocked("unsupported Copilot flags " + ", ".join(missing) + "; update the CLI")
+            # Use the shipped runner's selection so the probe and scheduled jobs stay local the same way.
+            automation = load_script("native_automation", AUTOMATION)
+            version = receipt["client_version"].splitlines()[0] if receipt["client_version"] else "unknown version"
+            try:
+                receipt["remote_flags"] = automation.remote_flags(output + error, version)
+            except ValueError as exc:
+                raise ProbeBlocked(str(exc)) from exc
 
 
 OVERLAY_PROMPT = ("/rpi-research First invoke the skill tool with skill name rpi-research. "
@@ -411,7 +420,7 @@ def overlay_run(name, base, binary, marker, overlay_marker, receipt):
     checks[name + "_skill_discovered"] = code == 0 and skill_discovered(output, project)
     if not checks[name + "_skill_discovered"]:
         raise ProbeBlocked(f"CLI did not discover the {name} fixture skill; inspect skill list output")
-    flags = cli_flags()
+    flags = cli_flags(receipt)
     if secret_names:
         flags.append("--secret-env-vars=" + ",".join(secret_names))
     argv = [binary, "-p", OVERLAY_PROMPT, *flags, "--output-format=json"]
@@ -468,7 +477,7 @@ def cli_probe(args, receipt, base, binary, model):
     remote_before = local_git("--git-dir", str(remote), "rev-parse", "refs/heads/main", cwd=base)
     denied_before = denied.read_bytes()
     preflight(binary, project, env, receipt, args.profile)
-    flags = cli_flags()
+    flags = cli_flags(receipt)
     if secret_names:
         flags.append("--secret-env-vars=" + ",".join(secret_names))
     if args.profile == "cli":

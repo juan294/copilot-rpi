@@ -598,7 +598,37 @@ def hook_config(profile):
          'cwd': '.', 'timeout': 3}]}}
 
 
-def install(target, profile, activate):
+RUNTIME = '.rpi/copilot/runtime/rpi-hook.py'
+RECORD = '.rpi/copilot/runtime/rpi-hook.install.json'
+
+
+def sha256(data):
+    import hashlib
+    return hashlib.sha256(data).hexdigest()
+
+
+def read_record(target):
+    path = target / RECORD
+    if path.is_symlink() or not path.is_file():
+        return None
+    try:
+        record = read_json(path.read_text(encoding='utf-8'))
+    except (OSError, UnicodeError, ValueError):
+        fail('The hook activation record is unreadable.', 'Review ' + RECORD + ' and restore or remove it.', 'installation')
+    if not isinstance(record, dict) or not isinstance(record.get('runtime_sha256'), str):
+        fail('The hook activation record is malformed.', 'Review ' + RECORD + ' and restore or remove it.', 'installation')
+    return record
+
+
+def write_new(path, data):
+    """Replace a file through a sibling temporary file in the same directory."""
+    import os
+    temporary = path.with_name('.' + path.name + '.tmp')
+    temporary.write_bytes(data)
+    os.replace(temporary, path)
+
+
+def install(target, profile, activate, deactivate=False):
     target = Path(target).resolve()
     if not target.is_dir() or repository(target) != target:
         fail('Hook target must be a Git repository root.', 'Pass --target with an existing project root.', 'installation')
@@ -607,18 +637,48 @@ def install(target, profile, activate):
     other = target / '.github/hooks' / ('rpi-policy-local.json' if profile == 'cli' else 'rpi-policy.json')
     if any(path.is_symlink() for path in (target / '.github', target / '.github/hooks',
                                           target / '.rpi', target / '.rpi/copilot',
-                                          target / '.rpi/copilot/runtime')):
+                                          target / '.rpi/copilot/runtime',
+                                          target / RUNTIME, target / RECORD)):
         fail('Hook installation path contains a symlink.', 'Review the project hook and runtime paths.', 'installation')
     config = hook_config(profile)
     content = (json.dumps(config, indent=2) + '\n').encode()
+    runtime = target / RUNTIME
+    if deactivate:
+        record = read_record(target)
+        if record is None or record.get('profile') != profile:
+            fail('No recorded ' + profile + ' hook activation in this target.',
+                 'Review .github/hooks and ' + RUNTIME + ' by hand; nothing was removed.', 'installation')
+        if destination.exists() and destination.read_bytes() != content:
+            fail('The hook configuration was edited after activation.', 'Review ' + str(destination) + '; its bytes are preserved.', 'installation')
+        if runtime.exists() and sha256(runtime.read_bytes()) != record['runtime_sha256']:
+            fail('The hook runtime was edited after activation.', 'Review ' + RUNTIME + '; its bytes are preserved.', 'installation')
+        for path in (destination, runtime, target / RECORD):
+            if path.exists():
+                path.unlink()
+        for directory in (runtime.parent, destination.parent):
+            if directory.is_dir() and not any(directory.iterdir()):
+                directory.rmdir()
+        print(json.dumps({'status': 'inactive', 'destination': str(destination)}, sort_keys=True))
+        return 0
     if activate:
-        runtime = target / '.rpi/copilot/runtime/rpi-hook.py'
-        if not runtime.is_file() or runtime.is_symlink():
-            fail('The packaged hook runtime is missing.', 'Render and apply the Copilot package before activation.', 'installation')
+        # The configuration runs the runtime from the target, and lifecycle apply never
+        # installs runtime files, so activation installs a recorded copy of itself.
+        source = Path(__file__).resolve().read_bytes()
+        if runtime.exists() and runtime.read_bytes() != source:
+            record = read_record(target)
+            if record is None or sha256(runtime.read_bytes()) != record['runtime_sha256']:
+                fail('An unrecorded or edited hook runtime occupies ' + RUNTIME + '.',
+                     'Review that file; its bytes are preserved.', 'installation')
         if other.exists() or other.is_symlink():
             fail('The other hook profile is active.', 'Review and retire the other profile before activation.', 'installation')
         if destination.is_symlink() or destination.exists() and destination.read_bytes() != content:
             fail('An owner hook already occupies the destination.', 'Review the existing hook; preserve its bytes.', 'installation')
+        runtime.parent.mkdir(parents=True, exist_ok=True)
+        if not runtime.exists() or runtime.read_bytes() != source:
+            write_new(runtime, source)
+        record = {'schema_version': 1, 'profile': profile, 'config': destination.relative_to(target).as_posix(),
+                  'runtime': RUNTIME, 'runtime_sha256': sha256(source)}
+        write_new(target / RECORD, (json.dumps(record, indent=2, sort_keys=True) + '\n').encode())
         destination.parent.mkdir(parents=True, exist_ok=True)
         if not destination.exists():
             destination.write_bytes(content)
@@ -633,12 +693,14 @@ def main(argv):
     setup = sub.add_parser('install')
     setup.add_argument('--target', required=True)
     setup.add_argument('--profile', required=True, choices=('cli', 'vscode-local'))
-    setup.add_argument('--activate', action='store_true')
+    mode = setup.add_mutually_exclusive_group()
+    mode.add_argument('--activate', action='store_true')
+    mode.add_argument('--deactivate', action='store_true')
     parser.add_argument('--profile', choices=('cli', 'vscode-local', 'sdk'))
     args = parser.parse_args(argv)
     try:
         if args.command == 'install':
-            return install(args.target, args.profile, args.activate)
+            return install(args.target, args.profile, args.activate, args.deactivate)
         if not args.profile:
             fail('Hook profile was not selected.', 'Pass --profile cli, vscode-local or sdk.', 'malformed-event')
         try:

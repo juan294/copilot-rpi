@@ -25,7 +25,16 @@ python3 "$package_dir/.rpi/copilot/runtime/rpi-hook.py" install \
   --target "$project_dir" --profile cli --activate
 ```
 
-The installer preserves an existing owner hook instead of replacing it. A
+The hook configuration runs `.rpi/copilot/runtime/rpi-hook.py` from the target, and lifecycle apply does not install runtime files. Activation therefore copies the running `rpi-hook.py` to that path and writes `.rpi/copilot/runtime/rpi-hook.install.json` with the profile, the configuration path and the runtime hash. Running activation again from a newer package refreshes a runtime whose bytes still match the record. Activation refuses a symlinked path, an unrecorded or edited runtime, the other active profile and an owner hook at the destination, and preserves their bytes.
+
+Deactivate before you detach. Lifecycle detach does not own these files and leaves them in place:
+
+```bash
+python3 "$package_dir/.rpi/copilot/runtime/rpi-hook.py" install \
+  --target "$project_dir" --profile cli --deactivate
+```
+
+Deactivation removes the configuration, the runtime copy and the record only when the record exists and their bytes are unchanged; otherwise it removes nothing and names the file to review. The installer preserves an existing owner hook instead of replacing it. A
 native probe must show a safe command succeeding and a disposable destructive
 fixture denied before any side effect before advertising this profile.
 
@@ -56,6 +65,8 @@ local command. CI and exact-commit remote checks remain separate gates after
 an authorized push.
 
 ## Scheduled Copilot jobs
+
+The runner keeps each session local and unexported. Its preflight reads `copilot --help`: when the client advertises `--no-remote` and `--no-remote-export` (Copilot CLI 1.0.88), the run passes both; when it advertises `--sync-session` without `--no-remote` (1.0.112, which removed `--no-remote`), the run passes `--sync-session=off`. Copilot CLI 1.0.112 documents incoming remote control only as an in-session `/remote` setting, and `--sync-session` without a value "does not enable incoming control". A client that advertises neither form is blocked before inference with the client version. The agent installer preflight and the native harness use the same rule.
 
 `rpi-automation.py schedule-preview` prints cron and launchd commands without
 installing or starting them. `run` requires an explicit owner model, a working

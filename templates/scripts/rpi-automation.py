@@ -23,7 +23,13 @@ import time
 import uuid
 
 
-REQUIRED_FLAGS = ("-p", "-s", "--no-ask-user", "--available-tools", "--allow-tool", "--model", "--no-remote", "--no-remote-export", "--no-auto-update", "--secret-env-vars")
+REQUIRED_FLAGS = ("-p", "-s", "--no-ask-user", "--available-tools", "--allow-tool", "--model", "--no-auto-update", "--secret-env-vars")
+# Keep the session local and unexported. Copilot CLI 1.0.88 advertises
+# --no-remote and --no-remote-export; 1.0.112 removed --no-remote (incoming
+# control is managed only inside an interactive session) and turns account
+# session sync off for one run with --sync-session=off.
+REMOTE_FLAG_SETS = ((("--no-remote", "--no-remote-export"), ["--no-remote", "--no-remote-export"]),
+                    (("--sync-session",), ["--sync-session=off"]))
 MAX_OUTPUT = 1024 * 1024
 
 
@@ -113,16 +119,36 @@ def preflight(binary, project, env):
     if not resolved:
         raise ValueError("Copilot CLI missing; install it or set COPILOT_BIN to its executable path")
     binary = str(Path(resolved).resolve())
+    version = ""
     for flag in ("--version", "--help"):
         code, out, err = command([binary, flag], cwd=project, env=env, timeout=5)
         if code:
             raise ValueError(f"Copilot CLI {flag} failed; check installation (exit {code})")
-        if flag == "--help":
-            help_text = (out + err).decode("utf-8", "replace")
-            missing = [item for item in REQUIRED_FLAGS if item not in help_text]
-            if missing:
-                raise ValueError(f"Copilot CLI lacks required flags: {', '.join(missing)}; update the CLI")
-    return binary
+        text = (out + err).decode("utf-8", "replace")
+        if flag == "--version":
+            version = (text.strip().splitlines() or ["unknown version"])[0][:200]
+            continue
+        missing = [item for item in REQUIRED_FLAGS if item not in text]
+        if missing:
+            raise ValueError(f"Copilot CLI lacks required flags: {', '.join(missing)}; update the CLI")
+        return binary, remote_flags(text, version)
+    raise ValueError("Copilot CLI --help was not inspected")
+
+
+def advertised(help_text, flag):
+    return re.search(r"(?<![\w-])" + re.escape(flag) + r"(?![\w-])", help_text) is not None
+
+
+def remote_flags(help_text, version):
+    """Choose the flags that keep this run local and unexported, or fail closed."""
+    for required, flags in REMOTE_FLAG_SETS:
+        if all(advertised(help_text, flag) for flag in required):
+            return list(flags)
+    raise ValueError(
+        f"{version} advertises neither --no-remote with --no-remote-export nor --sync-session. "
+        "WHY: the scheduled runner must keep the session local and unexported, and this client "
+        "offers no flag the runner knows for that. FIX: install a Copilot CLI that advertises one "
+        "of those flag sets (1.0.88 and 1.0.112 do), or point COPILOT_BIN at one, then rerun")
 
 
 def open_owned_lock(project, job):
@@ -198,7 +224,7 @@ def run_job(*, job, project, blueprint, report, binary, model, timeout, environ=
             raise ValueError("Timeout must be 1-3600 seconds")
         env = clean_env(source, model.strip())
         prompt = prompt_for(job, project, blueprint)
-        binary = preflight(binary, project, env)
+        binary, remote = preflight(binary, project, env)
     except (OSError, UnicodeError, ValueError) as exc:
         print(f"BLOCKED: {exc}", file=sys.stderr)
         return 2
@@ -220,8 +246,7 @@ def run_job(*, job, project, blueprint, report, binary, model, timeout, environ=
         lock.flush()
         os.fsync(lock.fileno())
         argv = [binary, "-p", prompt, "-s", "--no-ask-user", "--available-tools=view,grep,glob",
-                "--allow-tool=read", f"--model={model.strip()}", "--no-remote",
-                "--no-remote-export", "--no-auto-update"]
+                "--allow-tool=read", f"--model={model.strip()}", *remote, "--no-auto-update"]
         secrets = [key for key in ("COPILOT_GITHUB_TOKEN", "GH_TOKEN", "GITHUB_TOKEN",
                                    "COPILOT_PROVIDER_API_KEY") if env.get(key)]
         if secrets:

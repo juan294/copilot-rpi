@@ -47,7 +47,7 @@ legacy prompts by filename.
 | `AGENTS.md`, `.github/copilot-instructions.md` | Short repository guidance |
 | `.github/instructions/*.instructions.md` | Rules selected by path and task |
 | `.github/prompts/rpi-*.prompt.md` | Thin wrappers only in the `vscode-local` profile |
-| `.rpi/copilot/` | Per-project ownership manifest and content-addressed baselines; the standalone runtime stays in the rendered package |
+| `.rpi/copilot/` | Per-project ownership manifest and content-addressed baselines; the standalone runtime stays in the rendered package, except the recorded hook runtime that optional hook activation installs in `.rpi/copilot/runtime/` |
 
 Use `/rpi-research`, `/rpi-plan`, `/rpi-implement` and `/rpi-validate` in a
 qualified client. Native `/plan` and `/status` are distinct commands. The

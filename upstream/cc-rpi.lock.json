@@ -522,8 +522,8 @@
       "disposition": "adapted",
       "rationale": "Pinned portable control is adapted for the Copilot Phase 4 runtime. Intake 2026-11-15 (cc-rpi v2.2.0): Copilot hook and gate already have the cc-rpi 2.1 semantics; cc-rpi-specific parser deltas not ported. The lock keeps this component adapted with its existing Copilot destination and hash; this disposition applies to the incoming cc-rpi delta.",
       "destination": "templates/scripts/rpi-hook.py",
-      "destination_sha256": "825126920ab810f256efa0fd73045584b95214bd07c2e89434fcced027b5a38f",
-      "adaptation_note": "Copilot native hook policy uses preview-only activation and fail-closed local checks. Incoming cc-rpi changes through cec458a9769049c6dd08777768ef718ac7571a30 are inapplicable (2026-11-15 intake); the existing native destination is unchanged."
+      "destination_sha256": "ebd8d538a5d652982f0dcee1065a74aa530934785bff4b2dfc0b3dd85eae95de",
+      "adaptation_note": "Copilot native hook policy uses preview-only activation and fail-closed local checks. Incoming cc-rpi changes through cec458a9769049c6dd08777768ef718ac7571a30 are inapplicable (2026-11-15 intake); the existing native destination is unchanged. Post-plan fix (owner-approved 2026-11-15): activation installs and records a copy of the running hook runtime in the target, and --deactivate removes it; Copilot-specific, not from cc-rpi."
     },
     {
       "id": "resource:prepush-gate",

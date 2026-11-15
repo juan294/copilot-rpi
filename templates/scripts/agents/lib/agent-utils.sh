@@ -18,21 +18,34 @@ log_error() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] [ERROR] $*" >&2; }
 
 # Check executable and supported flags only. Authentication and model access are
 # reported by the bounded run; preflight never spends inference or edits files.
+# The session must stay local and unexported: Copilot CLI 1.0.88 advertises
+# --no-remote and --no-remote-export, and 1.0.112 replaces them with
+# --sync-session (the runner passes --sync-session=off).
 preflight_copilot() {
-  local binary help
+  local binary help version
   binary=$(command -v "$COPILOT_BIN") || {
     log_error "Copilot CLI missing; install it or set COPILOT_BIN"
     return 1
   }
-  "$binary" --version >/dev/null || return 1
+  version=$("$binary" --version) || return 1
+  version="${version%%$'\n'*}"
   help=$("$binary" --help) || return 1
   local flag
-  for flag in --prompt --silent --no-ask-user --available-tools --allow-tool --model --no-remote; do
+  for flag in --prompt --silent --no-ask-user --available-tools --allow-tool --model; do
     if [[ "$help" != *"$flag"* ]]; then
       log_error "Copilot CLI missing $flag; update the CLI"
       return 1
     fi
   done
+  if grep -Eq -- '(^|[^[:alnum:]-])--no-remote([^[:alnum:]-]|$)' <<< "$help" \
+      && grep -Eq -- '(^|[^[:alnum:]-])--no-remote-export([^[:alnum:]-]|$)' <<< "$help"; then
+    return 0
+  fi
+  if grep -Eq -- '(^|[^[:alnum:]-])--sync-session([^[:alnum:]-]|$)' <<< "$help"; then
+    return 0
+  fi
+  log_error "BLOCKED: $version advertises neither --no-remote with --no-remote-export nor --sync-session. WHY: scheduled jobs must keep the session local and unexported. FIX: install a Copilot CLI that advertises one of those flag sets (1.0.88 and 1.0.112 do), or set COPILOT_BIN to one"
+  return 1
 }
 
 # ---------------------------------------------------------------------------

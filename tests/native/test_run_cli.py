@@ -135,6 +135,30 @@ class NativeRunnerTests(unittest.TestCase):
                           if command["label"].startswith("skill list")],
                          ["skill list positive", "skill list negative"])
 
+    def test_cli_profile_selects_remote_flags_from_client_help(self):
+        for mode, present, absent in (("ok", ["--no-remote", "--no-remote-export"], ["--sync-session=off"]),
+                                      ("cli-1.0.112", ["--sync-session=off"], ["--no-remote", "--no-remote-export"])):
+            with self.subTest(mode=mode):
+                result = self.invoke("cli", mode=mode)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                receipt = self.receipt("cli")
+                argv = next(command["argv"] for command in receipt["commands"] if command["label"] == "cli skill")
+                for flag in present:
+                    self.assertIn(flag, argv)
+                for flag in absent:
+                    self.assertNotIn(flag, argv)
+                self.assertEqual(receipt["remote_flags"], present)
+
+    def test_client_without_remote_controls_blocks_before_inference(self):
+        result = self.invoke("overlay", mode="no-remote-controls")
+        self.assertEqual(result.returncode, 2)
+        receipt = self.receipt("overlay")
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("--sync-session", receipt["recovery"])
+        self.assertIn("fake-copilot 1.2.3", receipt["recovery"])
+        self.assertEqual([command["label"] for command in receipt["commands"]],
+                         ["preflight --version", "preflight --help"])
+
     def test_cli_skill_prompt_explicitly_requests_native_tool_call(self):
         result = self.invoke("cli", mode="requires-tool-first")
         self.assertEqual(result.returncode, 0, result.stderr)

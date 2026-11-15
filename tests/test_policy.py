@@ -2,9 +2,9 @@
 
 import json
 import contextlib
+import hashlib
 import importlib.util
 import io
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -118,9 +118,6 @@ class PolicyTests(unittest.TestCase):
             self.assertFalse((self.root / ".github/hooks/rpi-policy.json").exists())
 
     def test_activation_preserves_other_hooks_and_refuses_profile_collision(self):
-        runtime = self.root / ".rpi/copilot/runtime/rpi-hook.py"
-        runtime.parent.mkdir(parents=True)
-        shutil.copy2(HOOK, runtime)
         other = self.root / ".github/hooks/owner.json"
         other.parent.mkdir(parents=True)
         other.write_text('{"version":1,"hooks":{}}\n')
@@ -137,6 +134,124 @@ class PolicyTests(unittest.TestCase):
                                    text=True, capture_output=True, check=False)
         self.assertEqual(collision.returncode, 2)
         self.assertFalse((self.root / ".github/hooks/rpi-policy-local.json").exists())
+
+
+
+class HookActivationAfterInstallTests(unittest.TestCase):
+    """Activation from a real rendered and applied package, without copying the runtime by hand."""
+
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory(prefix="copilot hook install ")
+        self.addCleanup(temporary.cleanup)
+        self.base = Path(temporary.name)
+        self.package = self.base / "package"
+        self.target = self.base / "target"
+        self.target.mkdir()
+        subprocess.run(["git", "init", "-q", str(self.target)], check=True)
+        rendered = subprocess.run([sys.executable, str(ROOT / "templates/scripts/rpi-distribution.py"), "render",
+                                   "--source", str(ROOT), "--profile", "cli", "--target", str(self.package)],
+                                  capture_output=True, text=True)
+        self.assertEqual(0, rendered.returncode, rendered.stdout + rendered.stderr)
+        self.runtime = self.package / ".rpi/copilot/runtime"
+        self.plans = 0
+        self.lifecycle("plan", "--action", "update", apply=True)
+
+    def lifecycle(self, action, *extra, apply=False, expected=0):
+        self.plans += 1
+        output = self.base / f"plan-{self.plans}.json"
+        planned = subprocess.run([sys.executable, str(self.runtime / "rpi-lifecycle.py"), action,
+                                  "--package", str(self.package), "--target", str(self.target),
+                                  "--profile", "cli", *extra, "--output", str(output)],
+                                 capture_output=True, text=True)
+        self.assertEqual(0, planned.returncode, planned.stdout + planned.stderr)
+        if apply:
+            applied = subprocess.run([sys.executable, str(self.runtime / "rpi-lifecycle.py"), "apply",
+                                      "--plan", str(output)], capture_output=True, text=True)
+            self.assertEqual(expected, applied.returncode, applied.stdout + applied.stderr)
+
+    def hook(self, *flags, expected=0, profile="cli"):
+        result = subprocess.run([sys.executable, str(self.runtime / "rpi-hook.py"), "install",
+                                 "--target", str(self.target), "--profile", profile, *flags],
+                                capture_output=True, text=True)
+        self.assertEqual(expected, result.returncode, result.stdout + result.stderr)
+        return result
+
+    def check(self):
+        return subprocess.run([sys.executable, str(self.runtime / "rpi-lifecycle.py"), "check",
+                               "--package", str(self.package), "--target", str(self.target),
+                               "--profile", "cli"], capture_output=True, text=True)
+
+    def test_activation_installs_recorded_runtime_that_denies_and_deactivates(self):
+        self.assertFalse((self.target / ".rpi/copilot/runtime").exists())
+        self.hook("--activate")
+        installed = self.target / ".rpi/copilot/runtime/rpi-hook.py"
+        self.assertEqual(installed.read_bytes(), (self.runtime / "rpi-hook.py").read_bytes())
+        record = json.loads((self.target / ".rpi/copilot/runtime/rpi-hook.install.json").read_text())
+        self.assertEqual(record["profile"], "cli")
+        self.assertEqual(record["config"], ".github/hooks/rpi-policy.json")
+        config = json.loads((self.target / ".github/hooks/rpi-policy.json").read_text())
+        entry = config["hooks"]["preToolUse"][0]
+        denied = subprocess.run([entry["exec"], *entry["args"]], cwd=self.target, text=True, capture_output=True,
+                                input=json.dumps({"toolName": "bash", "cwd": str(self.target), "timestamp": 1,
+                                                  "toolArgs": {"command": "git push --force origin main"}}))
+        self.assertEqual(2, denied.returncode, denied.stderr)
+        self.assertIn("BLOCKED", denied.stderr)
+        self.assertEqual(0, self.check().returncode, self.check().stdout + self.check().stderr)
+        self.hook("--activate")
+        owner = self.target / ".github/hooks/owner.json"
+        owner.write_text('{"version":1,"hooks":{}}\n')
+        result = self.hook("--deactivate")
+        self.assertEqual("inactive", json.loads(result.stdout)["status"])
+        self.assertFalse((self.target / ".github/hooks/rpi-policy.json").exists())
+        self.assertFalse((self.target / ".rpi/copilot/runtime").exists())
+        self.assertEqual(owner.read_text(), '{"version":1,"hooks":{}}\n')
+        self.assertTrue((self.target / ".rpi/copilot/manifest.json").is_file())
+
+    def test_reactivation_refreshes_recorded_runtime_and_preserves_edited_bytes(self):
+        self.hook("--activate")
+        installed = self.target / ".rpi/copilot/runtime/rpi-hook.py"
+        installed.write_bytes(installed.read_bytes() + b"# earlier package copy\n")
+        record_path = self.target / ".rpi/copilot/runtime/rpi-hook.install.json"
+        record = json.loads(record_path.read_text())
+        record["runtime_sha256"] = hashlib.sha256(installed.read_bytes()).hexdigest()
+        record_path.write_text(json.dumps(record))
+        self.hook("--activate")
+        self.assertEqual(installed.read_bytes(), (self.runtime / "rpi-hook.py").read_bytes())
+        installed.write_bytes(b"# owner edit\n")
+        refused = self.hook("--deactivate", expected=2)
+        self.assertIn("runtime", refused.stderr)
+        self.assertEqual(installed.read_bytes(), b"# owner edit\n")
+        self.assertTrue((self.target / ".github/hooks/rpi-policy.json").exists())
+        self.hook("--activate", expected=2)
+        self.assertEqual(installed.read_bytes(), b"# owner edit\n")
+
+    def test_unrecorded_runtime_and_missing_record_are_preserved(self):
+        installed = self.target / ".rpi/copilot/runtime/rpi-hook.py"
+        installed.parent.mkdir(parents=True)
+        installed.write_bytes(b"# owner runtime\n")
+        self.hook("--activate", expected=2)
+        self.assertEqual(installed.read_bytes(), b"# owner runtime\n")
+        self.assertFalse((self.target / ".github/hooks/rpi-policy.json").exists())
+        refused = self.hook("--deactivate", expected=2)
+        self.assertIn("No recorded", refused.stderr)
+        self.assertEqual(installed.read_bytes(), b"# owner runtime\n")
+
+    def test_symlinked_runtime_directory_is_refused(self):
+        outside = self.base / "outside"
+        outside.mkdir()
+        (self.target / ".rpi/copilot/runtime").symlink_to(outside, target_is_directory=True)
+        self.hook("--activate", expected=2)
+        self.assertEqual([], list(outside.iterdir()))
+
+    def test_detach_preserves_active_hook_until_deactivation(self):
+        self.hook("--activate")
+        runtime = (self.target / ".rpi/copilot/runtime/rpi-hook.py").read_bytes()
+        self.lifecycle("detach", apply=True)
+        self.assertEqual(runtime, (self.target / ".rpi/copilot/runtime/rpi-hook.py").read_bytes())
+        self.assertTrue((self.target / ".github/hooks/rpi-policy.json").exists())
+        self.hook("--deactivate")
+        self.assertFalse((self.target / ".rpi/copilot/runtime").exists())
+        self.assertFalse((self.target / ".github/hooks/rpi-policy.json").exists())
 
 
 if __name__ == "__main__":

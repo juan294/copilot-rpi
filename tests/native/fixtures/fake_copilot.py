@@ -9,8 +9,9 @@ import sys
 import time
 
 
-HELP = "-p -s --no-ask-user --available-tools --allow-tool --deny-tool --model --no-remote --no-remote-export --no-auto-update --secret-env-vars --output-format"
 mode = os.environ.get("RPI_NATIVE_FAKE_MODE", "ok")
+REMOTE = {"cli-1.0.112": " --sync-session[=<on|off>]", "no-remote-controls": ""}.get(mode, " --no-remote --no-remote-export")
+HELP = "-p -s --no-ask-user --available-tools --allow-tool --deny-tool --model --no-auto-update --secret-env-vars --output-format" + REMOTE
 if os.environ.get("COPILOT_GITHUB_TOKEN") == "force-missing-auth":
     mode = "missing-auth"
 elif os.environ.get("COPILOT_GITHUB_TOKEN") == "force-omit-marker":
