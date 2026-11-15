@@ -12,12 +12,12 @@ Sync with cc-rpi v2.2.0 (`cec458a`): project overlays, a read-only `diagnose` co
 
 ### Added
 
-- **Project overlays.** Each of the 16 workflow skills has a `## Project overlay` section and reads `.rpi/project/<skill>.md` when it exists. An overlay adds the project's procedure and checks and can make a workflow stricter. It cannot grant push, tag, merge, deployment or publication authority, and it cannot relax a gate. Other procedure changes go under `## Declared overrides`, with the quoted stock rule, the reason and the owner decision. The lifecycle skills (`rpi-adopt`, `rpi-bootstrap`, `rpi-detach`, `rpi-update`) have no overlay. See [project overlays](docs/project-overlay.md).
+- **Project overlays.** Each of the 16 workflow skills has a `## Project overlay` section that opens `.rpi/project/<skill>.md` by its exact path and reads it when it exists. A file search can skip the hidden `.rpi` directory, so this first sentence differs from cc-rpi. An overlay adds the project's procedure and checks and can make a workflow stricter. It cannot grant push, tag, merge, deployment or publication authority, and it cannot relax a gate. Other procedure changes go under `## Declared overrides`, with the quoted stock rule, the reason and the owner decision. The lifecycle skills (`rpi-adopt`, `rpi-bootstrap`, `rpi-detach`, `rpi-update`) have no overlay. See [project overlays](docs/project-overlay.md).
 - **`diagnose`.** `rpi-lifecycle.py diagnose --target <dir>`, also through `rpi-distribution.py`, prints a JSON report of the installation and of each overlay (`present`, `stale`, `inert` or `invalid`, with a `fix` and, when known, the `header_line` to write). It is read-only, always exits 0 and never prints overlay text. `rpi-status` runs it.
 - **Authored hash.** The render receipt records `authored_sha256`, the SHA-256 of the authored `templates/skills/<skill>/SKILL.md`, on each skill `SKILL.md` record and prompt wrapper record. The installation manifest copies it. An installation without it stays healthy until its next real update records it.
 - **Reserved path.** No package destination can name `.rpi/project`, `.rpi/copilot` or `.rpi/local/copilot`, or anything below them, in any letter case. Plan, apply, check, rollback and detach leave `.rpi/project` byte-identical.
 - **Resource-lifecycle instruction.** A new `resource-lifecycle.instructions.md` covers Docker, local stacks, database tests and task services: prove ownership before any stop or removal, finish disposable lifecycles within authorization, preserve shared and recovery data, and report retained resources. The supabase instruction and the root `AGENTS.md` template point to it, and `rpi-implement` and `rpi-remediate` follow it before removing a worktree.
-- **Native overlay probe.** `tests/native/run_cli.py --profile overlay` runs the same `/rpi-research` prompt against a fixture without an overlay and then against one with `.rpi/project/rpi-research.md`. The receipt is `passed`, `failed` or `blocked`.
+- **Native overlay probe.** `tests/native/run_cli.py --profile overlay` runs the same `/rpi-research` prompt against a fixture without an overlay and then against one with `.rpi/project/rpi-research.md`. The receipt is `passed`, `failed` or `blocked`. Overlays passed this probe for the `cli` profile on Copilot CLI 1.0.88; `agent-host` and `vscode-local` were not probed. See [compatibility](docs/compatibility.md).
 
 ### Changed
 
@@ -53,7 +53,6 @@ Sync with cc-rpi v2.2.0 (`cec458a`): project overlays, a read-only `diagnose` co
 
 - `rpi-hook.py install --activate` needs `.rpi/copilot/runtime/rpi-hook.py` in the target, but apply does not install runtime files, so activation after a real install exits 2 with "The packaged hook runtime is missing". This defect exists since 2.0.0 and awaits an owner decision.
 - The scheduled runner (`templates/scripts/rpi-automation.py`) and `templates/scripts/agents/lib/agent-utils.sh` require `--no-remote` and `--no-remote-export`, so scheduled jobs fail closed on Copilot CLI 1.0.112, which removed `--no-remote`. This exists since 2.0.0 and awaits an owner decision.
-- Project overlays are not natively qualified: the native overlay probe failed twice on Copilot CLI 1.0.88: the skill loaded, but its answer did not apply the overlay. See [compatibility](docs/compatibility.md).
 
 ## [2.0.0] - 2026-09-29
 
