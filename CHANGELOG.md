@@ -52,6 +52,8 @@ Sync with cc-rpi v2.2.0 (`cec458a`): project overlays, a read-only `diagnose` co
 ### Known issues
 
 - `rpi-hook.py install --activate` needs `.rpi/copilot/runtime/rpi-hook.py` in the target, but apply does not install runtime files, so activation after a real install exits 2 with "The packaged hook runtime is missing". This defect exists since 2.0.0 and awaits an owner decision.
+- The scheduled runner (`templates/scripts/rpi-automation.py`) and `templates/scripts/agents/lib/agent-utils.sh` require `--no-remote` and `--no-remote-export`, so scheduled jobs fail closed on Copilot CLI 1.0.112, which removed `--no-remote`. This exists since 2.0.0 and awaits an owner decision.
+- Project overlays are not natively qualified: the native overlay probe failed twice on Copilot CLI 1.0.88: the skill loaded, but its answer did not apply the overlay. See [compatibility](docs/compatibility.md).
 
 ## [2.0.0] - 2026-09-29
 

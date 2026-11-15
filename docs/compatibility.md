@@ -21,6 +21,8 @@ The selected harness and skill inventory were not visually inspected in VS Code;
 the owner accepted these native session results as the specific release evidence
 substitution on 2026-09-29. This result does not qualify other client builds.
 
+Project overlays are not natively qualified. On 2026-11-15 the `overlay` probe (`tests/native/run_cli.py --profile overlay`) ran twice with Copilot CLI 1.0.88 and the auto-selected model `gpt-6-luna`, on candidates `4da73e9` and `3026a6c`. Both runs failed: the native `skill` call for `rpi-research` succeeded in both fixtures, and the negative fixture had no overlay marker, but the positive answer did not contain the overlay marker. In the second run the model looked for `.rpi/project/rpi-research.md` with the `glob` tool and never opened it; the `glob` result was not recorded. Copilot CLI 1.0.112 blocked before inference because it removed the `--no-remote` flag that the harness and the shipped scheduled runner require. These results do not qualify any client build for overlays.
+
 The direct-install artifact is the rendered `package_dir` directory. It
 contains `.rpi/copilot-render.json`, a receipt listing each file, component
 and SHA-256 hash, plus `.rpi/copilot/runtime/` with the standalone lifecycle
