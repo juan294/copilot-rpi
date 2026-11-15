@@ -2,7 +2,7 @@
   "schema_version": 1,
   "source_version": "2.0.0",
   "profile": "cli",
-  "managed_root_bytes": 4795,
+  "managed_root_bytes": 4999,
   "files": [
     {
       "path": ".github/agents/rpi-auditor.agent.md",
@@ -42,12 +42,12 @@
     {
       "path": ".github/instructions/resource-lifecycle.instructions.md",
       "component": "instruction:resource-lifecycle",
-      "sha256": "1455e66bc77dfac67b2c3d2ca1520b66f420c0ef49a1cd51a766c2d6386a91df"
+      "sha256": "ced1c527bcb385cb7462543ce4b466b22c60652ea1fc83f1b508a75d60a183ff"
     },
     {
       "path": ".github/instructions/supabase.instructions.md",
       "component": "instruction:supabase",
-      "sha256": "4129db6718fb33f75c857466dd01d33bf4f898a3276498ed3562b151a73a8ff5"
+      "sha256": "e454fc1f2fa009c80fc8f28d9d85cefcc37cc376f02c85409b231bc9719f5914"
     },
     {
       "path": ".github/instructions/tests.instructions.md",
@@ -246,8 +246,8 @@
     {
       "path": ".github/skills/rpi-remediate/SKILL.md",
       "component": "skill:rpi-remediate",
-      "sha256": "a4a68a9f210817eae0ca9bfea600f6a4c0cd05da99d2d14f5fd73300c2297813",
-      "authored_sha256": "a4a68a9f210817eae0ca9bfea600f6a4c0cd05da99d2d14f5fd73300c2297813"
+      "sha256": "68b568a6604c08f3345c04c88074ac2c17ed8c43aa5a2932c45c3a3b1717ce63",
+      "authored_sha256": "68b568a6604c08f3345c04c88074ac2c17ed8c43aa5a2932c45c3a3b1717ce63"
     },
     {
       "path": ".github/skills/rpi-remediate/references/dispatch.md",

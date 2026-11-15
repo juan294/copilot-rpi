@@ -148,7 +148,7 @@
       "disposition": "adapted",
       "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1. Intake 2026-11-15 (cc-rpi v2.2.0): Adapt the project overlay section from cc-rpi v2.2.0 to the Copilot skill; content adapted in Phase 2 or 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. Adapt the cc-rpi workflow-text changes deferred on 2026-11-14 (proportional release verification with S1-S4 severities, Wave B selection, resource-lifecycle and package guidance as applicable) in Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1.",
       "destination": "templates/skills/rpi-remediate",
-      "destination_sha256": "63266a0f679c9dc3705306a5b48ec02b2d295a6ca4001ea6c7ed789d1a793eb3",
+      "destination_sha256": "e90761039f703955b500975ec6a60169a179ba6ed6732c1f5271d35121aaa544",
       "adaptation_note": "Copilot skill metadata, explicit local authority and native path wording while retaining the portable workflow contract. Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md adapts cc-rpi changes through cec458a9769049c6dd08777768ef718ac7571a30: the verbatim cc-rpi v2.2.0 `## Project overlay` section before the first `##` heading; S3/S4 accepted known issues; the worktree-removal sentence names `.github/instructions/resource-lifecycle.instructions.md` and replaces the reference to a git-workflow skill that Copilot RPI does not ship."
     },
     {
@@ -269,7 +269,7 @@
       "disposition": "adapted",
       "rationale": "Portable domain content is under applicability review; Copilot installation is selected by project scope. Intake 2026-11-15 (cc-rpi v2.2.0): Adapted in Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md into the worktree-removal sentence. The single lock destination is templates/skills/rpi-remediate, whose Step 4 cleanup is the Copilot counterpart of the cc-rpi worktree-cleanup recipe; templates/skills/rpi-implement carries the same sentence.",
       "destination": "templates/skills/rpi-remediate",
-      "destination_sha256": "63266a0f679c9dc3705306a5b48ec02b2d295a6ca4001ea6c7ed789d1a793eb3",
+      "destination_sha256": "e90761039f703955b500975ec6a60169a179ba6ed6732c1f5271d35121aaa544",
       "adaptation_note": "Only the cc-rpi v2.2.0 worktree-removal sentence is adapted, naming `.github/instructions/resource-lifecycle.instructions.md` in place of `.rpi/rules/resource-lifecycle.md`. It also appears in templates/skills/rpi-implement, which the skill:rpi-implement entry hashes. The rest of the git-workflow skill is not shipped as a Copilot skill."
     },
     {
@@ -291,7 +291,7 @@
       "disposition": "adapted",
       "rationale": "Portable domain content is under applicability review; Copilot installation is selected by project scope. Intake 2026-11-15 (cc-rpi v2.2.0): Adapted in Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md into one sentence of package guidance in the AGENTS.md template.",
       "destination": "templates/AGENTS.md.template",
-      "destination_sha256": "871078fb36777d4a0c7cde140de656668e6e743a14d06b8ccae8bc6b4950a5f7",
+      "destination_sha256": "19a9c5b947f6108ea6d17897e017235a08d9b2a0815d5bb31e344005af6a0eaa",
       "adaptation_note": "Only the safe package installation guidance is adapted: verify the exact package name and publisher against official documentation, never install a literal placeholder or infer a name from a display name. The launchd, zsh and PEP 668 macOS content is not shipped as a Copilot skill. Shares this destination with rule:rpi-details and instruction:rule-map."
     },
     {
@@ -401,8 +401,8 @@
       "disposition": "adapted",
       "rationale": "Rule concept is under Copilot native instruction adaptation and applicability review. Intake 2026-11-15 (cc-rpi v2.2.0): Adapted in Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md into the AGENTS.md template.",
       "destination": "templates/AGENTS.md.template",
-      "destination_sha256": "871078fb36777d4a0c7cde140de656668e6e743a14d06b8ccae8bc6b4950a5f7",
-      "adaptation_note": "Two sentences in the managed root: proportional release verification with only S1/S2 blocking and owner-approved S3/S4 accepted known issues, and the read-the-resource-lifecycle-instruction sentence before allocating or reporting cleanup of local services. Shares this destination with instruction:rule-map and skill:macos-rules."
+      "destination_sha256": "19a9c5b947f6108ea6d17897e017235a08d9b2a0815d5bb31e344005af6a0eaa",
+      "adaptation_note": "Two passages in the managed root. Release: the rpi-details proportional wording (Wave A on every release; Wave B and Waves C-H only when the release profile selects them, one Wave B round per candidate), that an S1 or S2 finding, an unclassified finding or a skipped high-risk area blocks (pointing to rpi-release), and the rpi-details accepted-known-issue sentence for S3/S4 findings. Lifecycle: read the resource-lifecycle instruction before allocating or reporting cleanup of local services, and release owned disposable resources within authorization or record a retained-resource handoff. Shares this destination with instruction:rule-map and skill:macos-rules."
     },
     {
       "id": "rule:resource-lifecycle",
@@ -412,8 +412,8 @@
       "disposition": "adapted",
       "rationale": "New upstream resource-ownership rule, archived for reference on 2026-11-14. Intake 2026-11-15 (cc-rpi v2.2.0): Adapted in Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md into a new Copilot path instruction.",
       "destination": "templates/github/instructions/resource-lifecycle.instructions.md.template",
-      "destination_sha256": "1455e66bc77dfac67b2c3d2ca1520b66f420c0ef49a1cd51a766c2d6386a91df",
-      "adaptation_note": "Condensed into a Copilot `.instructions.md` with applyTo `**/Dockerfile*,**/compose*.yml,**/compose*.yaml,**/docker-compose*,supabase/**` (no braces): ownership before allocation, lifecycle classes, exact-identity teardown without host-wide prune, data-deleting commands only in an authorized disposable lifecycle, and removed/retained/cleanup-failed reporting. Grants no deletion authority. The host-maintenance and project-contract detail of the cc-rpi rule is not copied."
+      "destination_sha256": "ced1c527bcb385cb7462543ce4b466b22c60652ea1fc83f1b508a75d60a183ff",
+      "adaptation_note": "Condensed into a Copilot `.instructions.md` with applyTo `**/Dockerfile*,**/compose*.yml,**/compose*.yaml,**/docker-compose*,supabase/**` (no braces; `supabase/**` matches the existing Copilot supabase instruction in place of upstream `**/supabase/**`): ownership before allocation, lifecycle classes, an ownership record kept outside cleanup directories and free of credentials, delegate accounting by the coordinator, exact-identity teardown (a same-name replacement is not the recorded resource) without host-wide prune, data-deleting commands only in an authorized disposable lifecycle, and removed/retained/cleanup-failed reporting. Grants no deletion authority. The host-maintenance and project-contract detail of the cc-rpi rule is not copied."
     },
     {
       "id": "rule:supabase",
@@ -423,8 +423,8 @@
       "disposition": "adapted",
       "rationale": "Rule concept is under Copilot native instruction adaptation and applicability review. Intake 2026-11-15 (cc-rpi v2.2.0): Adapted in Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md into the Copilot supabase instruction.",
       "destination": "templates/github/instructions/supabase.instructions.md.template",
-      "destination_sha256": "4129db6718fb33f75c857466dd01d33bf4f898a3276498ed3562b151a73a8ff5",
-      "adaptation_note": "The lifecycle-first sentence: follow the resource-lifecycle instruction and the project's lifecycle command, verify the effective Supabase project identity and Docker ownership, a worktree can inherit `project_id`, never use `stop --no-backup` as generic cleanup. The rest of the cc-rpi rule was already adapted into this Copilot instruction."
+      "destination_sha256": "e454fc1f2fa009c80fc8f28d9d85cefcc37cc376f02c85409b231bc9719f5914",
+      "adaptation_note": "The lifecycle-first passage: follow the resource-lifecycle instruction and the project's lifecycle command, verify the effective Supabase project identity and Docker ownership, a worktree can inherit `project_id`, never use `stop --no-backup` as generic cleanup, the verification steps are not permission to reset an existing database, and finish the owned lifecycle afterwards. The rest of the cc-rpi rule was already adapted into this Copilot instruction."
     },
     {
       "id": "rule:testing",
@@ -456,7 +456,7 @@
       "disposition": "adapted",
       "rationale": "Native adapter awaits the phase that qualifies and renders the Copilot surface. Intake 2026-11-15 (cc-rpi v2.2.0): Adapted in Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md into the AGENTS.md template.",
       "destination": "templates/AGENTS.md.template",
-      "destination_sha256": "871078fb36777d4a0c7cde140de656668e6e743a14d06b8ccae8bc6b4950a5f7",
+      "destination_sha256": "19a9c5b947f6108ea6d17897e017235a08d9b2a0815d5bb31e344005af6a0eaa",
       "adaptation_note": "Copilot routes scoped rules through `.github/instructions/` applyTo globs, not a rule-map table. The new resource-lifecycle row becomes the managed-root sentence that names `.github/instructions/resource-lifecycle.instructions.md` and local resources in the scoped-instruction list. Shares this destination with rule:rpi-details and skill:macos-rules."
     },
     {

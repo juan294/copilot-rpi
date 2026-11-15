@@ -258,7 +258,7 @@ rationale; stop after all authorized work.
 
 For each wave, confirm ownership, preservation of changes and all artifacts
 (including ignored/untracked plans, handoffs and evidence), and local integration
-before removing its worktree. Before removing the worktree, follow `.github/instructions/resource-lifecycle.instructions.md`: finish its authorized disposable services or preserve their ownership records, required workdir and explicit retained-resource handoff. Never restore a task's database identity to the primary identity while its stack remains allocated without a verified handoff.
+before removing its worktree, and follow `.github/instructions/resource-lifecycle.instructions.md`: finish its authorized disposable services or preserve their ownership records, required workdir and explicit retained-resource handoff. Never restore a task's database identity to the primary identity while its stack remains allocated without a verified handoff.
 
 ```bash
 git worktree list --porcelain

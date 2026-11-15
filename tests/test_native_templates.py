@@ -63,7 +63,8 @@ class NativeTemplateContracts(unittest.TestCase):
             "migrations": ("existing migration", "rollback", "data"),
             "deployment-safety": ("local", "preview", "authorization"),
             "supabase": ("rls", "privilege", "local", "resource-lifecycle"),
-            "resource-lifecycle": ("ownership", "disposable", "retained", "no deletion authority"),
+            "resource-lifecycle": ("ownership", "disposable", "retained", "no deletion authority",
+                                   "never record credentials", "interrupted delegates", "same name"),
         }
         files = {path.name.removesuffix(".instructions.md.template"): path for path in
                  INSTRUCTIONS.glob("*.instructions.md.template")}
@@ -85,6 +86,8 @@ class NativeTemplateContracts(unittest.TestCase):
         self.assertIn("rpi-implement", agents)
         self.assertIn(".github/instructions/resource-lifecycle.instructions.md", agents)
         self.assertIn("release profile selects", agents)
+        self.assertIn("one wave b round per candidate", agents.lower())
+        self.assertIn("unclassified finding", agents)
         self.assertIn("publisher against the official documentation", agents)
         self.assertIn("AGENTS.md", copilot)
         self.assertIn(".github/skills/", copilot)
