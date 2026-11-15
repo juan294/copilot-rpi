@@ -1,6 +1,6 @@
-# Copilot catalog crosswalk to cc-rpi 2.1.0
+# Copilot catalog crosswalk to cc-rpi 2.2.0
 
-The [machine-readable crosswalk](upstream-catalog-crosswalk.json) accounts for all 40 Copilot error IDs, 55 Copilot rule IDs, 64 pinned upstream errors, and 92 active upstream rules. The upstream source is cc-rpi commit `5920376165d8dec6d35baa0d273a0b3fc9ee1f81`, version 2.1.0. Copilot IDs and cc-rpi IDs are independent; an equal meaning does not renumber Copilot's catalog.
+The [machine-readable crosswalk](upstream-catalog-crosswalk.json) accounts for all 40 Copilot error IDs, 55 Copilot rule IDs, 64 pinned upstream errors, and 92 active upstream rules. The upstream source is cc-rpi commit `cec458a9769049c6dd08777768ef718ac7571a30`, version 2.2.0. Copilot IDs and cc-rpi IDs are independent; an equal meaning does not renumber Copilot's catalog.
 
 Each local row records its title, upstream meaning match, disposition, and reason. Each upstream row records the reverse link. `adopted` means the meaning is already present; `adapted` means Copilot wording or authority changed; `deferred` means no equivalent observed Copilot catalog item has yet earned a new permanent ID. Deferred upstream items remain visible for future review, including tool, platform, and domain cases. They are not silently discarded or declared fixed. The cc-rpi retired rule IDs 67, 69, and 80 are recorded separately and never reused here.
 
@@ -24,3 +24,7 @@ defer all incoming behavioral changes. Existing native Copilot destinations,
 their hashes and the permanent catalog IDs are unchanged. Previously adapted
 components retain their implementations; the new resource-lifecycle rule
 and the macOS domain skill remain unregistered.
+
+## cc-rpi 2.2.0 intake, 2026-11-15
+
+The lock now pins cc-rpi `cec458a` (tag `v2.2.0`). The upstream pattern catalog did not change, so every catalog row, Copilot ID and disposition above is unchanged. The [reviewed intake decisions](decisions/2026-11-15-cc-rpi-2.2-sync-intake.json) record one decision for each changed component and re-decide the components that the 2026-11-14 intake deferred. Native Copilot destinations keep their bytes and hashes until the phase of the [sync plan](plans/2026-11-15-cc-rpi-2.2-sync.md) that edits them.

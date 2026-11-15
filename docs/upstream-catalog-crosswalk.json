@@ -1,8 +1,8 @@
 {
   "source": {
     "repository": "cc-rpi",
-    "version": "2.1.0",
-    "commit": "5920376165d8dec6d35baa0d273a0b3fc9ee1f81"
+    "version": "2.2.0",
+    "commit": "cec458a9769049c6dd08777768ef718ac7571a30"
   },
   "policy": "IDs are independent and permanent. A model improvement alone is never grounds to retire an error. P1 retires no Copilot ID; deferred entries remain active until native qualification or a versioned retirement decision.",
   "copilot_errors": [

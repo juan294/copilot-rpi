@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "upstream_commit": "5920376165d8dec6d35baa0d273a0b3fc9ee1f81",
+  "upstream_commit": "cec458a9769049c6dd08777768ef718ac7571a30",
   "files": [
     {
       "path": ".codex/skills/codex-simplify/SKILL.md",
@@ -36,7 +36,7 @@
     },
     {
       "path": "templates/adapters/codex-marketplace.json",
-      "sha256": "0bec6c044f1239a9d1adbd848db360ffa2a49265a65da50e2ef3f8d00d941a09"
+      "sha256": "d744be9a950dc0cef39d54f683b2eb9ac91e24a2ac9c0b8b488d8d714548f2ab"
     },
     {
       "path": "templates/adapters/codex-permissions.rules",
@@ -44,7 +44,7 @@
     },
     {
       "path": "templates/adapters/codex-plugin.json",
-      "sha256": "a2ae514538d04be3d1ad804e415d1f13bfc344e312ecc0aa965e8bb2b81da682"
+      "sha256": "79eb2a490e921a72ddb83411754d956d9d62fdfc716581049560cae3047051b5"
     },
     {
       "path": "templates/adapters/codex.json",
@@ -56,7 +56,7 @@
     },
     {
       "path": "templates/distribution.json",
-      "sha256": "7721d05b911e4965320c62acdaebc5f4b58db31d29797700b3329a70be2eb478"
+      "sha256": "b61ec5d12874ad8b8b366ebed3e877e903b9677f90a4441e50dd8cf11e0b394e"
     },
     {
       "path": "templates/e2e-pro-playbook-template.md",
@@ -124,7 +124,7 @@
     },
     {
       "path": "templates/scripts/rpi-diagnostics.py",
-      "sha256": "ddd56f0311a836187671c04352551756ecedaf717b740a6561a7a0e229cefd23"
+      "sha256": "bd4b44e765e87075a3eb71ec57bcd7f343f8e5e632c3a3e8bc4cb62479cc22d6"
     },
     {
       "path": "templates/scripts/rpi-dispatch.py",
@@ -136,7 +136,7 @@
     },
     {
       "path": "templates/scripts/rpi-lifecycle.py",
-      "sha256": "0b3588595ac3b08e4ee60985a7b3e195bd0e9c91ef359dc68a2ecddac39ead5a"
+      "sha256": "31e9fb3253b39c7b44ea55172bce2c1fe08756a378e5cc3ad4132f1f89154a47"
     },
     {
       "path": "templates/scripts/rpi-models.py",
@@ -208,7 +208,7 @@
     },
     {
       "path": "templates/skills/rpi-assess/SKILL.md",
-      "sha256": "8dce5b2d090b96741ef61009a9b8f1504a407432931270c786939281946b3ee4"
+      "sha256": "50d70c92a40b29f6ab2c9b93316acf1e7b2625705992b3a4a9c16b5c0c6dff61"
     },
     {
       "path": "templates/skills/rpi-bootstrap/SKILL.md",
@@ -220,11 +220,11 @@
     },
     {
       "path": "templates/skills/rpi-brainstorm/SKILL.md",
-      "sha256": "4b9dfe53c32345632369adcf2495a94dbb9cc15b4aa4c3517ed9da4c68e55c04"
+      "sha256": "6ed0f20ec9fb73c056cab65101fd9c7157e02973c8b18111c2c42c790eee4e75"
     },
     {
       "path": "templates/skills/rpi-describe-pr/SKILL.md",
-      "sha256": "a3e9972d2d371b35fe6d3b9ea4672f851821383a0994ce498922fe14a0242e5e"
+      "sha256": "be06d3cb585ae96ee912bd496a62d8c367b5b4e567137af14ac0dd989dd6078a"
     },
     {
       "path": "templates/skills/rpi-detach/SKILL.md",
@@ -232,35 +232,35 @@
     },
     {
       "path": "templates/skills/rpi-explore-release/SKILL.md",
-      "sha256": "1a8a27e38dbfcb4d12a391ee8f621e8456f1ab4f925e6ea8e9b05b33e8abaaa7"
+      "sha256": "a3c686faf4f7bcfddf6379dcab269d60b33088b83b3b4f50647fe98e9987744d"
     },
     {
       "path": "templates/skills/rpi-fix-ci/SKILL.md",
-      "sha256": "8be8e40497d644367604364c010d7d509342c12c9231577d19644107b8002251"
+      "sha256": "454a24af15038f86970bc302d5b0b1ac68f69f595ac6a1ad1392cb012bd1117f"
     },
     {
       "path": "templates/skills/rpi-implement/SKILL.md",
-      "sha256": "5d7568a3727f8eda01da0dffb185da45cdf11cfd08abc303a12d4093fce650c5"
+      "sha256": "4f0578f02258de5e972781eef0879828320e1793ca568157d1fc540e9e1ef378"
     },
     {
       "path": "templates/skills/rpi-plan/SKILL.md",
-      "sha256": "a24f7d4dfca20e94bec01f29286df34c4223959cdbd8ab3eeb8a7988751539b9"
+      "sha256": "c00216bb5ee59216763bc68d52321cecc0ceabbc14085f0a9eed9cec8fa33273"
     },
     {
       "path": "templates/skills/rpi-pre-launch/SKILL.md",
-      "sha256": "5aa74dda2bb9e0c7aa0094dc0aaae987559d5168e46867e8b3c622504d8ae88c"
+      "sha256": "e9767291618b6c2400c88b811f4fe2aa71b2bc8c75948d3b8dd78689e4b67de8"
     },
     {
       "path": "templates/skills/rpi-release/SKILL.md",
-      "sha256": "39e0182d625bc4e2b0aa1927bbfec97294b7cb4a2c32f4d9550dc82591627293"
+      "sha256": "7e8b592b517057a5af5063ccdf9aae60fd804d03ad4292409b7e7ce0dc445797"
     },
     {
       "path": "templates/skills/rpi-remediate/SKILL.md",
-      "sha256": "472243b8da2e781d4c7a7a844441333c65a37ba3e0c266cb3b916e6315bf114e"
+      "sha256": "b0b05ab45e73cfeb48379fe955bb63677a03bfcd55f284eca94ffa972873d51b"
     },
     {
       "path": "templates/skills/rpi-research/SKILL.md",
-      "sha256": "2e7ef9a0825acd290201113ba086f0da6680765657c6ff620b8ed243040dc833"
+      "sha256": "221b51de15206193e5de504b67769bd66c90148d12d917ee8e361f9c9c4717d2"
     },
     {
       "path": "templates/skills/rpi-research/references/research-contract.md",
@@ -268,19 +268,19 @@
     },
     {
       "path": "templates/skills/rpi-status/SKILL.md",
-      "sha256": "56e684456e9aa07475182db3998e204f4e45702176026af3813dcdc4855220e5"
+      "sha256": "d436a1350717c2b90e585800e034a104a0bdbb60a8d23eae79b5e6c5d2085d78"
     },
     {
       "path": "templates/skills/rpi-tool-design/SKILL.md",
-      "sha256": "e5a66ab7a3c08a8a7b2d54abb3aee8ae8ba46940a795a94b0e36641825275b47"
+      "sha256": "edf0ca294e680de41ed3d709f38f2ee215f665b47de02438b22b095d14f934fd"
     },
     {
       "path": "templates/skills/rpi-triage/SKILL.md",
-      "sha256": "fa7327f388155b0ab9ef334225d9ea8d350649600e3d7ef8bbdefa66293c2e56"
+      "sha256": "16a28b765db389d6234ed84703878a80708d98ab665871e3a67799e9297396cc"
     },
     {
       "path": "templates/skills/rpi-update-docs/SKILL.md",
-      "sha256": "d92562693934304b24a8a3d9e805abeadb987f073e289a48dd3baf584fe44ea7"
+      "sha256": "c6edb810a4c8ba6b7f24ccf0eda1624562b2036c26ed25d7736808bdb1866ab1"
     },
     {
       "path": "templates/skills/rpi-update/SKILL.md",
@@ -288,7 +288,7 @@
     },
     {
       "path": "templates/skills/rpi-validate/SKILL.md",
-      "sha256": "939fb1beaedd5ca495a688bba8443454721e51f254ed9fcc0c08ddaf49345284"
+      "sha256": "6d1e524b10433e20cd6b0a41c1a067f592df7001cf69c72d202e8bcf32b1096b"
     },
     {
       "path": "templates/skills/shell-tools/SKILL.md",

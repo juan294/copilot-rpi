@@ -10,10 +10,11 @@ from pathlib import Path
 
 
 STATUSES = {"adopted", "adapted", "deferred", "inapplicable"}
-PIN = "5920376165d8dec6d35baa0d273a0b3fc9ee1f81"
-PINNED_INVENTORY_SHA = "ca148a3550e256b91497513cbe6d7e758fc3cbc57db9f112a650a12dd9310bc9"
+PIN = "cec458a9769049c6dd08777768ef718ac7571a30"
+PIN_VERSION = "2.2.0"
+PINNED_INVENTORY_SHA = "ced9f8e1df93f710af0a87c39c50855fc59ffe87be78f385c0d1ac29a8bdf200"
 PINNED_ANCHORS = {
-    "templates/distribution.json": "7721d05b911e4965320c62acdaebc5f4b58db31d29797700b3329a70be2eb478",
+    "templates/distribution.json": "b61ec5d12874ad8b8b366ebed3e877e903b9677f90a4441e50dd8cf11e0b394e",
     "patterns/agent-errors.md": "fc485f9de1dbc706a214601827e3bf1efbf742817f8265baf14c3a4744597eac",
     "patterns/quick-reference.md": "7b1d5b43398f0ace8c1aebc8f0fe9a00fc22e2c1104e52c46dd0c7e382eeadaa",
     "LICENSE": "7784153b6b563cf7749faa3e0c24222367b4b8ffc360bb76d9b677b3baa1589d",
@@ -285,7 +286,7 @@ def check(lock_path, inventory_path, source_path=None, content_only=False):
         errors.append("unsupported lock or inventory schema")
     if lock.get("upstream", {}).get("commit") != PIN or inventory.get("upstream_commit") != PIN:
         errors.append("upstream pin mismatch")
-    if lock.get("upstream", {}).get("version") != "2.1.0":
+    if lock.get("upstream", {}).get("version") != PIN_VERSION:
         errors.append("upstream version mismatch")
     if digest(inventory_path.read_bytes()) != PINNED_INVENTORY_SHA:
         errors.append("pinned inventory hash mismatch")
@@ -477,7 +478,7 @@ def check(lock_path, inventory_path, source_path=None, content_only=False):
                 errors.append(f"unknown upstream component: {identifier}")
             for identifier in sorted(set(expected) - live_ids):
                 errors.append(f"missing upstream component: {identifier}")
-            if live.get("version") != "2.1.0":
+            if live.get("version") != PIN_VERSION:
                 errors.append(f"supplied upstream version drift: {live.get('version')}")
             for item in components:
                 try:

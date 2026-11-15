@@ -1,0 +1,264 @@
+{
+  "source_sha": "cec458a9769049c6dd08777768ef718ac7571a30",
+  "changes_sha256": "3b88912b5fa1d0f1e6f2a61b3895db002619e410eff72e63cf8488b45f3d4e95",
+  "upstream_version": "2.2.0",
+  "base_lock": "5920376165d8dec6d35baa0d273a0b3fc9ee1f81",
+  "note": "decisions answers the comparison of the 5920376 lock against cc-rpi cec458a. prior_deferred_redecisions re-decides the 22 IDs deferred in docs/decisions/2026-11-14-upstream-security-reference-intake.json; those IDs that did not change between 5920376 and cec458a are not printed by the comparison, so they are kept outside decisions, which must hold exactly the printed IDs. lock_disposition names the lock disposition where it differs from the decision.",
+  "decisions": [
+    {
+      "id": "component:config:codex-marketplace",
+      "disposition": "inapplicable",
+      "rationale": "Codex-specific marketplace configuration has no Copilot native installation target."
+    },
+    {
+      "id": "component:config:codex-package",
+      "disposition": "inapplicable",
+      "rationale": "Codex-specific package configuration has no Copilot native installation target."
+    },
+    {
+      "id": "component:resource:diagnostics",
+      "disposition": "deferred",
+      "rationale": "Copilot gets its own read-only diagnose command in Phase 2 and does not port the cc-rpi rpi-diagnostics.py module. This decision changes to adapted in Phase 2, when that destination exists."
+    },
+    {
+      "id": "component:resource:distribution-manifest",
+      "disposition": "adapted",
+      "rationale": "Copilot keeps its own component manifest; the entries for the overlay, authored hash and diagnose changes are content adapted in Phase 2 or 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1."
+    },
+    {
+      "id": "component:resource:lifecycle-engine",
+      "disposition": "adapted",
+      "rationale": "Adapt the .rpi/project reserved path and the per-skill authored hash only; content adapted in Phase 2 or 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The cc-rpi WB-L, WB2-L and WB2R3-L lifecycle repair series stays deferred; Copilot keeps its own recovery implementation. The Copilot destination and its hash are unchanged in Phase 1."
+    },
+    {
+      "id": "component:skill:rpi-assess",
+      "disposition": "adapted",
+      "rationale": "Adapt the project overlay section from cc-rpi v2.2.0 to the Copilot skill; content adapted in Phase 2 or 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1."
+    },
+    {
+      "id": "component:skill:rpi-brainstorm",
+      "disposition": "adapted",
+      "rationale": "Adapt the project overlay section from cc-rpi v2.2.0 to the Copilot skill; content adapted in Phase 2 or 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1."
+    },
+    {
+      "id": "component:skill:rpi-describe-pr",
+      "disposition": "adapted",
+      "rationale": "Adapt the project overlay section from cc-rpi v2.2.0 to the Copilot skill; content adapted in Phase 2 or 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1."
+    },
+    {
+      "id": "component:skill:rpi-explore-release",
+      "disposition": "adapted",
+      "rationale": "Adapt the project overlay section from cc-rpi v2.2.0 to the Copilot skill; content adapted in Phase 2 or 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1."
+    },
+    {
+      "id": "component:skill:rpi-fix-ci",
+      "disposition": "adapted",
+      "rationale": "Adapt the project overlay section from cc-rpi v2.2.0 to the Copilot skill; content adapted in Phase 2 or 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1."
+    },
+    {
+      "id": "component:skill:rpi-implement",
+      "disposition": "adapted",
+      "rationale": "Adapt the project overlay section and the stock rules for committed deviation notes and plan citations by file name from cc-rpi v2.2.0 to the Copilot skill; content adapted in Phase 2 or 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1."
+    },
+    {
+      "id": "component:skill:rpi-plan",
+      "disposition": "adapted",
+      "rationale": "Adapt the project overlay section from cc-rpi v2.2.0 to the Copilot skill; content adapted in Phase 2 or 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1."
+    },
+    {
+      "id": "component:skill:rpi-pre-launch",
+      "disposition": "adapted",
+      "rationale": "Adapt the project overlay section from cc-rpi v2.2.0 to the Copilot skill; content adapted in Phase 2 or 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1."
+    },
+    {
+      "id": "component:skill:rpi-release",
+      "disposition": "adapted",
+      "rationale": "Adapt the project overlay section from cc-rpi v2.2.0 to the Copilot skill; content adapted in Phase 2 or 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1."
+    },
+    {
+      "id": "component:skill:rpi-remediate",
+      "disposition": "adapted",
+      "rationale": "Adapt the project overlay section from cc-rpi v2.2.0 to the Copilot skill; content adapted in Phase 2 or 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1."
+    },
+    {
+      "id": "component:skill:rpi-research",
+      "disposition": "adapted",
+      "rationale": "Adapt the project overlay section from cc-rpi v2.2.0 to the Copilot skill; content adapted in Phase 2 or 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1."
+    },
+    {
+      "id": "component:skill:rpi-status",
+      "disposition": "adapted",
+      "rationale": "Adapt the project overlay section and project_overlays reporting, which Copilot supplies through its own diagnose command from cc-rpi v2.2.0 to the Copilot skill; content adapted in Phase 2 or 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1."
+    },
+    {
+      "id": "component:skill:rpi-tool-design",
+      "disposition": "adapted",
+      "rationale": "Adapt the project overlay section from cc-rpi v2.2.0 to the Copilot skill; content adapted in Phase 2 or 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1."
+    },
+    {
+      "id": "component:skill:rpi-triage",
+      "disposition": "adapted",
+      "rationale": "Adapt the project overlay section and the stock rules for an older report left by a failed run and an observability gap as YELLOW from cc-rpi v2.2.0 to the Copilot skill; content adapted in Phase 2 or 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1."
+    },
+    {
+      "id": "component:skill:rpi-update-docs",
+      "disposition": "adapted",
+      "rationale": "Adapt the project overlay section from cc-rpi v2.2.0 to the Copilot skill; content adapted in Phase 2 or 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1."
+    },
+    {
+      "id": "component:skill:rpi-validate",
+      "disposition": "adapted",
+      "rationale": "Adapt the project overlay section from cc-rpi v2.2.0 to the Copilot skill; content adapted in Phase 2 or 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1."
+    },
+    {
+      "id": "manifest:version",
+      "disposition": "deferred",
+      "rationale": "Record the cc-rpi version label 2.2.0 as the pinned upstream version (upstream.version in the lock). The Copilot product version is independent; Copilot 2.1.0 is prepared in Phase 4.",
+      "upstream_version": "2.2.0"
+    }
+  ],
+  "prior_deferred_redecisions": [
+    {
+      "id": "component:hook:guard-bash",
+      "prior_disposition": "deferred",
+      "disposition": "inapplicable",
+      "rationale": "Copilot hook and gate already have the cc-rpi 2.1 semantics; cc-rpi-specific parser deltas not ported."
+    },
+    {
+      "id": "component:instruction:rule-map",
+      "prior_disposition": "deferred",
+      "disposition": "adapted",
+      "rationale": "Adapted in Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md into a row in the AGENTS.md template (templates/AGENTS.md.template). The lock records it as deferred until Phase 3 writes that destination, because an adapted lock entry must name an existing destination and its hash (scripts/check-upstream.py:369-383).",
+      "lock_disposition": "deferred"
+    },
+    {
+      "id": "component:resource:configuration-engine",
+      "prior_disposition": "deferred",
+      "disposition": "deferred",
+      "rationale": "Copilot keeps its own implementation; cc-rpi repair series not ported. The lock keeps this component adapted with its existing Copilot destination and hash; this disposition applies to the incoming cc-rpi delta.",
+      "lock_disposition": "adapted"
+    },
+    {
+      "id": "component:resource:diagnostics",
+      "prior_disposition": "deferred",
+      "disposition": "deferred",
+      "rationale": "Superseded by the decision for component:resource:diagnostics in this file."
+    },
+    {
+      "id": "component:resource:distribution-engine",
+      "prior_disposition": "deferred",
+      "disposition": "deferred",
+      "rationale": "Copilot keeps its own implementation; cc-rpi repair series not ported. The lock keeps this component adapted with its existing Copilot destination and hash; this disposition applies to the incoming cc-rpi delta.",
+      "lock_disposition": "adapted"
+    },
+    {
+      "id": "component:resource:distribution-manifest",
+      "prior_disposition": "deferred",
+      "disposition": "adapted",
+      "rationale": "Superseded by the decision for component:resource:distribution-manifest in this file."
+    },
+    {
+      "id": "component:resource:lifecycle-engine",
+      "prior_disposition": "deferred",
+      "disposition": "adapted",
+      "rationale": "Superseded by the decision for component:resource:lifecycle-engine in this file."
+    },
+    {
+      "id": "component:resource:package-engine",
+      "prior_disposition": "deferred",
+      "disposition": "deferred",
+      "rationale": "Copilot keeps its own implementation; cc-rpi repair series not ported."
+    },
+    {
+      "id": "component:resource:policy-engine",
+      "prior_disposition": "deferred",
+      "disposition": "inapplicable",
+      "rationale": "Copilot hook and gate already have the cc-rpi 2.1 semantics; cc-rpi-specific parser deltas not ported. The lock keeps this component adapted with its existing Copilot destination and hash; this disposition applies to the incoming cc-rpi delta.",
+      "lock_disposition": "adapted"
+    },
+    {
+      "id": "component:resource:prepush-gate",
+      "prior_disposition": "deferred",
+      "disposition": "inapplicable",
+      "rationale": "Copilot hook and gate already have the cc-rpi 2.1 semantics; cc-rpi-specific parser deltas not ported. The lock keeps this component adapted with its existing Copilot destination and hash; this disposition applies to the incoming cc-rpi delta.",
+      "lock_disposition": "adapted"
+    },
+    {
+      "id": "component:rule:resource-lifecycle",
+      "prior_disposition": "deferred",
+      "disposition": "adapted",
+      "rationale": "Adapted in Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md into a new Copilot resource-lifecycle instruction. The lock records it as deferred until Phase 3 writes that destination, because an adapted lock entry must name an existing destination and its hash (scripts/check-upstream.py:369-383).",
+      "lock_disposition": "deferred"
+    },
+    {
+      "id": "component:rule:rpi-details",
+      "prior_disposition": "deferred",
+      "disposition": "adapted",
+      "rationale": "Adapted in Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md into the AGENTS.md template (templates/AGENTS.md.template). The lock records it as deferred until Phase 3 writes that destination, because an adapted lock entry must name an existing destination and its hash (scripts/check-upstream.py:369-383).",
+      "lock_disposition": "deferred"
+    },
+    {
+      "id": "component:rule:supabase",
+      "prior_disposition": "deferred",
+      "disposition": "adapted",
+      "rationale": "Adapted in Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md into the Copilot supabase instruction (templates/github/instructions/supabase.instructions.md.template). The lock records it as deferred until Phase 3 writes that destination, because an adapted lock entry must name an existing destination and its hash (scripts/check-upstream.py:369-383).",
+      "lock_disposition": "deferred"
+    },
+    {
+      "id": "component:skill:git-workflow",
+      "prior_disposition": "deferred",
+      "disposition": "adapted",
+      "rationale": "Adapted in Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md into the worktree-removal sentence in templates/skills/rpi-implement and templates/skills/rpi-remediate. The lock records it as deferred until Phase 3 writes that destination, because an adapted lock entry must name an existing destination and its hash (scripts/check-upstream.py:369-383).",
+      "lock_disposition": "deferred"
+    },
+    {
+      "id": "component:skill:macos-rules",
+      "prior_disposition": "deferred",
+      "disposition": "adapted",
+      "rationale": "Adapted in Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md into one sentence of package guidance in the AGENTS.md template (templates/AGENTS.md.template). The lock records it as deferred until Phase 3 writes that destination, because an adapted lock entry must name an existing destination and its hash (scripts/check-upstream.py:369-383).",
+      "lock_disposition": "deferred"
+    },
+    {
+      "id": "component:skill:rpi-adopt",
+      "prior_disposition": "deferred",
+      "disposition": "adapted",
+      "rationale": "Adapt the cc-rpi workflow-text changes deferred on 2026-11-14 (proportional release verification with S1-S4 severities, Wave B selection, resource-lifecycle and package guidance as applicable) in Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1."
+    },
+    {
+      "id": "component:skill:rpi-bootstrap",
+      "prior_disposition": "deferred",
+      "disposition": "adapted",
+      "rationale": "Adapt the cc-rpi workflow-text changes deferred on 2026-11-14 (proportional release verification with S1-S4 severities, Wave B selection, resource-lifecycle and package guidance as applicable) in Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1."
+    },
+    {
+      "id": "component:skill:rpi-explore-release",
+      "prior_disposition": "deferred",
+      "disposition": "adapted",
+      "rationale": "Adapt the cc-rpi workflow-text changes deferred on 2026-11-14 (proportional release verification with S1-S4 severities, Wave B selection, resource-lifecycle and package guidance as applicable) in Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1."
+    },
+    {
+      "id": "component:skill:rpi-pre-launch",
+      "prior_disposition": "deferred",
+      "disposition": "adapted",
+      "rationale": "Adapt the cc-rpi workflow-text changes deferred on 2026-11-14 (proportional release verification with S1-S4 severities, Wave B selection, resource-lifecycle and package guidance as applicable) in Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1."
+    },
+    {
+      "id": "component:skill:rpi-release",
+      "prior_disposition": "deferred",
+      "disposition": "adapted",
+      "rationale": "Adapt the cc-rpi workflow-text changes deferred on 2026-11-14 (proportional release verification with S1-S4 severities, Wave B selection, resource-lifecycle and package guidance as applicable) in Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1."
+    },
+    {
+      "id": "component:skill:rpi-remediate",
+      "prior_disposition": "deferred",
+      "disposition": "adapted",
+      "rationale": "Adapt the cc-rpi workflow-text changes deferred on 2026-11-14 (proportional release verification with S1-S4 severities, Wave B selection, resource-lifecycle and package guidance as applicable) in Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1."
+    },
+    {
+      "id": "component:skill:rpi-validate",
+      "prior_disposition": "deferred",
+      "disposition": "adapted",
+      "rationale": "Adapt the cc-rpi workflow-text changes deferred on 2026-11-14 (proportional release verification with S1-S4 severities, Wave B selection, resource-lifecycle and package guidance as applicable) in Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1."
+    }
+  ]
+}

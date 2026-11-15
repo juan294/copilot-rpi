@@ -43,7 +43,11 @@ docs/research/
 !docs/research/
 docs/research/*
 !docs/research/2026-09-28-blueprint-sync-state.md
-docs/decisions/
+!docs/research/2026-11-15-cc-rpi-2.2-sync-state.md
+# Reviewed upstream intake decisions are tracked one file at a time.
+docs/decisions/*
+!docs/decisions/2026-11-14-upstream-security-reference-intake.json
+!docs/decisions/2026-11-15-cc-rpi-2.2-sync-intake.json
 
 # Plans stay local, but the deviation log /implement writes must survive to
 # /validate. The `/*` matters: git cannot re-include a path whose parent
@@ -54,3 +58,7 @@ docs/plans/*
 !docs/plans/2026-09-28-copilot-blueprint-modernization-phases/
 docs/plans/2026-09-28-copilot-blueprint-modernization-phases/*
 !docs/plans/2026-09-28-copilot-blueprint-modernization-phases/phase-*.md
+!docs/plans/2026-11-15-cc-rpi-2.2-sync.md
+!docs/plans/2026-11-15-cc-rpi-2.2-sync-phases/
+docs/plans/2026-11-15-cc-rpi-2.2-sync-phases/*
+!docs/plans/2026-11-15-cc-rpi-2.2-sync-phases/phase-*.md

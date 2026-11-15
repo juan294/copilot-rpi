@@ -272,6 +272,39 @@ class UpstreamCheckerTests(unittest.TestCase):
             self.assertNotEqual(0, result.returncode)
             self.assertIn(f"changed link {relative}", result.stdout)
 
+    def test_repinned_lock_blocks_with_exact_id_when_decision_removed(self):
+        lock = json.loads(LOCK.read_text())
+        self.assertEqual("cec458a9769049c6dd08777768ef718ac7571a30", lock["upstream"]["commit"])
+        self.assertEqual("2.2.0", lock["upstream"]["version"])
+        reviewed = json.loads((ROOT / "docs/decisions/2026-11-15-cc-rpi-2.2-sync-intake.json").read_text())
+        reviewed = {item["id"]: item for item in reviewed["decisions"]}
+        with tempfile.TemporaryDirectory() as tmp:
+            temp = Path(tmp)
+            source = temp / "source"
+            shutil.copytree(ROOT / "upstream/snapshots", source)
+            for relative in ("templates/skills/rpi-plan/SKILL.md", "templates/scripts/rpi-diagnostics.py"):
+                path = source / relative
+                path.write_bytes(path.read_bytes() + b"\nchanged\n")
+            args = ("--compare-source", source, "--content-only", "--lock", LOCK, "--inventory", INVENTORY)
+            missing = run_check(*args, "--check")
+            change_hash = re.search(r"changes SHA256: ([0-9a-f]{64})", missing.stdout).group(1)
+            ids = ["component:resource:diagnostics", "component:skill:rpi-plan"]
+            decisions = temp / "decisions.json"
+
+            def write(selected):
+                decisions.write_text(json.dumps({
+                    "source_sha": "content-only", "changes_sha256": change_hash,
+                    "decisions": [reviewed[identifier] for identifier in selected],
+                }))
+                return run_check(*args, "--decisions", decisions, "--check")
+
+            accepted = write(ids)
+            self.assertEqual(0, accepted.returncode, accepted.stdout)
+            removed = write(ids[:1])
+            self.assertNotEqual(0, removed.returncode)
+            self.assertIn("BLOCKED: missing future intake decision: component:skill:rpi-plan", removed.stdout)
+            self.assertNotIn("BLOCKED: missing future intake decision: component:resource:diagnostics", removed.stdout)
+
     def test_future_intake_empty_diff_is_noop(self):
         with tempfile.TemporaryDirectory() as tmp:
             source = Path(tmp) / "source"
