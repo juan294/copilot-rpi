@@ -30,7 +30,7 @@ Sync with cc-rpi v2.2.0 (`cec458a`): project overlays, a read-only `diagnose` co
 
 ### Fixed
 
-- Refresh the pinned upstream reference archive to remove invented package installation examples. Defer incoming upstream behavior and preserve all native Copilot destinations and their hashes.
+- The pinned upstream reference archive refresh of 2026-11-14 removes invented package installation examples from the reference snapshots. That refresh changed no native Copilot destination.
 
 ### Migration
 

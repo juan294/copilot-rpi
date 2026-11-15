@@ -18,7 +18,8 @@
     {
       "id": "component:resource:diagnostics",
       "disposition": "deferred",
-      "rationale": "Copilot gets its own read-only diagnose command in Phase 2 and does not port the cc-rpi rpi-diagnostics.py module. This decision changes to adapted in Phase 2, when that destination exists."
+      "rationale": "Copilot gets its own read-only diagnose command in Phase 2 and does not port the cc-rpi rpi-diagnostics.py module. This decision changes to adapted in Phase 2, when that destination exists.",
+      "lock_disposition": "adapted"
     },
     {
       "id": "component:resource:distribution-manifest",

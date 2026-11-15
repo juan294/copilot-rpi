@@ -123,6 +123,27 @@ if [[ -f pyproject.toml ]]; then
   DECLARED=$((DECLARED + 1))
 fi
 
+# An npm lockfile repeats the project version twice: the top-level "version"
+# and packages[""].version. Every other "version" line in it belongs to a
+# dependency, so only those two fields are declared locations.
+if [[ -f package-lock.json ]]; then
+  LOCK_FOUND="$(awk '
+    /^  "version": *"/ { print; next }
+    /^    "": *\{/ { root = 1; next }
+    root && /^    }/ { root = 0 }
+    root && /^      "version": *"/ { print }
+  ' package-lock.json | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || true)"
+  LOCK_N="$(printf '%s' "$LOCK_FOUND" | grep -c . || true)"
+  LOCK_BAD="$(printf '%s\n' "$LOCK_FOUND" | grep -v "^${VERSION}$" | grep . || true)"
+  if [[ "$LOCK_N" != 2 || -n "$LOCK_BAD" ]]; then
+    emit_block "npm lock version in package-lock.json says $(printf '%s' "$LOCK_FOUND" | tr '\n' ' ' | sed 's/ *$//') (expected $VERSION twice), $CHANGELOG says $VERSION" \
+      "The top-level version and packages[\"\"].version must match the release; a stale lockfile tells npm the project is a release it is not." \
+      "  npm install --package-lock-only   # or set both root version fields to $VERSION by hand"
+    FAILED=1
+  fi
+  DECLARED=$((DECLARED + 1))
+fi
+
 if grep -qE 'shields\.io/badge/Version-[0-9]+\.[0-9]+\.[0-9]+' README.md 2>/dev/null; then
   check_version "README.md" 'Version[-: ]+v?[0-9]+\.[0-9]+\.[0-9]+|releases/tag/v[0-9]+\.[0-9]+\.[0-9]+' "Version badge" 3
   DECLARED=$((DECLARED + 1))
@@ -143,7 +164,8 @@ fi
 #   tests/test_legacy_migration.py -- actual prior-release sync metadata is a
 #                      historical migration fixture, not a current claim
 #   *.lock, package-lock.json -- dependency versions and ranges in lockfiles
-#                      belong to other packages, not this repo
+#                      belong to other packages; check 1 already requires the
+#                      two package-lock.json root fields to equal $VERSION
 if [[ -n "$PREV_VERSION" ]]; then
   STALE="$(git grep -n -F "$PREV_VERSION" -- \
              ':!CHANGELOG.md' ':!CONTRIBUTING.md' \

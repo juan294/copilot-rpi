@@ -396,6 +396,20 @@ class NativeRunnerTests(unittest.TestCase):
         self.assertEqual(receipt["status"], "blocked")
         self.assertIn("timeout", receipt["recovery"].lower())
 
+    def test_overlay_not_diagnosed_present_blocks_before_positive_inference(self):
+        env = {"COPILOT_BIN": str(FAKE), "RPI_NATIVE_FAKE_MODE": "ok",
+               "RPI_NATIVE_EVIDENCE_DIR": str(self.evidence)}
+        with mock.patch.object(native, "overlay_diagnosis", return_value="stale"), \
+                mock.patch.dict(os.environ, env), mock.patch("sys.stderr"):
+            code = native.main(["--profile", "overlay", "--timeout-seconds", "15"])
+        self.assertEqual(code, 2)
+        receipt = self.receipt("overlay")
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIs(receipt["checks"]["positive_overlay_diagnosed_present"], False)
+        self.assertEqual(receipt["fixture"]["overlay"]["diagnose_status"], "stale")
+        self.assertIn("diagnosed as stale", receipt["recovery"])
+        self.assertNotIn("positive skill", [command["label"] for command in receipt["commands"]])
+
     def test_overlay_observation_requires_marker_after_successful_skill(self):
         marker = "OVERLAY-0123456789abcdef"
         start = json.dumps({"type": "tool.execution_start", "data": {

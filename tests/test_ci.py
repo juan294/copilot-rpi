@@ -45,6 +45,46 @@ class CIContractTests(unittest.TestCase):
             self.assertNotEqual(0, result.returncode)
             self.assertIn("pyproject.toml", result.stdout)
 
+    def test_release_gate_checks_npm_lock_root_versions_but_not_dependency_ranges(self):
+        lock = """{{
+  "name": "fixture",
+  "version": "{root}",
+  "lockfileVersion": 3,
+  "packages": {{
+    "": {{
+      "name": "fixture",
+      "version": "{package}",
+      "devDependencies": {{
+        "dep": "^9.0.0"
+      }}
+    }},
+    "node_modules/dep": {{
+      "version": "9.0.0",
+      "dependencies": {{
+        "other": "^9.0.0"
+      }}
+    }}
+  }}
+}}
+"""
+        cases = {("9.1.0", "9.1.0"): 0, ("9.0.0", "9.1.0"): 1, ("9.1.0", "9.0.0"): 1}
+        for (root, package), expected in cases.items():
+            with self.subTest(root=root, package=package), tempfile.TemporaryDirectory() as directory:
+                project = Path(directory)
+                (project / "templates/scripts").mkdir(parents=True)
+                script = project / "templates/scripts/verify-version.sh"
+                script.write_bytes((ROOT / "templates/scripts/verify-version.sh").read_bytes())
+                (project / "CHANGELOG.md").write_text(
+                    "## [Unreleased]\n\n## [9.1.0] - 2026-11-15\n\n## [9.0.0] - 2026-09-29\n")
+                (project / "package.json").write_text('{\n  "name": "fixture",\n  "version": "9.1.0"\n}\n')
+                (project / "package-lock.json").write_text(lock.format(root=root, package=package))
+                subprocess.run(["git", "init", "-q", project], check=True)
+                subprocess.run(["git", "-C", project, "add", "."], check=True)
+                result = subprocess.run(["bash", script], cwd=project, capture_output=True, text=True)
+                self.assertEqual(expected, result.returncode, result.stdout)
+                if expected:
+                    self.assertIn("package-lock.json", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()
