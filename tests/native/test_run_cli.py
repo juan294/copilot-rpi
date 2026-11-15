@@ -330,6 +330,13 @@ class NativeRunnerTests(unittest.TestCase):
         self.assertIn("--deny-tool=write", positive)
         self.assertNotIn(overlay["marker"], self.overlay_command(receipt, "negative skill")["stdout"])
         self.assertIn(overlay["marker"], self.overlay_command(receipt, "positive skill")["stdout"])
+        positive_run = receipt["runs"]["positive"]
+        self.assertEqual(positive_run["exit"], 0)
+        self.assertIn({"tool": "skill", "arguments": json.dumps({"skill": "rpi-research"})},
+                      positive_run["tool_calls"])
+        self.assertTrue(any(overlay["marker"] in message for message in positive_run["assistant_messages"]))
+        self.assertFalse(any(overlay["marker"] in message
+                             for message in receipt["runs"]["negative"]["assistant_messages"]))
 
     def test_overlay_marker_missing_in_positive_run_fails(self):
         result = self.invoke("overlay", mode="ignore-overlay")

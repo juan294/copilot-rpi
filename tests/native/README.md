@@ -80,6 +80,9 @@ the negative run, gives status `failed` (exit 1). A missing client, a failed
 or unauthenticated run, a missing skill event or a timeout gives `blocked`
 (exit 2). Both fixtures must keep their product files and local remotes
 unchanged.
+Because each command's stdout excerpt is limited to 4000 characters, the
+overlay receipt also keeps `runs.<negative|positive>` with the exit, up to 40
+sanitized tool calls and up to 10 sanitized assistant messages.
 
 Each run writes `.rpi/local/copilot/native/<profile>-receipt.json` by default,
 so the two required profile results survive sequential runs. Set

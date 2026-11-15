@@ -373,6 +373,19 @@ OVERLAY_PROMPT = ("/rpi-research First invoke the skill tool with skill name rpi
                   "Return a concise research result in stdout. Do not create or modify files.")
 
 
+def run_summary(output, env, code):
+    """Keep bounded, sanitized tool calls and answers beyond the 4000-character stdout excerpt."""
+    tools, messages = [], []
+    for event, data in json_events(output):
+        if event.get("type") == "tool.execution_start" and len(tools) < 40:
+            arguments = data.get("arguments")
+            text = arguments if isinstance(arguments, str) else json.dumps(arguments, sort_keys=True)
+            tools.append({"tool": sanitized(str(data.get("toolName")), env), "arguments": sanitized(text, env, 300)})
+        elif event.get("type") == "assistant.message" and len(messages) < 10:
+            messages.append(sanitized(str(data.get("content", "")), env, 2000))
+    return {"exit": code, "tool_calls": tools, "assistant_messages": messages}
+
+
 def overlay_run(name, base, binary, marker, overlay_marker, receipt):
     """Run one isolated overlay fixture and return its observation."""
     root = base / name
@@ -407,6 +420,7 @@ def overlay_run(name, base, binary, marker, overlay_marker, receipt):
                                       deadline=time.monotonic() + receipt["timeout_seconds"],
                                       commands=receipt["commands"], label=f"{name} skill")
     seen = overlay_observation(output, marker, overlay_marker)
+    receipt.setdefault("runs", {})[name] = run_summary(output, env, code)
     checks[name + "_skill_invoked"] = seen["invoked"]
     checks[name + "_answer_after_invocation"] = seen["answer_after"]
     if code:
