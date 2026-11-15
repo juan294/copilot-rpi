@@ -63,7 +63,7 @@ Find EVERY report and agent failure. No assumptions about which agents ran or ho
      --json number,title,headRefName,mergeable,mergeStateStatus,statusCheckRollup,labels
    ```
 
-   For each PR, classify the update type from the title (e.g., `Bump foo from 1.2.3 to 1.2.4` -> patch; `1.2.x -> 1.3.0` -> minor; `1.x -> 2.0.0` -> major) and the CI status:
+   For each PR, classify the update type from the title (e.g., `Bump foo from 1.2.3 to 1.2.4` -> patch; `1.2.x -> 1.3.0` -> minor; `4.x -> 5.0.0` -> major) and the CI status:
 
    - **patch + CI green** -> ready-to-merge (auto)
    - **minor + CI green** -> ready-to-merge (auto)

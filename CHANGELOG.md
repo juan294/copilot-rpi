@@ -6,11 +6,52 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-11-15
+
+Sync with cc-rpi v2.2.0 (`cec458a`): project overlays, a read-only `diagnose` command and proportional release verification, adapted to Copilot.
+
+### Added
+
+- **Project overlays.** Each of the 16 workflow skills has a `## Project overlay` section and reads `.rpi/project/<skill>.md` when it exists. An overlay adds the project's procedure and checks and can make a workflow stricter. It cannot grant push, tag, merge, deployment or publication authority, and it cannot relax a gate. Other procedure changes go under `## Declared overrides`, with the quoted stock rule, the reason and the owner decision. The lifecycle skills (`rpi-adopt`, `rpi-bootstrap`, `rpi-detach`, `rpi-update`) have no overlay. See [project overlays](docs/project-overlay.md).
+- **`diagnose`.** `rpi-lifecycle.py diagnose --target <dir>`, also through `rpi-distribution.py`, prints a JSON report of the installation and of each overlay (`present`, `stale`, `inert` or `invalid`, with a `fix` and, when known, the `header_line` to write). It is read-only, always exits 0 and never prints overlay text. `rpi-status` runs it.
+- **Authored hash.** The render receipt records `authored_sha256`, the SHA-256 of the authored `templates/skills/<skill>/SKILL.md`, on each skill `SKILL.md` record and prompt wrapper record. The installation manifest copies it. An installation without it stays healthy until its next real update records it.
+- **Reserved path.** No package destination can name `.rpi/project`, `.rpi/copilot` or `.rpi/local/copilot`, or anything below them, in any letter case. Plan, apply, check, rollback and detach leave `.rpi/project` byte-identical.
+- **Resource-lifecycle instruction.** A new `resource-lifecycle.instructions.md` covers Docker, local stacks, database tests and task services: prove ownership before any stop or removal, finish disposable lifecycles within authorization, preserve shared and recovery data, and report retained resources. The supabase instruction and the root `AGENTS.md` template point to it, and `rpi-implement` and `rpi-remediate` follow it before removing a worktree.
+- **Native overlay probe.** `tests/native/run_cli.py --profile overlay` runs the same `/rpi-research` prompt against a fixture without an overlay and then against one with `.rpi/project/rpi-research.md`. The receipt is `passed`, `failed` or `blocked`.
+
+### Changed
+
+- **Proportional release verification.** Wave A's truthful local gate runs for every release. Wave B exploratory charters and Waves C-H run only when the project's release profile selects them, with one Wave B round per candidate. Every finding has a severity from S1 to S4. Only an S1 or S2 finding, an unclassified finding or a skipped high-risk area blocks publication; an S3 or S4 finding can be an owner-approved accepted known issue, recorded with its severity and reason. This applies to `rpi-release`, `rpi-explore-release`, `rpi-remediate`, `rpi-pre-launch` and the bundled release playbooks.
+- **Wave B selection.** `rpi-adopt` and `rpi-bootstrap` select Wave B in the release profile only for code that runs unattended or destructively on users' machines.
+- **Stock rules.** `rpi-implement` commits the deviation notes with the phase and cites plans by file name. `rpi-triage` treats an old report as an agent failure, and an error-tracker, log or audit query that did not run sets the status to at least YELLOW. `rpi-validate` inspects the resource-lifecycle disposition of allocated services. `rpi-status` runs `diagnose` and reports `project_overlays`.
+- **Package guidance.** The root `AGENTS.md` template says to verify a package's exact name and publisher against official documentation before installing it, and never to install a placeholder from an example.
+- **Runtime wording.** `README.md` and `GUIDE.md` now say that an installed target holds the manifest and content-addressed baselines under `.rpi/copilot/`, and that the runtime stays in the rendered package.
+- **Upstream intake** is pinned to cc-rpi v2.2.0 (`cec458a`), with a reviewed decision for every changed component in `docs/decisions/2026-11-15-cc-rpi-2.2-sync-intake.json`.
+
 ### Fixed
 
-- Refresh the pinned upstream reference archive to remove invented package
-  installation examples. Defer incoming upstream behavior and preserve all
-  native Copilot destinations and their hashes.
+- Refresh the pinned upstream reference archive to remove invented package installation examples. Defer incoming upstream behavior and preserve all native Copilot destinations and their hashes.
+
+### Migration
+
+- Render the 2.1.0 package for your profile, review the lifecycle plan, apply it and run `check`, as in [the v2 guide](docs/migrations/v2.md). Then run `diagnose` against the target.
+- Put project additions to a workflow skill in `.rpi/project/<skill>.md`, not in the managed skill copy. Start the file with the `header_line` that `diagnose` prints. After a later update, a `stale` status means the stock skill changed: review the overlay and write the new header.
+
+### Not taken in from cc-rpi v2.2.0
+
+- The cc-rpi lifecycle-engine repair series (WB-L, WB2-L, WB2R3-L) and the configuration, distribution and package engine deltas: deferred. Copilot keeps its own implementations.
+- The cc-rpi policy-hook, pre-push and `guard-bash` deltas: inapplicable. The Copilot hook and pre-push gate already have the cc-rpi 2.1 semantics.
+- The cc-rpi diagnostics module: only the installation and overlay report is adapted. Harness, model, hook-trust and plugin-route diagnostics are Claude and Codex specific.
+- The cc-rpi launcher and the Codex package and marketplace configurations: inapplicable. They have no Copilot installation target; Copilot has `rpi-automation.py` for scheduled jobs.
+- The cc-rpi domain skills and rules: deferred, pending applicability review.
+
+### Retirement review
+
+- No rule or error ID was retired in this release.
+
+### Known issues
+
+- `rpi-hook.py install --activate` needs `.rpi/copilot/runtime/rpi-hook.py` in the target, but apply does not install runtime files, so activation after a real install exits 2 with "The packaged hook runtime is missing". This defect exists since 2.0.0 and awaits an owner decision.
 
 ## [2.0.0] - 2026-09-29
 

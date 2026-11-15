@@ -142,10 +142,13 @@ fi
 #                      shipped in
 #   tests/test_legacy_migration.py -- actual prior-release sync metadata is a
 #                      historical migration fixture, not a current claim
+#   *.lock, package-lock.json -- dependency versions and ranges in lockfiles
+#                      belong to other packages, not this repo
 if [[ -n "$PREV_VERSION" ]]; then
   STALE="$(git grep -n -F "$PREV_VERSION" -- \
              ':!CHANGELOG.md' ':!CONTRIBUTING.md' \
-             ':!docs/' ':!*.lock' ':!tests/test_legacy_migration.py' 2>/dev/null || true)"
+             ':!docs/' ':!*.lock' ':!package-lock.json' \
+             ':!tests/test_legacy_migration.py' 2>/dev/null || true)"
   if [[ -n "$STALE" ]]; then
     emit_block "Previous version $PREV_VERSION still appears outside $CHANGELOG:
 $(printf '%s' "$STALE" | sed 's/^/  /')" \

@@ -665,8 +665,8 @@
       "disposition": "adapted",
       "rationale": "Pinned upstream distribution contract has a Copilot-owned Phase 2 implementation. Intake 2026-11-15 (cc-rpi v2.2.0): Copilot keeps its own component manifest; the entries for the overlay, authored hash and diagnose changes are content adapted in Phase 2 or 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1.",
       "destination": "templates/distribution.json",
-      "destination_sha256": "040ed5c37bfe50f8bfe66c2e5a68c4f91a0a3c81d812c8e65730b9871dcadda8",
-      "adaptation_note": "Component identity and resource declarations adapted to Copilot skills, agents, Local wrappers and optional examples. Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md declares the instruction:resource-lifecycle component for all three profiles; Copilot keeps its own component manifest."
+      "destination_sha256": "cd0670a5ee2023dd1bf6ab7f2fc53faa4ad600ecb27db4f6fd996d40ad1e6827",
+      "adaptation_note": "Component identity and resource declarations adapted to Copilot skills, agents, Local wrappers and optional examples. Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md declares the instruction:resource-lifecycle component for all three profiles, and Phase 4 sets the Copilot product version to 2.1.0; Copilot keeps its own component manifest."
     },
     {
       "id": "resource:claude-adapter",
