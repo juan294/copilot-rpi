@@ -16,7 +16,7 @@
       "disposition": "adapted",
       "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1. Intake 2026-11-15 (cc-rpi v2.2.0): Adapt the cc-rpi workflow-text changes deferred on 2026-11-14 (proportional release verification with S1-S4 severities, Wave B selection, resource-lifecycle and package guidance as applicable) in Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1.",
       "destination": "templates/skills/rpi-adopt",
-      "destination_sha256": "487d795a5dc0d1142481e8bec9384da93194da77918fcb386554c1f2e1ca664c",
+      "destination_sha256": "eb9b5e63a161197cb06abe36af6617da0b97cc77ed5271dab90b30ec35a00740",
       "adaptation_note": "Copilot project skill location and explicit adopter lifecycle authority. Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md adapts cc-rpi changes through cec458a9769049c6dd08777768ef718ac7571a30: Wave B is selected only for code that runs unattended or destructively on users' machines, one round per candidate; the cc-rpi v2.2.0 playbook copy. No overlay section: lifecycle skills install the overlay readers. Copilot 2.2.0 retires the process-errors skill and documents --retired-component; local change, no upstream intake."
     },
     {
@@ -49,7 +49,7 @@
       "disposition": "adapted",
       "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1. Intake 2026-11-15 (cc-rpi v2.2.0): Adapt the cc-rpi workflow-text changes deferred on 2026-11-14 (proportional release verification with S1-S4 severities, Wave B selection, resource-lifecycle and package guidance as applicable) in Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The Copilot destination and its hash are unchanged in Phase 1.",
       "destination": "templates/skills/rpi-bootstrap",
-      "destination_sha256": "12291247ad73351be2d305d5daa79a9628a28237a265f278c389c0989ef61f2a",
+      "destination_sha256": "d43a5dfbb1213c6867f78ce56959bee5006da57186c0e42934d623e2afe449ec",
       "adaptation_note": "Copilot project skill location and explicit bootstrap lifecycle authority. Phase 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md adapts cc-rpi changes through cec458a9769049c6dd08777768ef718ac7571a30: Wave B is selected in the release profile only for code that runs unattended or destructively on users' machines, one round per candidate; the cc-rpi v2.2.0 playbook copy. No overlay section: lifecycle skills install the overlay readers. Copilot 2.2.0 retires the process-errors skill and documents --retired-component; local change, no upstream intake."
     },
     {
@@ -71,7 +71,7 @@
       "disposition": "adapted",
       "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1.",
       "destination": "templates/skills/rpi-detach",
-      "destination_sha256": "8a8bcbe69a2e0298d4fa353f79a313015cdaf8f111c240c6dba00a3dc8c01029",
+      "destination_sha256": "b731d164f2dbefd3324f14fb40eef24e4b59cf11a5d245c7796553c736770d7b",
       "adaptation_note": "Copilot project skill location and owner-preserving detach contract. Post-plan fix (owner-approved 2026-11-15): deactivate the recorded hook and pre-push gate before apply; Copilot-specific. Copilot 2.2.0 retires the process-errors skill and documents --retired-component; local change, no upstream intake."
     },
     {
@@ -203,7 +203,7 @@
       "disposition": "adapted",
       "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1.",
       "destination": "templates/skills/rpi-update",
-      "destination_sha256": "f748f454dfb589d91a4cd248d04dc64b05a20ce83241d82b41ce69cf5f3895e8",
+      "destination_sha256": "f9443c8d4a99ccffa2a4e7802f0e1c86f40996594de695c1d74c007cf0641270",
       "adaptation_note": "Copilot project skill location and owner-preserving update contract. Copilot 2.2.0 retires the process-errors skill and documents --retired-component; local change, no upstream intake."
     },
     {
@@ -544,7 +544,7 @@
       "disposition": "adapted",
       "rationale": "Pinned upstream read-only diagnostics are adapted as the Copilot lifecycle diagnose command. Intake 2026-11-15 (cc-rpi v2.2.0): Copilot does not port the cc-rpi rpi-diagnostics.py module; Phase 2 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md adds its installation and project_overlays reports to the lifecycle engine.",
       "destination": "templates/scripts/rpi-lifecycle.py",
-      "destination_sha256": "2358bc9ab38eba7979cb7bd5aaa91822515b01ca66c90e2b4bdcb425146be97b",
+      "destination_sha256": "5ee5cac335725dc69f3a152b572d6d705dc92b6d2cb84a45b8fc26a16ea23204",
       "adaptation_note": "Only the installation summary and project_overlays report are adapted, as rpi-lifecycle.py diagnose with JSON output and exit 0. It avoids the cc-rpi 2.2.0 known issues: symlinks are not followed, names are lowercase only, lifecycle-skill names are invalid, a directory named *.md is invalid, reads stop at 64 KiB, every item has the same fields and malformed declared overrides are named. Harness, model, hook-trust and plugin-route diagnostics are Claude and Codex specific and are not ported. Copilot 2.2.0 retires the process-errors skill and documents --retired-component; local change, no upstream intake."
     },
     {
@@ -632,7 +632,7 @@
       "disposition": "adapted",
       "rationale": "Pinned upstream lifecycle and configuration algorithms are adapted for the Copilot project-local ownership engine. Intake 2026-11-15 (cc-rpi v2.2.0): Adapt the .rpi/project reserved path and the per-skill authored hash only; content adapted in Phase 2 or 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The cc-rpi WB-L, WB2-L and WB2R3-L lifecycle repair series stays deferred; Copilot keeps its own recovery implementation. Phase 2 adapted the reserved path, the authored hash and the diagnose command into this destination.",
       "destination": "templates/scripts/rpi-lifecycle.py",
-      "destination_sha256": "2358bc9ab38eba7979cb7bd5aaa91822515b01ca66c90e2b4bdcb425146be97b",
+      "destination_sha256": "5ee5cac335725dc69f3a152b572d6d705dc92b6d2cb84a45b8fc26a16ea23204",
       "adaptation_note": "Adapted for verified standalone Copilot render packages, namespaced ownership and recovery, exact historical-byte migration, safe state validation and JSONC field reconciliation. Phase 2 (2026-11-15) adapts the cc-rpi v2.2.0 .rpi/project reserved path (case-insensitive, with both Copilot state roots), the per-entry authored_sha256 copied from the render receipt, and the read-only diagnose command; the cc-rpi WB-L, WB2-L and WB2R3-L repair series stays deferred. Copilot 2.2.0 retires the process-errors skill and documents --retired-component; local change, no upstream intake."
     },
     {
