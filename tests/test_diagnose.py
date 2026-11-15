@@ -389,7 +389,9 @@ class DiagnoseTest(unittest.TestCase):
                 self.assertEqual(1, text.count("\n## Project overlay\n"))
                 headings = [line for line in text.splitlines() if line.startswith("## ")]
                 self.assertEqual("## Project overlay", headings[0])
-                self.assertIn(f"If `.rpi/project/{name}.md` exists, read it completely before you start", text)
+                self.assertIn(f"\n## Project overlay\n\nOpen `.rpi/project/{name}.md` directly by that path "
+                              "(a file search or glob can skip the hidden `.rpi` directory). "
+                              "If it exists, read it completely before you start", text)
                 self.assertIn("It cannot relax a gate", text)
 
 

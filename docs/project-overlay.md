@@ -6,7 +6,7 @@ A project overlay holds one project's additions to one Copilot RPI workflow skil
 
 - One file per workflow skill: `.rpi/project/<skill>.md`, for example `.rpi/project/rpi-release.md`.
 - The project owns the file. Track it in Git. Plan, apply, check, detach and rollback never read, write or delete anything under `.rpi/project/`. No package destination can name `.rpi/project`, `.rpi/copilot` or `.rpi/local/copilot`, or anything below them, in any letter case.
-- From Copilot RPI 2.1.0, each of the 16 workflow skills has a `## Project overlay` section that tells the agent to read the file when it exists: `rpi-assess`, `rpi-brainstorm`, `rpi-describe-pr`, `rpi-explore-release`, `rpi-fix-ci`, `rpi-implement`, `rpi-plan`, `rpi-pre-launch`, `rpi-release`, `rpi-remediate`, `rpi-research`, `rpi-status`, `rpi-tool-design`, `rpi-triage`, `rpi-update-docs` and `rpi-validate`.
+- From Copilot RPI 2.1.0, each of the 16 workflow skills has a `## Project overlay` section that tells the agent to open the file by its exact path and read it when it exists (a file search can skip the hidden `.rpi` directory): `rpi-assess`, `rpi-brainstorm`, `rpi-describe-pr`, `rpi-explore-release`, `rpi-fix-ci`, `rpi-implement`, `rpi-plan`, `rpi-pre-launch`, `rpi-release`, `rpi-remediate`, `rpi-research`, `rpi-status`, `rpi-tool-design`, `rpi-triage`, `rpi-update-docs` and `rpi-validate`.
 - The four lifecycle skills (`rpi-adopt`, `rpi-bootstrap`, `rpi-detach`, `rpi-update`) have no overlay. Other skills, such as `rpi-debug` and `rpi-quality-review`, do not read one either.
 
 ## Profiles
