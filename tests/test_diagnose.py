@@ -206,6 +206,8 @@ class DiagnoseTest(unittest.TestCase):
         self.overlay("rpi-plan.md", (header("rpi-plan", sha(source)[:12]) + "\n").encode())
         self.overlay(".DS_Store", b"\0finder")
         self.overlay(".rpi-plan.md.swp", b"swap")
+        self.overlay(".rpi-plan.md", (header("rpi-plan", sha(source)[:12]) + "\n").encode())
+        self.overlay("._rpi-plan.md", b"\0\5\26\7AppleDouble")
         self.overlay("README.txt", b"notes")
         (self.target / ".rpi/project/archive").mkdir()
         report = self.diagnose()
@@ -309,6 +311,51 @@ class DiagnoseTest(unittest.TestCase):
         missing = self.diagnose(target=self.base / "no such project")
         self.assertEqual("unreadable", missing["installation"]["status"])
         self.assertEqual([], missing["project_overlays"])
+
+    def test_deeply_nested_manifest_still_exits_zero(self):
+        manifest = self.target / ".rpi/copilot/manifest.json"
+        manifest.parent.mkdir(parents=True)
+        manifest.write_text("[" * 200000 + "]" * 200000)
+        installation = self.diagnose()["installation"]
+        self.assertEqual("unreadable", installation["status"])
+        self.assertIn(" check ", installation["fix"])
+
+    def test_unexpected_error_prints_minimal_report_and_exits_zero(self):
+        import contextlib
+        import importlib.util
+        import io
+        spec = importlib.util.spec_from_file_location("diagnose_guard", LIFECYCLE)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        def broken(target):
+            raise RuntimeError("SECRET-MARKER-guard")
+        module.diagnose = broken
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            code = module.command(["diagnose", "--target", str(self.target)])
+        self.assertEqual(0, code)
+        report = json.loads(output.getvalue())
+        self.assertEqual({"schema_version", "target", "installation", "project_overlays"}, set(report))
+        self.assertEqual(INSTALLATION_FIELDS, set(report["installation"]))
+        self.assertEqual("unreadable", report["installation"]["status"])
+        self.assertIn("RuntimeError", report["installation"]["reason"])
+        self.assertNotIn("SECRET-MARKER-guard", output.getvalue())
+        self.assertIn(" check ", report["installation"]["fix"])
+        self.assertEqual([], report["project_overlays"])
+
+    def test_symlinked_rpi_directory_names_the_symlink(self):
+        outside = self.base / "outside state"
+        (outside / "project").mkdir(parents=True)
+        (outside / "project/rpi-plan.md").write_text(header("rpi-plan", "0" * 12) + "\n")
+        (self.target / ".rpi").symlink_to(outside, target_is_directory=True)
+        items = self.diagnose()["project_overlays"]
+        self.assertEqual([".rpi/project"], [item["file"] for item in items])
+        link = str(self.target.resolve() / ".rpi")
+        self.assertEqual("invalid", items[0]["status"])
+        self.assertIn("symlink", items[0]["reason"])
+        self.assertIn(link, items[0]["reason"])
+        self.assertIn(link, items[0]["fix"])
 
     def test_distribution_forwards_diagnose_without_pyyaml(self):
         source = skill_source("rpi-plan")

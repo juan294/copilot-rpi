@@ -869,7 +869,7 @@ def installation_report(target, state):
     check_command = engine_command('check', '--target', target) + ' --package "$package_dir" --profile "$selected_profile"'
     try:
         manifest = load_state(state)
-    except (OSError, ValueError, KeyError, TypeError) as exc:
+    except (OSError, ValueError, KeyError, TypeError, RecursionError) as exc:
         report.update(status='unreadable', reason=str(exc),
                       fix='repair or restore ' + report['manifest'] + ', then run ' + check_command)
         return report, None
@@ -987,9 +987,9 @@ def overlay_item(target, entry, manifest):
 
 def project_overlays(target, manifest):
     """One item per .rpi/project/*.md with a fixed field set; dotfiles and other names are skipped."""
-    def directory_problem(reason):
+    def directory_problem(reason, path=PROJECT):
         return [{'file': PROJECT, 'skill': None, 'status': 'invalid', 'reason': reason,
-                 'fix': 'make ' + PROJECT + ' a regular directory inside the project, not a symlink',
+                 'fix': 'make ' + str(path) + ' a regular directory inside the project, not a symlink',
                  'written_against': None, 'current': None, 'header_line': None, 'overrides': None}]
     try:
         directory = bound_path(target, PROJECT)
@@ -1001,7 +1001,10 @@ def project_overlays(target, manifest):
                               key=lambda entry: entry.name)
     except FileNotFoundError:
         return []
-    except (Conflict, OSError) as exc:
+    except Conflict as exc:
+        # bound_path names only the offending parent, for example a symlinked .rpi.
+        return directory_problem(str(exc), str(exc).partition(': ')[2] or PROJECT)
+    except OSError as exc:
         return directory_problem('unreadable: ' + type(exc).__name__)
     items = []
     for entry in selected:
@@ -1058,7 +1061,16 @@ def command(argv=None):
     diagnose_parser.add_argument('--target', type=Path, required=True)
     args = parser.parse_args(argv)
     if args.command == 'diagnose':
-        print(json.dumps(diagnose(args.target), sort_keys=True))
+        try:
+            report = diagnose(args.target)
+        except Exception as exc:  # The contract is exit 0 with a report; never echo exception text here.
+            report = {'schema_version': 1, 'target': str(args.target.absolute()), 'project_overlays': [],
+                      'installation': {'status': 'unreadable', 'manifest': STATE + '/manifest.json', 'profile': None,
+                                       'source_version': None, 'drift': [],
+                                       'reason': 'diagnose stopped on ' + type(exc).__name__,
+                                       'fix': 'run ' + engine_command('check', '--target', args.target.absolute()) +
+                                              ' --package "$package_dir" --profile "$selected_profile"'}}
+        print(json.dumps(report, sort_keys=True))
         return 0
     try:
         if args.command == 'apply':

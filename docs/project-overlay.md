@@ -67,6 +67,8 @@ The first status that applies is reported, in this order:
 | `stale` | The stock skill changed since the overlay was reviewed. | Review the overlay against the installed skill, then replace its first line with `header_line`. |
 | `present` | The header matches the installed skill. | None. |
 
+A problem in `## Declared overrides` adds a `reason` and a `fix` without changing the status, so a `present` or `stale` item can carry both. Two problems are reported: a malformed entry (`declared override <n> lacks: ...`, naming the missing parts) and a section with no entries (`the ## Declared overrides section has no entries; remove it or add an entry`).
+
 ## Limits
 
 - Files whose names start with a dot are skipped, and so are names that do not end in `.md`. A directory named like an overlay is `invalid`.
