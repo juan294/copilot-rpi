@@ -53,6 +53,7 @@ Use `/rpi-research`, `/rpi-plan`, `/rpi-implement` and `/rpi-validate` in a
 qualified client. Native `/plan` and `/status` are distinct commands. The
 [guide](GUIDE.md) explains the workflow; [methodology](methodology/README.md)
 contains the full process. [Examples](examples/README.md) show its artifacts.
+A project keeps its own additions to a workflow skill in a [project overlay](docs/project-overlay.md) under `.rpi/project/`, which the package never owns.
 
 The package does not activate hooks, schedulers, MCP servers, cloud jobs or
 global Copilot settings. Optional controls and their proof requirements are

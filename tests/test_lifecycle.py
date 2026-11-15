@@ -1,7 +1,9 @@
 """Filesystem contract for the standalone Copilot lifecycle runtime."""
 
 import hashlib
+import importlib.util
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -12,6 +14,23 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNTIME = ROOT / "templates/scripts/rpi-lifecycle.py"
+
+
+def overlay_tree(root):
+    """Bytes, link targets, modes and mtimes of a project-owned tree, without following links."""
+    tree = {}
+    for directory, names, files in os.walk(root, followlinks=False):
+        for name in names + files:
+            path = Path(directory) / name
+            info = path.lstat()
+            relative = path.relative_to(root).as_posix()
+            if path.is_symlink():
+                tree[relative] = ("link", os.readlink(path), info.st_mtime_ns)
+            elif path.is_dir():
+                tree[relative] = ("dir", info.st_mode, info.st_mtime_ns)
+            else:
+                tree[relative] = ("file", path.read_bytes(), info.st_mode, info.st_mtime_ns)
+    return tree
 
 
 def encoded_json(value):
@@ -30,15 +49,18 @@ class LifecycleTest(unittest.TestCase):
         self.plan_path = self.root / "review.json"
         self.set_package(b"---\nname: hello\ndescription: Hello\n---\n\noriginal\nline two\nline three\nline four\nfooter\n")
 
-    def set_package(self, content):
+    def set_package(self, content, authored=None, extra=()):
         destination = ".github/skills/hello/SKILL.md"
         file = self.package / destination
         file.parent.mkdir(parents=True, exist_ok=True)
         file.write_bytes(content)
+        record = {"path": destination, "component": "skill:hello", "sha256": hashlib.sha256(content).hexdigest()}
+        if authored is not None:
+            record["authored_sha256"] = authored
         receipt = {
             "schema_version": 1, "source_version": "1.0.0", "profile": "cli",
             "managed_root_bytes": 0,
-            "files": [{"path": destination, "component": "skill:hello", "sha256": hashlib.sha256(content).hexdigest()}],
+            "files": [record, *extra],
             "preserved": [],
         }
         output = self.package / ".rpi/copilot-render.json"
@@ -317,6 +339,111 @@ class LifecycleTest(unittest.TestCase):
         self.assertFalse((self.target / ".github/skills/hello/SKILL.md").exists())
         (transactions / "fake").unlink()
         self.assertEqual("ready", self.plan()["status"])
+
+
+    def manifest(self):
+        return json.loads((self.target / ".rpi/copilot/manifest.json").read_text())
+
+    def test_manifest_copies_authored_hash_and_a_missing_hash_stays_healthy(self):
+        content = (self.package / ".github/skills/hello/SKILL.md").read_bytes()
+        self.set_package(content, authored=hashlib.sha256(content).hexdigest())
+        self.plan()
+        self.apply()
+        entry = self.manifest()["entries"][0]
+        self.assertEqual(hashlib.sha256(content).hexdigest(), entry["authored_sha256"])
+        state = self.manifest()
+        del state["entries"][0]["authored_sha256"]
+        (self.target / ".rpi/copilot/manifest.json").write_bytes(encoded_json(state))
+        healthy = self.run_cli("check", "--package", self.package, "--target", self.target, "--profile", "cli")
+        self.assertEqual("healthy", healthy["status"])
+        self.plan_path.unlink()
+        self.assertEqual("noop", self.plan()["status"])
+        self.assertNotIn("authored_sha256", self.manifest()["entries"][0])
+        updated = content.replace(b"original", b"upstream")
+        self.set_package(updated, authored=hashlib.sha256(updated).hexdigest())
+        self.plan_path.unlink()
+        self.assertEqual("ready", self.plan()["status"])
+        self.apply()
+        self.assertEqual(hashlib.sha256(updated).hexdigest(), self.manifest()["entries"][0]["authored_sha256"])
+
+    def test_malformed_authored_hash_is_rejected_in_receipt_and_manifest(self):
+        content = (self.package / ".github/skills/hello/SKILL.md").read_bytes()
+        good = hashlib.sha256(content).hexdigest()
+        for bad in ("A" * 64, good[:12], 7):
+            self.set_package(content, authored=bad)
+            refused = self.plan(expected=2)
+            self.assertIn("invalid package file record", refused.stderr)
+            self.assertFalse((self.target / ".github/skills/hello/SKILL.md").exists())
+        resource = self.package / ".github/skills/hello/notes.md"
+        resource.write_bytes(b"notes\n")
+        self.set_package(content, authored=good, extra=[{
+            "path": ".github/skills/hello/notes.md", "component": "skill:hello",
+            "sha256": hashlib.sha256(b"notes\n").hexdigest(), "authored_sha256": good}])
+        self.assertIn("invalid package file record", self.plan(expected=2).stderr)
+        self.set_package(content, authored=good)
+        self.assertEqual("ready", self.plan()["status"])
+        self.apply()
+        manifest_path = self.target / ".rpi/copilot/manifest.json"
+        valid = manifest_path.read_bytes()
+        for bad in ("g" * 64, good.upper(), None):
+            state = json.loads(valid)
+            state["entries"][0]["authored_sha256"] = bad
+            manifest_path.write_bytes(encoded_json(state))
+            refused = self.run_cli("check", "--package", self.package, "--target", self.target, expected=2)
+            self.assertIn("invalid Copilot ownership entry", refused.stderr)
+        manifest_path.write_bytes(valid)
+        self.assertEqual("healthy", self.run_cli("check", "--package", self.package, "--target", self.target)["status"])
+
+    def test_reserved_project_and_state_destinations_are_refused(self):
+        content = (self.package / ".github/skills/hello/SKILL.md").read_bytes()
+        for reserved in (".rpi/project/x.md", ".RPI/Project/x.md", ".rpi/project", ".rpi/Copilot/manifest.json",
+                         ".Rpi/Local/Copilot/lock"):
+            data = b"reserved\n"
+            path = self.package / reserved
+            if not path.is_dir():
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(data)
+            self.set_package(content, extra=[{"path": reserved, "component": "skill:hello",
+                                              "sha256": hashlib.sha256(data).hexdigest()}])
+            refused = self.plan(expected=2)
+            self.assertIn("package cannot own project or Copilot state: " + reserved, refused.stderr)
+            self.assertFalse((self.target / ".rpi/project").exists())
+        spec = importlib.util.spec_from_file_location("lifecycle_reserved", RUNTIME)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        for reserved in (".rpi/project", ".RPI/PROJECT/a/b.md", ".rpi/copilot", ".rpi/local/copilot/x"):
+            with self.assertRaisesRegex(ValueError, "package cannot own project or Copilot state"):
+                module.safe_relative(reserved)
+        for allowed in (".rpi/projects/x.md", ".github/skills/project/SKILL.md", ".rpi/local/other"):
+            self.assertEqual(allowed, module.safe_relative(allowed))
+        self.set_package(content)
+        self.assertEqual("ready", self.plan()["status"])
+
+    def test_lifecycle_operations_leave_project_overlays_byte_identical(self):
+        project = self.target / ".rpi/project"
+        (project / "nested").mkdir(parents=True)
+        (project / "rpi-plan.md").write_bytes(b"<!-- rpi-overlay: skill=rpi-plan; written-against=000000000000 -->\r\n# Plan\n")
+        (project / "nested/notes.md").write_bytes(b"owner notes\n")
+        (project / "rpi-research.md").symlink_to("nested/notes.md")
+        (project / "nested/dangling.md").symlink_to("../../missing-overlay.md")
+        before = overlay_tree(project)
+        self.plan("install")
+        self.assertEqual(before, overlay_tree(project))
+        applied = self.apply()
+        self.assertEqual(before, overlay_tree(project))
+        self.assertEqual("healthy", self.run_cli("check", "--package", self.package, "--target", self.target)["status"])
+        self.assertEqual(before, overlay_tree(project))
+        self.assertEqual("rolled-back", self.run_cli("rollback", "--journal", applied["journal"])["status"])
+        self.assertEqual(before, overlay_tree(project))
+        self.plan_path.unlink()
+        self.plan()
+        self.apply()
+        self.plan_path.unlink()
+        self.assertEqual("ready", self.plan("detach")["status"])
+        self.assertEqual(before, overlay_tree(project))
+        self.apply()
+        self.assertFalse((self.target / ".github/skills/hello/SKILL.md").exists())
+        self.assertEqual(before, overlay_tree(project))
 
 
 if __name__ == "__main__":

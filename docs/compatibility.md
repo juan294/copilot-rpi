@@ -24,7 +24,8 @@ substitution on 2026-09-29. This result does not qualify other client builds.
 The direct-install artifact is the rendered `package_dir` directory. It
 contains `.rpi/copilot-render.json`, a receipt listing each file, component
 and SHA-256 hash, plus `.rpi/copilot/runtime/` with the standalone lifecycle
-entrypoint. `plan --package` verifies those bytes and that the receipt profile
+entrypoint.
+Each skill `SKILL.md` record and prompt wrapper record also carries `authored_sha256`, the SHA-256 of the authored `templates/skills/<skill>/SKILL.md`, which [project overlays](project-overlay.md) compare against. `plan --package` verifies those bytes and that the receipt profile
 matches `--profile`. Keep the whole rendered directory together; a copied
 skill directory or runtime script alone is not an install package. The
 selected profile is also recorded in the target installation manifest at

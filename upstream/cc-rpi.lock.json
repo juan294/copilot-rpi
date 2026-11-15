@@ -541,11 +541,11 @@
       "kind": "resource",
       "source": "templates/scripts/rpi-diagnostics.py",
       "source_sha256": "bd4b44e765e87075a3eb71ec57bcd7f343f8e5e632c3a3e8bc4cb62479cc22d6",
-      "disposition": "deferred",
-      "rationale": "Portable resource or lifecycle algorithm awaits the phase that adapts it for Copilot. Intake 2026-11-15 (cc-rpi v2.2.0): Copilot gets its own read-only diagnose command in Phase 2 and does not port the cc-rpi rpi-diagnostics.py module. This decision changes to adapted in Phase 2, when that destination exists.",
-      "destination": null,
-      "destination_sha256": null,
-      "adaptation_note": null
+      "disposition": "adapted",
+      "rationale": "Pinned upstream read-only diagnostics are adapted as the Copilot lifecycle diagnose command. Intake 2026-11-15 (cc-rpi v2.2.0): Copilot does not port the cc-rpi rpi-diagnostics.py module; Phase 2 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md adds its installation and project_overlays reports to the lifecycle engine.",
+      "destination": "templates/scripts/rpi-lifecycle.py",
+      "destination_sha256": "b92eea3625b4794719fed2816c78a1311f3b01f4084c4e6738235f03102aa33e",
+      "adaptation_note": "Only the installation summary and project_overlays report are adapted, as rpi-lifecycle.py diagnose with JSON output and exit 0. It avoids the cc-rpi 2.2.0 known issues: symlinks are not followed, names are lowercase only, lifecycle-skill names are invalid, a directory named *.md is invalid, reads stop at 64 KiB, every item has the same fields and malformed declared overrides are named. Harness, model, hook-trust and plugin-route diagnostics are Claude and Codex specific and are not ported."
     },
     {
       "id": "resource:models",
@@ -621,8 +621,8 @@
       "disposition": "adapted",
       "rationale": "Pinned upstream distribution contract has a Copilot-owned Phase 2 implementation. Intake 2026-11-15 (cc-rpi v2.2.0): Copilot keeps its own implementation; cc-rpi repair series not ported. The lock keeps this component adapted with its existing Copilot destination and hash; this disposition applies to the incoming cc-rpi delta.",
       "destination": "templates/scripts/rpi-distribution.py",
-      "destination_sha256": "2f4d343a9abc894a7aff5e6a70658c97d3f379928b8cf8ace791d35b83caa6b8",
-      "adaptation_note": "Path safety, manifest validation, resource accounting and deterministic rendering adapted to Copilot profiles and metadata. Incoming cc-rpi changes through cec458a9769049c6dd08777768ef718ac7571a30 are deferred (2026-11-15 intake); the existing native destination is unchanged."
+      "destination_sha256": "690c425eaaf546f9e59e45eba36be0f72bcf419ac9b1d5e77d87af22c8d010b3",
+      "adaptation_note": "Path safety, manifest validation, resource accounting and deterministic rendering adapted to Copilot profiles and metadata. Phase 2 (2026-11-15) adds authored_sha256 to skill SKILL.md and prompt wrapper receipt records and forwards diagnose to the standard-library lifecycle runtime; other incoming cc-rpi changes through cec458a9769049c6dd08777768ef718ac7571a30 are deferred (2026-11-15 intake)."
     },
     {
       "id": "resource:lifecycle-engine",
@@ -630,10 +630,10 @@
       "source": "templates/scripts/rpi-lifecycle.py",
       "source_sha256": "31e9fb3253b39c7b44ea55172bce2c1fe08756a378e5cc3ad4132f1f89154a47",
       "disposition": "adapted",
-      "rationale": "Pinned upstream lifecycle and configuration algorithms are adapted for the Copilot project-local ownership engine. Intake 2026-11-15 (cc-rpi v2.2.0): Adapt the .rpi/project reserved path and the per-skill authored hash only; content adapted in Phase 2 or 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The cc-rpi WB-L, WB2-L and WB2R3-L lifecycle repair series stays deferred; Copilot keeps its own recovery implementation. The Copilot destination and its hash are unchanged in Phase 1.",
+      "rationale": "Pinned upstream lifecycle and configuration algorithms are adapted for the Copilot project-local ownership engine. Intake 2026-11-15 (cc-rpi v2.2.0): Adapt the .rpi/project reserved path and the per-skill authored hash only; content adapted in Phase 2 or 3 of docs/plans/2026-11-15-cc-rpi-2.2-sync.md. The cc-rpi WB-L, WB2-L and WB2R3-L lifecycle repair series stays deferred; Copilot keeps its own recovery implementation. Phase 2 adapted the reserved path, the authored hash and the diagnose command into this destination.",
       "destination": "templates/scripts/rpi-lifecycle.py",
-      "destination_sha256": "118938943f34515619ce855d6a9c026c5c539243ab65b4d769a7e35dc074036f",
-      "adaptation_note": "Adapted for verified standalone Copilot render packages, namespaced ownership and recovery, exact historical-byte migration, safe state validation and JSONC field reconciliation. Phase 2 adapts the cc-rpi v2.2.0 .rpi/project reserved path and authored skill hash; the cc-rpi WB-L, WB2-L and WB2R3-L repair series stays deferred. The existing native destination is unchanged until Phase 2."
+      "destination_sha256": "b92eea3625b4794719fed2816c78a1311f3b01f4084c4e6738235f03102aa33e",
+      "adaptation_note": "Adapted for verified standalone Copilot render packages, namespaced ownership and recovery, exact historical-byte migration, safe state validation and JSONC field reconciliation. Phase 2 (2026-11-15) adapts the cc-rpi v2.2.0 .rpi/project reserved path (case-insensitive, with both Copilot state roots), the per-entry authored_sha256 copied from the render receipt, and the read-only diagnose command; the cc-rpi WB-L, WB2-L and WB2R3-L repair series stays deferred."
     },
     {
       "id": "resource:configuration-engine",

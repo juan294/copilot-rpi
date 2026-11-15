@@ -134,6 +134,7 @@ resource loading and tool restrictions in the actual client.
 The blueprint provides 5 instruction templates for these scoped topics.
 The 55 operational rules in [the quick reference](patterns/quick-reference.md)
 are read when a task matches their scope.
+A project adds its own steps to a workflow skill in a [project overlay](docs/project-overlay.md), `.rpi/project/<skill>.md`. An overlay can make a workflow stricter; it cannot grant push, tag, merge, deployment or publication authority, or relax a gate.
 
 ### Context and the documentarian rule
 
@@ -261,6 +262,7 @@ with its own setup and authority; it is not part of a local install.
 | CI ownership | [push accountability](methodology/push-accountability.md) |
 | Error and rule catalogs | [agent errors](patterns/agent-errors.md), [quick reference](patterns/quick-reference.md) |
 | Native profiles and controls | [compatibility](docs/compatibility.md), [native policy](docs/native-policy.md) |
+| Project additions to workflow skills | [project overlays](docs/project-overlay.md) |
 
 The methodology adapts [HumanLayer's RPI and ACE-FCA work](https://humanlayer.dev/)
 to GitHub Copilot's repository skills, agents and instructions.

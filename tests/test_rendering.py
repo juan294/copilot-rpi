@@ -1,5 +1,6 @@
 """Native Copilot distribution rendering and metadata controls."""
 
+import hashlib
 import json
 import shutil
 import subprocess
@@ -146,6 +147,23 @@ class RendererTests(unittest.TestCase):
         self.assertIn(".rpi/copilot-render.json", left)
         self.assertNotIn(".github/prompts/rpi-test.prompt.md", left)
         self.assertNotIn(b"$ARGUMENTS", b"".join(left.values()))
+
+    def test_receipt_records_authored_hash_on_skill_and_prompt_entrypoints_only(self):
+        authored = hashlib.sha256((self.root / "templates/skills/rpi-test/SKILL.md").read_bytes()).hexdigest()
+        entrypoints = {"cli": ".github/skills/rpi-test/SKILL.md", "vscode-local": ".github/prompts/rpi-test.prompt.md"}
+        for profile, entrypoint in entrypoints.items():
+            target = Path(self.temp.name) / ("authored-" + profile)
+            result = invoke(self.root, "render", "--profile", profile, "--target", str(target))
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            receipt = json.loads((target / ".rpi/copilot-render.json").read_text())
+            carrying = {item["path"]: item["authored_sha256"] for item in receipt["files"] if "authored_sha256" in item}
+            self.assertEqual({entrypoint: authored}, carrying, profile)
+            self.assertTrue(any(item["path"].endswith("references/guide.md") for item in receipt["files"]), profile)
+        self_applied = invoke(self.root, "render", "--profile", "cli", "--target", str(self.root))
+        self.assertEqual(self_applied.returncode, 0, self_applied.stdout + self_applied.stderr)
+        self.assertEqual(invoke(self.root, "check-generated", "--profile", "cli").returncode, 0)
+        receipt = json.loads((self.root / ".rpi/copilot-render.json").read_text())
+        self.assertEqual([authored], [item["authored_sha256"] for item in receipt["files"] if "authored_sha256" in item])
 
     def test_rendered_package_verifies_with_stdlib_only(self):
         package = Path(self.temp.name) / "package"

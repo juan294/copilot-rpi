@@ -22,6 +22,7 @@ changing the target.
 Render the selected profile from a verified blueprint checkout into an empty
 `package_dir` first. The package's `.rpi/copilot-render.json` records its
 profile and every rendered file hash; the lifecycle plan checks that receipt.
+Skill `SKILL.md` and prompt wrapper records also carry `authored_sha256`, the hash of the authored skill source that `.rpi/project/` overlays are written against.
 Keep its `.rpi/copilot/runtime/` with the package. Use actual absolute paths
 for `source_dir`, `package_dir`, `project_dir` and `plan_file`. The bundled
 runtime uses Python 3.11+ without repository development dependencies. The

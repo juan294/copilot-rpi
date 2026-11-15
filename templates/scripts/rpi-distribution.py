@@ -13,7 +13,7 @@ import re
 import sys
 from pathlib import Path
 
-if __name__ == "__main__" and len(sys.argv) > 1 and sys.argv[1] in {"plan", "apply", "check", "rollback", "detach"}:
+if __name__ == "__main__" and len(sys.argv) > 1 and sys.argv[1] in {"plan", "apply", "check", "rollback", "detach", "diagnose"}:
     # Lifecycle is the adopter runtime. Dispatch before importing maintainer-only
     # PyYAML so a rendered package runs with Python's standard library alone.
     import runpy
@@ -412,14 +412,35 @@ def validate(root, manifest):
     return all_outputs
 
 
-def render_record(manifest, profile, outputs, roots, preserve_ids):
+def authored_entrypoints(root, manifest, outputs):
+    """Map each skill SKILL.md or prompt wrapper output to the hash of its authored SKILL.md source."""
+    entrypoints = {}
+    for component in manifest["components"]:
+        if component["kind"] == "skill":
+            relative = component["destination"] + "/SKILL.md"
+        elif component["kind"] == "prompt":
+            relative = component["destination"]
+        else:
+            continue
+        if relative in outputs and outputs[relative][1] == component["id"]:
+            source = safe_path(root, component["source"] + "/SKILL.md", "authored skill")
+            entrypoints[relative] = sha(source.read_bytes())
+    return entrypoints
+
+
+def render_record(root, manifest, profile, outputs, roots, preserve_ids):
     files = []
     preserved = []
+    authored = authored_entrypoints(root, manifest, outputs)
     for relative, (data, cid) in sorted(outputs.items()):
         if cid in preserve_ids:
             preserved.append(relative)
         else:
-            files.append({"path": relative, "component": cid, "sha256": sha(data)})
+            record = {"path": relative, "component": cid, "sha256": sha(data)}
+            if relative in authored:
+                # Overlays compare against the authored skill text, the same in every profile.
+                record["authored_sha256"] = authored[relative]
+            files.append(record)
     return {
         "schema_version": 1, "source_version": manifest["version"], "profile": profile,
         "managed_root_bytes": roots, "files": files, "preserved": preserved,
@@ -436,7 +457,7 @@ def render(root, manifest, profile, target, include_examples=False):
     outputs, roots = generated_files(root, manifest, profile, include_examples)
     target.mkdir(parents=True, exist_ok=True)
     preserve_ids = set(manifest["self_application"].get("preserve", [])) if target == root else set()
-    record = render_record(manifest, profile, outputs, roots, preserve_ids)
+    record = render_record(root, manifest, profile, outputs, roots, preserve_ids)
     runtime = {}
     if target != root:
         for name in (
@@ -487,7 +508,7 @@ def check_generated(root, manifest, profile):
         if not path.is_file() or path.read_bytes() != data:
             failed.append(relative)
     _, roots = generated_files(root, manifest, profile)
-    expected_receipt = json.dumps(render_record(manifest, profile, outputs, roots, preserve), indent=2).encode() + b"\n"
+    expected_receipt = json.dumps(render_record(root, manifest, profile, outputs, roots, preserve), indent=2).encode() + b"\n"
     receipt_path = safe_path(root, OUTPUT_MANIFEST, "render receipt")
     if not receipt_path.is_file() or receipt_path.read_bytes() != expected_receipt:
         print(f"BLOCKED: render receipt drift: {OUTPUT_MANIFEST}")

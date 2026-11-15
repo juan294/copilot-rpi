@@ -171,12 +171,33 @@ def configuration_engine():
     return module
 
 
+# Project-owned overlays and installation state: no package destination may name these or anything below them.
+# The comparison folds case because default macOS and Windows filesystems do.
+RESERVED_DESTINATIONS = ('.rpi/project', STATE, LOCAL)
+
+
 def safe_relative(value):
     if not isinstance(value, str) or not value or Path(value).is_absolute() or Path(value).as_posix() != value or '..' in Path(value).parts:
         raise ValueError('noncanonical destination: ' + str(value))
-    if value.startswith(('.rpi/copilot/', '.rpi/local/copilot/')) or value in (STATE, LOCAL):
-        raise ValueError('package cannot own Copilot state: ' + value)
+    folded = value.casefold()
+    if any(folded == root or folded.startswith(root + '/') for root in RESERVED_DESTINATIONS):
+        raise ValueError('package cannot own project or Copilot state: ' + value)
     return value
+
+
+def authored_entrypoint(component, relative):
+    """Only a skill SKILL.md or a prompt wrapper records the authored skill hash."""
+    if not isinstance(component, str) or ':' not in component:
+        return False
+    kind, name = component.split(':', 1)
+    return ((kind == 'skill' and relative == '.github/skills/' + name + '/SKILL.md') or
+            (kind == 'prompt' and relative == '.github/prompts/' + name + '.prompt.md'))
+
+
+def valid_authored(record, relative):
+    value = record.get('authored_sha256')
+    return (isinstance(value, str) and re.fullmatch('[0-9a-f]{64}', value) is not None and
+            authored_entrypoint(record.get('component', record.get('component_id')), relative))
 
 
 def permitted_product_path(component, relative):
@@ -227,11 +248,14 @@ def package_files(package, profile):
                 raise ValueError('undeclared active or capability destination in package: ' + relative)
         if relative in files:
             raise ValueError('duplicate package destination: ' + relative)
+        if 'authored_sha256' in item and not valid_authored(item, relative):
+            raise ValueError('invalid package file record')
         node = snapshot(bound_path(package, relative))
         if node['kind'] != 'file' or node['sha256'] != item['sha256']:
             raise Conflict('package file changed from receipt: ' + relative)
         if not item['component'].startswith('runtime:'):
-            files[relative] = {'component_id': item['component'], 'data': node_bytes(node)}
+            files[relative] = {'component_id': item['component'], 'data': node_bytes(node),
+                               **({'authored_sha256': item['authored_sha256']} if 'authored_sha256' in item else {})}
     return receipt, files, receipt_node['sha256']
 
 
@@ -265,6 +289,8 @@ def load_state(state):
         if (path in seen or not permitted_product_path(entry.get('component_id'), path) or
                 not re.fullmatch('[0-9a-f]{64}', entry.get('base_hash', ''))):
             raise ValueError('invalid or duplicate Copilot ownership entry')
+        if 'authored_sha256' in entry and not valid_authored(entry, path):
+            raise ValueError('invalid Copilot ownership entry')
         seen.add(path)
     for entry in value.get('config_entries', []):
         if not isinstance(entry, dict) or not isinstance(entry.get('base_hash'), str) or not isinstance(entry.get('record'), dict):
@@ -438,7 +464,9 @@ def make_plan(request):
             if proposed:
                 base_hash = digest(upstream)
                 baselines[base_hash] = upstream
-                new_entries.append({'destination': relative, 'component_id': proposed['component_id'], 'base_hash': base_hash, 'status': 'clean' if result == upstream else 'local-only'})
+                new_entries.append({'destination': relative, 'component_id': proposed['component_id'], 'base_hash': base_hash,
+                                    'status': 'clean' if result == upstream else 'local-only',
+                                    **({'authored_sha256': proposed['authored_sha256']} if 'authored_sha256' in proposed else {})})
             if result != local:
                 action = 'create' if local is None else 'remove' if result is None else 'update'
                 actions.append({'destination': relative, 'component_id': (proposed or prior)['component_id'], 'action': action})
@@ -546,8 +574,11 @@ def make_plan(request):
             for document in (before_manifest, after_manifest):
                 for entry in document.get('entries', []):
                     entry.pop('status', None)
+                    entry.pop('authored_sha256', None)
             if before_manifest == after_manifest:
-                operations.clear()  # A local-only label is not an actionable update.
+                # A local-only label or a newly known authored hash is not an actionable update;
+                # the next real update records the hash.
+                operations.clear()
     target_stat = target.stat() if target.exists() else None
     target_identity = {'path': str(target), 'device': target_stat.st_dev if target_stat else None, 'inode': target_stat.st_ino if target_stat else None}
     return {'schema_version': 1, 'request': request, 'source_sha256': source_hash, 'package_receipt_sha256': receipt_sha,
@@ -784,6 +815,221 @@ def check(request):
     return result
 
 
+PROJECT = '.rpi/project'
+# Workflow skills that read .rpi/project/<skill>.md. Lifecycle skills install the overlay readers and have none.
+OVERLAY_SKILLS = (
+    'rpi-assess', 'rpi-brainstorm', 'rpi-describe-pr', 'rpi-explore-release', 'rpi-fix-ci', 'rpi-implement',
+    'rpi-plan', 'rpi-pre-launch', 'rpi-release', 'rpi-remediate', 'rpi-research', 'rpi-status',
+    'rpi-tool-design', 'rpi-triage', 'rpi-update-docs', 'rpi-validate',
+)
+LIFECYCLE_SKILLS = ('rpi-adopt', 'rpi-bootstrap', 'rpi-detach', 'rpi-update')
+OVERLAY_LIMIT = 64 * 1024
+OVERLAY_HEADER = re.compile(r'<!-- rpi-overlay: skill=([a-z0-9-]+); written-against=([0-9a-f]{12}) -->')
+OVERLAY_SECTION = re.compile(rb'(?m)^## Project overlay\r?$')
+OVERRIDE_FIELDS = ('Override', 'Reason', 'Source', 'Owner decision')
+NOT_REGULAR = 'not a regular file; symlinks and directories are not overlays'
+
+
+def overlay_header(skill, written_against):
+    return '<!-- rpi-overlay: skill=' + skill + '; written-against=' + written_against + ' -->'
+
+
+def skill_copy(skill, profile):
+    """The installed file that a profile loads for a workflow skill."""
+    return '.github/prompts/' + skill + '.prompt.md' if profile == 'vscode-local' else '.github/skills/' + skill + '/SKILL.md'
+
+
+def declared_overrides(text):
+    """Count entries under "## Declared overrides" and name the first malformed one. Never returns overlay text."""
+    entries, inside, present = [], False, False
+    for line in text.splitlines():
+        if line.startswith('## '):
+            inside = line.strip() == '## Declared overrides'
+            present = present or inside
+        elif inside and line.startswith('- '):
+            entries.append({'stock': re.fullmatch(r'- Stock rule: ".+"\s*', line) is not None, 'fields': set()})
+        elif inside and entries and line[:1].isspace():
+            match = re.fullmatch(r'\s+(Override|Reason|Source|Owner decision): (\S.*)', line)
+            if match and (match[1] != 'Owner decision' or re.match(r'\d{4}-\d{2}-\d{2}\b', match[2])):
+                entries[-1]['fields'].add(match[1])
+    if present and not entries:
+        return 0, 'the ## Declared overrides section has no entries; remove it or add an entry'
+    for number, entry in enumerate(entries, 1):
+        lacking = (['a quoted Stock rule'] if not entry['stock'] else []) + [
+            field for field in OVERRIDE_FIELDS if field not in entry['fields']]
+        if lacking:
+            return len(entries), 'declared override ' + str(number) + ' lacks: ' + ', '.join(lacking)
+    return len(entries), None
+
+
+def installation_report(target, state):
+    """Summarize the ownership manifest and drift from recorded baselines without writing anything."""
+    report = {'status': 'missing', 'manifest': STATE + '/manifest.json', 'profile': None, 'source_version': None,
+              'drift': [], 'reason': None, 'fix': None}
+    check_command = engine_command('check', '--target', target) + ' --package "$package_dir" --profile "$selected_profile"'
+    try:
+        manifest = load_state(state)
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        report.update(status='unreadable', reason=str(exc),
+                      fix='repair or restore ' + report['manifest'] + ', then run ' + check_command)
+        return report, None
+    if manifest is None:
+        report.update(reason='no Copilot RPI ownership manifest',
+                      fix='install Copilot RPI with rpi-adopt or rpi-bootstrap, then run ' + check_command)
+        return report, None
+    drift = []
+    for entry in manifest['entries']:
+        try:
+            node = snapshot(bound_path(target, entry['destination']))
+        except (Conflict, OSError):
+            node = {'kind': 'unreadable'}
+        if node['kind'] == 'missing':
+            drift.append({'destination': entry['destination'], 'state': 'missing'})
+        elif node['kind'] != 'file' or node['sha256'] != entry['base_hash']:
+            drift.append({'destination': entry['destination'], 'state': 'modified'})
+    text = lambda value: value if isinstance(value, str) else None
+    report.update(status='present', profile=text(manifest.get('profile')),
+                  source_version=text(manifest.get('source_version')),
+                  drift=sorted(drift, key=lambda item: item['destination']))
+    return report, manifest
+
+
+def read_overlay(path):
+    """Read at most one byte past the size limit from a regular file, never following a final symlink."""
+    descriptor = os.open(path, os.O_RDONLY | getattr(os, 'O_NOFOLLOW', 0) | getattr(os, 'O_NONBLOCK', 0))
+    try:
+        if not stat.S_ISREG(os.fstat(descriptor).st_mode):
+            return None
+        chunks, size = [], 0
+        while size <= OVERLAY_LIMIT:
+            chunk = os.read(descriptor, OVERLAY_LIMIT + 1 - size)
+            if not chunk:
+                break
+            chunks.append(chunk)
+            size += len(chunk)
+        return b''.join(chunks)
+    finally:
+        os.close(descriptor)
+
+
+def overlay_item(target, entry, manifest):
+    item = {'file': PROJECT + '/' + entry.name, 'skill': None, 'status': 'present', 'reason': None, 'fix': None,
+            'written_against': None, 'current': None, 'header_line': None, 'overrides': None}
+
+    def invalid(reason, fix):
+        item.update(status='invalid', reason=reason, fix=fix)
+        return item
+
+    regular_fix = 'replace ' + item['file'] + ' with a regular file, or remove it'
+    if entry.is_symlink() or not entry.is_file(follow_symlinks=False):
+        return invalid(NOT_REGULAR, regular_fix)
+    if entry.name != entry.name.lower():
+        return invalid('overlay file names are lowercase', 'rename ' + item['file'] + ' to ' + PROJECT + '/' + entry.name.lower())
+    skill = entry.name[:-len('.md')]
+    if skill in LIFECYCLE_SKILLS:
+        return invalid('lifecycle skills have no project overlay',
+                       'remove ' + item['file'] + ', or move its steps to a workflow skill overlay')
+    if skill not in OVERLAY_SKILLS:
+        return invalid('not a workflow skill that reads a project overlay',
+                       'rename or remove ' + item['file'] + '; docs/project-overlay.md lists the workflow skills')
+    item['skill'] = skill
+    profile = (manifest or {}).get('profile')
+    # Without a readable profile, inspect both copies: cli and agent-host share the skill path.
+    copies = sorted({skill_copy(skill, profile)} if profile in ('cli', 'agent-host', 'vscode-local') else
+                    {skill_copy(skill, 'cli'), skill_copy(skill, 'vscode-local')})
+    recorded = {record['destination']: record.get('authored_sha256') for record in (manifest or {}).get('entries', [])}
+    hashes = {recorded.get(copy) for copy in copies} - {None}
+    if len(hashes) == 1:
+        item['current'] = hashes.pop()[:12]
+        item['header_line'] = overlay_header(skill, item['current'])
+    try:
+        data = read_overlay(target / PROJECT / entry.name)
+    except OSError as exc:
+        return invalid('unreadable: ' + type(exc).__name__, 'make ' + item['file'] + ' a readable regular file')
+    if data is None:
+        return invalid(NOT_REGULAR, regular_fix)
+    if len(data) > OVERLAY_LIMIT:
+        return invalid('larger than ' + str(OVERLAY_LIMIT) + ' bytes',
+                       'shorten ' + item['file'] + ' to ' + str(OVERLAY_LIMIT) + ' bytes or less')
+    try:
+        text = data.decode('utf-8-sig')
+    except UnicodeDecodeError:
+        return invalid('not UTF-8 text', 'save ' + item['file'] + ' as UTF-8')
+    header = OVERLAY_HEADER.fullmatch(text.partition('\n')[0].strip())
+    if not header or header[1] != skill:
+        return invalid('the first line is not the rpi-overlay header for ' + skill,
+                       'make the first line ' + item['header_line'] if item['header_line'] else
+                       'update the installation so it records authored hashes, then make the first line '
+                       'the header_line that diagnose prints')
+    item['written_against'] = header[2]
+    item['overrides'], override_problem = declared_overrides(text)
+    installed = []
+    for copy in copies:
+        try:
+            node = snapshot(bound_path(target, copy))
+        except (Conflict, OSError):
+            continue
+        if node['kind'] == 'file':
+            installed.append(node_bytes(node))
+    if not installed or any(not OVERLAY_SECTION.search(copy_bytes) for copy_bytes in installed):
+        item.update(status='inert',
+                    reason='the installed ' + ' or '.join(copies) + ' is missing or has no ## Project overlay section',
+                    fix='update the Copilot RPI installation with rpi-update, then rerun diagnose')
+    elif item['current'] and item['current'] != item['written_against']:
+        item.update(status='stale', reason='the stock skill changed since the overlay was reviewed',
+                    fix='review the overlay against the installed skill, then replace its first line with header_line')
+    if override_problem:
+        item['reason'] = '; '.join(filter(None, (item['reason'], override_problem)))
+        item['fix'] = '; '.join(filter(None, (item['fix'], 'give each declared override a quoted Stock rule and '
+                                              'Override, Reason, Source and Owner decision (YYYY-MM-DD) lines')))
+    return item
+
+
+def project_overlays(target, manifest):
+    """One item per .rpi/project/*.md with a fixed field set; dotfiles and other names are skipped."""
+    def directory_problem(reason):
+        return [{'file': PROJECT, 'skill': None, 'status': 'invalid', 'reason': reason,
+                 'fix': 'make ' + PROJECT + ' a regular directory inside the project, not a symlink',
+                 'written_against': None, 'current': None, 'header_line': None, 'overrides': None}]
+    try:
+        directory = bound_path(target, PROJECT)
+        if not stat.S_ISDIR(os.lstat(directory).st_mode):
+            return directory_problem('not a regular directory')
+        with os.scandir(directory) as entries:
+            selected = sorted((entry for entry in entries
+                               if not entry.name.startswith('.') and entry.name.lower().endswith('.md')),
+                              key=lambda entry: entry.name)
+    except FileNotFoundError:
+        return []
+    except (Conflict, OSError) as exc:
+        return directory_problem('unreadable: ' + type(exc).__name__)
+    items = []
+    for entry in selected:
+        try:
+            items.append(overlay_item(target, entry, manifest))
+        except (Conflict, OSError) as exc:
+            items.append({'file': PROJECT + '/' + entry.name, 'skill': None, 'status': 'invalid',
+                          'reason': 'unreadable: ' + type(exc).__name__, 'fix': 'make the file a readable regular file',
+                          'written_against': None, 'current': None, 'header_line': None, 'overrides': None})
+    return items
+
+
+def diagnose(target):
+    """Read-only report; problems are data, so the command always exits 0."""
+    report = {'schema_version': 1, 'target': str(Path(target).absolute()), 'installation': None, 'project_overlays': []}
+    try:
+        target, state, _ = state_paths(target)
+    except (OSError, ValueError) as exc:
+        report['installation'] = {'status': 'unreadable', 'manifest': STATE + '/manifest.json', 'profile': None,
+                                  'source_version': None, 'drift': [], 'reason': str(exc),
+                                  'fix': 'pass an existing project directory that is not a symlink to diagnose --target'}
+        return report
+    report['target'] = str(target)
+    report['installation'], manifest = installation_report(target, state)
+    report['project_overlays'] = project_overlays(target, manifest)
+    return report
+
+
 def command(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest='command', required=True)
@@ -808,7 +1054,12 @@ def command(argv=None):
     apply_parser.add_argument('--fail-after', type=int, help=argparse.SUPPRESS)
     rollback_parser = commands.add_parser('rollback')
     rollback_parser.add_argument('--journal', type=Path, required=True)
+    diagnose_parser = commands.add_parser('diagnose', help='read-only installation and project overlay report')
+    diagnose_parser.add_argument('--target', type=Path, required=True)
     args = parser.parse_args(argv)
+    if args.command == 'diagnose':
+        print(json.dumps(diagnose(args.target), sort_keys=True))
+        return 0
     try:
         if args.command == 'apply':
             result = apply_plan(json.loads(args.plan.read_bytes()), args.fail_after)
