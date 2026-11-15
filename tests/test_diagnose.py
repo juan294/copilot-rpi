@@ -2,12 +2,16 @@
 
 import hashlib
 import json
-import os
 from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import unittest
+
+try:
+    from .lifecycle_support import load_lifecycle, overlay_tree
+except ImportError:  # unittest discover -s tests imports test modules at top level.
+    from lifecycle_support import load_lifecycle, overlay_tree
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,20 +35,12 @@ def header(skill, written_against):
     return "<!-- rpi-overlay: skill=" + skill + "; written-against=" + written_against + " -->"
 
 
-def tree(root):
-    result = {}
-    for directory, names, files in os.walk(root, followlinks=False):
-        for name in names + files:
-            path = Path(directory) / name
-            info = path.lstat()
-            relative = path.relative_to(root).as_posix()
-            if path.is_symlink():
-                result[relative] = ("link", os.readlink(path), info.st_mtime_ns)
-            elif path.is_dir():
-                result[relative] = ("dir", info.st_mtime_ns)
-            else:
-                result[relative] = ("file", path.read_bytes(), info.st_mode, info.st_mtime_ns)
-    return result
+def current(source):
+    return sha(source)[:12]
+
+
+def overlay_text(skill, written_against, body=""):
+    return (header(skill, written_against) + "\n" + body).encode()
 
 
 class DiagnoseTest(unittest.TestCase):
@@ -116,31 +112,31 @@ class DiagnoseTest(unittest.TestCase):
 
     def test_present_overlay_for_each_profile(self):
         source = skill_source("rpi-plan")
-        current = sha(source)[:12]
+        expected = current(source)
         for profile in ("cli", "agent-host", "vscode-local"):
             with self.subTest(profile=profile):
                 self.target = self.base / ("project-" + profile)
                 self.target.mkdir()
                 self.install(self.package(profile, {"rpi-plan": source}), profile)
-                self.overlay("rpi-plan.md", (header("rpi-plan", current) + "\n# Plan overlay\n\n## Procedure\n\nStep.\n").encode())
+                self.overlay("rpi-plan.md", overlay_text("rpi-plan", expected, "# Plan overlay\n\n## Procedure\n\nStep.\n"))
                 report = self.diagnose()
                 self.assertEqual({"status": "present", "manifest": ".rpi/copilot/manifest.json", "profile": profile,
                                   "source_version": "2.1.0", "drift": [], "reason": None, "fix": None},
                                  report["installation"])
                 self.assertEqual([{"file": ".rpi/project/rpi-plan.md", "skill": "rpi-plan", "status": "present",
-                                   "reason": None, "fix": None, "written_against": current, "current": current,
-                                   "header_line": header("rpi-plan", current), "overrides": 0}],
+                                   "reason": None, "fix": None, "written_against": expected, "current": expected,
+                                   "header_line": header("rpi-plan", expected), "overrides": 0}],
                                  report["project_overlays"])
 
     def test_stale_overlay_reports_header_line_and_recovers(self):
         source = skill_source("rpi-plan")
         self.install(self.package("cli", {"rpi-plan": source}), "cli")
-        path = self.overlay("rpi-plan.md", (header("rpi-plan", "0" * 12) + "\n## Procedure\n\nStep.\n").encode())
+        path = self.overlay("rpi-plan.md", overlay_text("rpi-plan", "0" * 12, "## Procedure\n\nStep.\n"))
         item = self.items(self.diagnose())[".rpi/project/rpi-plan.md"]
         self.assertEqual("stale", item["status"])
         self.assertEqual("0" * 12, item["written_against"])
-        self.assertEqual(sha(source)[:12], item["current"])
-        self.assertEqual(header("rpi-plan", sha(source)[:12]), item["header_line"])
+        self.assertEqual(current(source), item["current"])
+        self.assertEqual(header("rpi-plan", current(source)), item["header_line"])
         self.assertIn("header_line", item["fix"])
         lines = path.read_text().splitlines(keepends=True)
         path.write_text(item["header_line"] + "\n" + "".join(lines[1:]))
@@ -150,7 +146,7 @@ class DiagnoseTest(unittest.TestCase):
         old = skill_source("rpi-plan", section=False)
         new = skill_source("rpi-plan", section=True)
         self.install(self.package("cli", {"rpi-plan": old}, name="old"), "cli")
-        self.overlay("rpi-plan.md", (header("rpi-plan", sha(new)[:12]) + "\n## Procedure\n\nStep.\n").encode())
+        self.overlay("rpi-plan.md", overlay_text("rpi-plan", current(new), "## Procedure\n\nStep.\n"))
         item = self.items(self.diagnose())[".rpi/project/rpi-plan.md"]
         self.assertEqual("inert", item["status"])
         self.assertIn("## Project overlay", item["reason"])
@@ -164,13 +160,13 @@ class DiagnoseTest(unittest.TestCase):
         skills = {name: skill_source(name) for name in ("rpi-plan", "rpi-assess", "rpi-status", "rpi-implement",
                                                         "rpi-triage", "rpi-update", "rpi-validate", "rpi-release")}
         self.install(self.package("cli", skills), "cli")
-        current = {name: sha(source)[:12] for name, source in skills.items()}
-        valid = (header("rpi-plan", current["rpi-plan"]) + "\n## Procedure\n\nStep.\n").encode()
+        hashes = {name: current(source) for name, source in skills.items()}
+        valid = overlay_text("rpi-plan", hashes["rpi-plan"], "## Procedure\n\nStep.\n")
         self.overlay("rpi-plan.md", valid)
         (self.target / ".rpi/project/rpi-research.md").symlink_to("rpi-plan.md")
         self.overlay("rpi-Validate.md", valid.replace(b"rpi-plan", b"rpi-validate"))
-        self.overlay("rpi-implement.md", (header("rpi-implement", current["rpi-implement"]) + "\n").encode() + b"x" * 65536)
-        self.overlay("rpi-triage.md", (header("rpi-triage", current["rpi-triage"]) + "\n").encode() + b"\xff\xfe bad\n")
+        self.overlay("rpi-implement.md", overlay_text("rpi-implement", hashes["rpi-implement"]) + b"x" * 65536)
+        self.overlay("rpi-triage.md", overlay_text("rpi-triage", hashes["rpi-triage"]) + b"\xff\xfe bad\n")
         self.overlay("rpi-unknown.md", valid)
         self.overlay("rpi-debug.md", valid.replace(b"rpi-plan", b"rpi-debug"))
         self.overlay("rpi-update.md", valid.replace(b"rpi-plan", b"rpi-update"))
@@ -188,8 +184,8 @@ class DiagnoseTest(unittest.TestCase):
             "rpi-unknown.md": "rename or remove",
             "rpi-debug.md": "rename or remove",
             "rpi-update.md": "lifecycle",
-            "rpi-assess.md": header("rpi-assess", current["rpi-assess"]),
-            "rpi-status.md": header("rpi-status", current["rpi-status"]),
+            "rpi-assess.md": header("rpi-assess", hashes["rpi-assess"]),
+            "rpi-status.md": header("rpi-status", hashes["rpi-status"]),
         }
         for name, fix in expected_fix.items():
             item = items[".rpi/project/" + name]
@@ -199,14 +195,14 @@ class DiagnoseTest(unittest.TestCase):
                 self.assertIn(fix, item["reason"] + " " + item["fix"])
         self.assertIsNone(items[".rpi/project/rpi-unknown.md"]["skill"])
         self.assertIsNone(items[".rpi/project/rpi-update.md"]["skill"])
-        self.assertEqual(header("rpi-assess", current["rpi-assess"]), items[".rpi/project/rpi-assess.md"]["header_line"])
+        self.assertEqual(header("rpi-assess", hashes["rpi-assess"]), items[".rpi/project/rpi-assess.md"]["header_line"])
 
     def test_no_installation_and_skipped_entries(self):
         source = skill_source("rpi-plan")
-        self.overlay("rpi-plan.md", (header("rpi-plan", sha(source)[:12]) + "\n").encode())
+        self.overlay("rpi-plan.md", overlay_text("rpi-plan", current(source)))
         self.overlay(".DS_Store", b"\0finder")
         self.overlay(".rpi-plan.md.swp", b"swap")
-        self.overlay(".rpi-plan.md", (header("rpi-plan", sha(source)[:12]) + "\n").encode())
+        self.overlay(".rpi-plan.md", overlay_text("rpi-plan", current(source)))
         self.overlay("._rpi-plan.md", b"\0\5\26\7AppleDouble")
         self.overlay("README.txt", b"notes")
         (self.target / ".rpi/project/archive").mkdir()
@@ -223,7 +219,7 @@ class DiagnoseTest(unittest.TestCase):
         self.install(self.package("cli", {"rpi-plan": source}), "cli")
         manifest = self.target / ".rpi/copilot/manifest.json"
         valid = manifest.read_bytes()
-        self.overlay("rpi-plan.md", (header("rpi-plan", sha(source)[:12]) + "\n").encode())
+        self.overlay("rpi-plan.md", overlay_text("rpi-plan", current(source)))
         for damaged in (b"{not json", b'{"schema_version":1,"ownership":"copilot-rpi","entries":[null]}'):
             manifest.write_bytes(damaged)
             report = self.diagnose()
@@ -249,16 +245,23 @@ class DiagnoseTest(unittest.TestCase):
     def test_install_without_authored_hashes_skips_staleness(self):
         source = skill_source("rpi-plan")
         self.install(self.package("cli", {"rpi-plan": source}, authored=False), "cli")
-        self.overlay("rpi-plan.md", (header("rpi-plan", "0" * 12) + "\n").encode())
+        self.overlay("rpi-plan.md", overlay_text("rpi-plan", "0" * 12))
         item = self.diagnose()["project_overlays"][0]
         self.assertEqual("present", item["status"])
         self.assertIsNone(item["current"])
         self.assertIsNone(item["header_line"])
+        self.assertEqual("staleness is not checked until the next update records authored hashes", item["reason"])
+        self.assertIsNone(item["fix"])
+        self.overlay("rpi-plan.md", b"# no header\n")
+        item = self.diagnose()["project_overlays"][0]
+        self.assertEqual("invalid", item["status"])
+        self.assertNotIn("update", item["fix"])
+        self.assertIn("rpi-overlay: skill=rpi-plan", item["fix"])
 
     def test_bom_crlf_and_declared_overrides(self):
         source = skill_source("rpi-release")
         self.install(self.package("cli", {"rpi-release": source}), "cli")
-        line = header("rpi-release", sha(source)[:12])
+        line = header("rpi-release", current(source))
         entry = ('- Stock rule: "Run every check."\r\n  Override: run the fast subset first\r\n  Reason: cost\r\n'
                  '  Source: abc1234\r\n  Owner decision: 2026-11-15, docs/decisions/x.md\r\n')
         good = "﻿" + line + "\r\n# Release overlay\r\n\r\n## Procedure\r\n\r\nStep.\r\n\r\n## Declared overrides\r\n\r\n"
@@ -281,7 +284,7 @@ class DiagnoseTest(unittest.TestCase):
         marker = "SECRET-MARKER-7f3c"
         source = skill_source("rpi-plan")
         self.install(self.package("cli", {"rpi-plan": source, "rpi-assess": skill_source("rpi-assess")}), "cli")
-        line = header("rpi-plan", sha(source)[:12])
+        line = header("rpi-plan", current(source))
         self.overlay("rpi-plan.md", (line + "\n# " + marker + "\n\n## Procedure\n\n" + marker + "\n\n## Declared overrides\n\n"
                                      '- Stock rule: "' + marker + '"\n  Override: ' + marker + "\n").encode())
         self.overlay("rpi-assess.md", ("<!-- rpi-overlay: skill=rpi-assess; written-against=" + marker + " -->\n").encode())
@@ -294,9 +297,9 @@ class DiagnoseTest(unittest.TestCase):
         self.install(self.package("cli", {"rpi-plan": skill_source("rpi-plan")}), "cli")
         self.overlay("rpi-plan.md", b"# no header\n")
         (self.target / ".rpi/project/rpi-research.md").symlink_to("../../outside.md")
-        before = tree(self.target)
+        before = overlay_tree(self.target)
         self.diagnose()
-        self.assertEqual(before, tree(self.target))
+        self.assertEqual(before, overlay_tree(self.target))
 
     def test_symlinked_project_directory_and_bad_target_still_exit_zero(self):
         outside = self.base / "outside overlays"
@@ -322,11 +325,8 @@ class DiagnoseTest(unittest.TestCase):
 
     def test_unexpected_error_prints_minimal_report_and_exits_zero(self):
         import contextlib
-        import importlib.util
         import io
-        spec = importlib.util.spec_from_file_location("diagnose_guard", LIFECYCLE)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
+        module = load_lifecycle()
 
         def broken(target):
             raise RuntimeError("SECRET-MARKER-guard")
@@ -360,15 +360,12 @@ class DiagnoseTest(unittest.TestCase):
     def test_distribution_forwards_diagnose_without_pyyaml(self):
         source = skill_source("rpi-plan")
         self.install(self.package("cli", {"rpi-plan": source}), "cli")
-        self.overlay("rpi-plan.md", (header("rpi-plan", sha(source)[:12]) + "\n").encode())
+        self.overlay("rpi-plan.md", overlay_text("rpi-plan", current(source)))
         report = self.diagnose(script=DISTRIBUTION, flags=("-S",))
         self.assertEqual("present", report["project_overlays"][0]["status"])
 
     def test_engine_skill_sets_match_distribution_manifest(self):
-        import importlib.util
-        spec = importlib.util.spec_from_file_location("diagnose_lifecycle", LIFECYCLE)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
+        module = load_lifecycle()
         manifest = json.loads((ROOT / "templates/distribution.json").read_text())
         skills = {item["id"].split(":", 1)[1] for item in manifest["components"] if item["kind"] == "skill"}
         self.assertEqual(16, len(module.OVERLAY_SKILLS))

@@ -1,9 +1,7 @@
 """Filesystem contract for the standalone Copilot lifecycle runtime."""
 
 import hashlib
-import importlib.util
 import json
-import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -11,26 +9,14 @@ import sys
 import tempfile
 import unittest
 
+try:
+    from .lifecycle_support import load_lifecycle, overlay_tree
+except ImportError:  # unittest discover -s tests imports test modules at top level.
+    from lifecycle_support import load_lifecycle, overlay_tree
+
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNTIME = ROOT / "templates/scripts/rpi-lifecycle.py"
-
-
-def overlay_tree(root):
-    """Bytes, link targets, modes and mtimes of a project-owned tree, without following links."""
-    tree = {}
-    for directory, names, files in os.walk(root, followlinks=False):
-        for name in names + files:
-            path = Path(directory) / name
-            info = path.lstat()
-            relative = path.relative_to(root).as_posix()
-            if path.is_symlink():
-                tree[relative] = ("link", os.readlink(path), info.st_mtime_ns)
-            elif path.is_dir():
-                tree[relative] = ("dir", info.st_mode, info.st_mtime_ns)
-            else:
-                tree[relative] = ("file", path.read_bytes(), info.st_mode, info.st_mtime_ns)
-    return tree
 
 
 def encoded_json(value):
@@ -408,9 +394,7 @@ class LifecycleTest(unittest.TestCase):
             refused = self.plan(expected=2)
             self.assertIn("package cannot own project or Copilot state: " + reserved, refused.stderr)
             self.assertFalse((self.target / ".rpi/project").exists())
-        spec = importlib.util.spec_from_file_location("lifecycle_reserved", RUNTIME)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
+        module = load_lifecycle()
         for reserved in (".rpi/project", ".RPI/PROJECT/a/b.md", ".rpi/copilot", ".rpi/local/copilot/x"):
             with self.assertRaisesRegex(ValueError, "package cannot own project or Copilot state"):
                 module.safe_relative(reserved)

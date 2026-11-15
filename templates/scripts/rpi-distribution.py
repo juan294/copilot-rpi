@@ -300,7 +300,8 @@ def generated_files(root, manifest, profile, include_examples=False):
                     output = f"{destination}/{relative}"
                     if output in outputs:
                         raise ValueError(f"{cid}: output collision: {output}")
-                    outputs[output] = (data, cid)
+                    # The third element is the authored SKILL.md hash, carried only by the loading entrypoint.
+                    outputs[output] = (data, cid, sha(data) if relative == "SKILL.md" else None)
             else:
                 body = files["SKILL.md"].split(b"\n---\n", 1)[1].decode("utf-8")
                 resources = sorted((item for item in files if item != "SKILL.md"), key=len, reverse=True)
@@ -314,7 +315,7 @@ def generated_files(root, manifest, profile, include_examples=False):
                     resource_output = f".github/prompts/{name}/{relative}"
                     if resource_output in outputs:
                         raise ValueError(f"{cid}: output collision: {resource_output}")
-                    outputs[resource_output] = (data, cid)
+                    outputs[resource_output] = (data, cid, None)
                 text = (
                     f"---\nname: {name}\ndescription: {json.dumps(metadata['description'])}\n"
                     "agent: agent\n---\n\n"
@@ -323,7 +324,7 @@ def generated_files(root, manifest, profile, include_examples=False):
                 )
                 if destination in outputs:
                     raise ValueError(f"{cid}: output collision: {destination}")
-                outputs[destination] = (text.encode(), cid)
+                outputs[destination] = (text.encode(), cid, sha(files["SKILL.md"]))
             names.add(name)
         else:
             if not source.is_file():
@@ -342,7 +343,7 @@ def generated_files(root, manifest, profile, include_examples=False):
                 raise ValueError(f"{cid}: $ARGUMENTS is unsupported Copilot syntax")
             if destination in outputs:
                 raise ValueError(f"{cid}: output collision: {destination}")
-            outputs[destination] = (data, cid)
+            outputs[destination] = (data, cid, None)
             if kind == "root":
                 roots += len(data)
     if roots > manifest["root_budget_bytes"]:
@@ -412,34 +413,17 @@ def validate(root, manifest):
     return all_outputs
 
 
-def authored_entrypoints(root, manifest, outputs):
-    """Map each skill SKILL.md or prompt wrapper output to the hash of its authored SKILL.md source."""
-    entrypoints = {}
-    for component in manifest["components"]:
-        if component["kind"] == "skill":
-            relative = component["destination"] + "/SKILL.md"
-        elif component["kind"] == "prompt":
-            relative = component["destination"]
-        else:
-            continue
-        if relative in outputs and outputs[relative][1] == component["id"]:
-            source = safe_path(root, component["source"] + "/SKILL.md", "authored skill")
-            entrypoints[relative] = sha(source.read_bytes())
-    return entrypoints
-
-
-def render_record(root, manifest, profile, outputs, roots, preserve_ids):
+def render_record(manifest, profile, outputs, roots, preserve_ids):
     files = []
     preserved = []
-    authored = authored_entrypoints(root, manifest, outputs)
-    for relative, (data, cid) in sorted(outputs.items()):
+    for relative, (data, cid, authored) in sorted(outputs.items()):
         if cid in preserve_ids:
             preserved.append(relative)
         else:
             record = {"path": relative, "component": cid, "sha256": sha(data)}
-            if relative in authored:
+            if authored:
                 # Overlays compare against the authored skill text, the same in every profile.
-                record["authored_sha256"] = authored[relative]
+                record["authored_sha256"] = authored
             files.append(record)
     return {
         "schema_version": 1, "source_version": manifest["version"], "profile": profile,
@@ -457,7 +441,7 @@ def render(root, manifest, profile, target, include_examples=False):
     outputs, roots = generated_files(root, manifest, profile, include_examples)
     target.mkdir(parents=True, exist_ok=True)
     preserve_ids = set(manifest["self_application"].get("preserve", [])) if target == root else set()
-    record = render_record(root, manifest, profile, outputs, roots, preserve_ids)
+    record = render_record(manifest, profile, outputs, roots, preserve_ids)
     runtime = {}
     if target != root:
         for name in (
@@ -480,7 +464,7 @@ def render(root, manifest, profile, target, include_examples=False):
                 runtime[relative] = source.read_bytes()
             record["files"].append({"path": relative, "component": f"runtime:{name}", "sha256": sha(runtime[relative])})
         record["files"].sort(key=lambda item: item["path"])
-    for relative, (data, cid) in sorted(outputs.items()):
+    for relative, (data, cid, _) in sorted(outputs.items()):
         if cid in preserve_ids:
             continue
         path = safe_path(target, relative, "output")
@@ -500,7 +484,7 @@ def check_generated(root, manifest, profile):
     outputs = validate(root, manifest)[profile]
     preserve = set(manifest["self_application"].get("preserve", []))
     failed = []
-    for relative, (data, cid) in sorted(outputs.items()):
+    for relative, (data, cid, _) in sorted(outputs.items()):
         if cid in preserve:
             print(f"preserved owner file: {relative}")
             continue
@@ -508,7 +492,7 @@ def check_generated(root, manifest, profile):
         if not path.is_file() or path.read_bytes() != data:
             failed.append(relative)
     _, roots = generated_files(root, manifest, profile)
-    expected_receipt = json.dumps(render_record(root, manifest, profile, outputs, roots, preserve), indent=2).encode() + b"\n"
+    expected_receipt = json.dumps(render_record(manifest, profile, outputs, roots, preserve), indent=2).encode() + b"\n"
     receipt_path = safe_path(root, OUTPUT_MANIFEST, "render receipt")
     if not receipt_path.is_file() or receipt_path.read_bytes() != expected_receipt:
         print(f"BLOCKED: render receipt drift: {OUTPUT_MANIFEST}")

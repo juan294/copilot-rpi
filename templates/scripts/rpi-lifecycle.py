@@ -185,18 +185,24 @@ def safe_relative(value):
     return value
 
 
+def is_sha256(value):
+    return isinstance(value, str) and re.fullmatch('[0-9a-f]{64}', value) is not None
+
+
+def entrypoint_path(kind, name):
+    """The file that loads a skill: SKILL.md for a skill, the wrapper for a prompt; None for other kinds."""
+    return {'skill': '.github/skills/' + name + '/SKILL.md', 'prompt': '.github/prompts/' + name + '.prompt.md'}.get(kind)
+
+
 def authored_entrypoint(component, relative):
     """Only a skill SKILL.md or a prompt wrapper records the authored skill hash."""
     if not isinstance(component, str) or ':' not in component:
         return False
-    kind, name = component.split(':', 1)
-    return ((kind == 'skill' and relative == '.github/skills/' + name + '/SKILL.md') or
-            (kind == 'prompt' and relative == '.github/prompts/' + name + '.prompt.md'))
+    return entrypoint_path(*component.split(':', 1)) == relative
 
 
 def valid_authored(record, relative):
-    value = record.get('authored_sha256')
-    return (isinstance(value, str) and re.fullmatch('[0-9a-f]{64}', value) is not None and
+    return (is_sha256(record.get('authored_sha256')) and
             authored_entrypoint(record.get('component', record.get('component_id')), relative))
 
 
@@ -236,7 +242,7 @@ def package_files(package, profile):
         raise ValueError('invalid package render receipt or profile')
     files = {}
     for item in receipt['files']:
-        if not isinstance(item, dict) or not isinstance(item.get('component'), str) or not re.fullmatch('[0-9a-f]{64}', item.get('sha256', '')):
+        if not isinstance(item, dict) or not isinstance(item.get('component'), str) or not is_sha256(item.get('sha256')):
             raise ValueError('invalid package file record')
         relative = item.get('path')
         if isinstance(relative, str) and relative.startswith('.rpi/copilot/runtime/') and item['component'].startswith('runtime:'):
@@ -254,8 +260,9 @@ def package_files(package, profile):
         if node['kind'] != 'file' or node['sha256'] != item['sha256']:
             raise Conflict('package file changed from receipt: ' + relative)
         if not item['component'].startswith('runtime:'):
-            files[relative] = {'component_id': item['component'], 'data': node_bytes(node),
-                               **({'authored_sha256': item['authored_sha256']} if 'authored_sha256' in item else {})}
+            files[relative] = {'component_id': item['component'], 'data': node_bytes(node)}
+            if 'authored_sha256' in item:
+                files[relative]['authored_sha256'] = item['authored_sha256']
     return receipt, files, receipt_node['sha256']
 
 
@@ -287,7 +294,7 @@ def load_state(state):
             raise ValueError('invalid Copilot ownership entry')
         path = safe_relative(entry.get('destination'))
         if (path in seen or not permitted_product_path(entry.get('component_id'), path) or
-                not re.fullmatch('[0-9a-f]{64}', entry.get('base_hash', ''))):
+                not is_sha256(entry.get('base_hash'))):
             raise ValueError('invalid or duplicate Copilot ownership entry')
         if 'authored_sha256' in entry and not valid_authored(entry, path):
             raise ValueError('invalid Copilot ownership entry')
@@ -297,7 +304,7 @@ def load_state(state):
             raise ValueError('invalid Copilot configuration ownership entry')
         if (entry.get('destination') != '.vscode/settings.json' or
                 entry['record'] != VSCODE_SETTING_RECORD or
-                not re.fullmatch('[0-9a-f]{64}', entry.get('base_hash', ''))):
+                not is_sha256(entry.get('base_hash'))):
             raise ValueError('invalid Copilot configuration ownership entry')
     return value
 
@@ -464,9 +471,11 @@ def make_plan(request):
             if proposed:
                 base_hash = digest(upstream)
                 baselines[base_hash] = upstream
-                new_entries.append({'destination': relative, 'component_id': proposed['component_id'], 'base_hash': base_hash,
-                                    'status': 'clean' if result == upstream else 'local-only',
-                                    **({'authored_sha256': proposed['authored_sha256']} if 'authored_sha256' in proposed else {})})
+                entry = {'destination': relative, 'component_id': proposed['component_id'], 'base_hash': base_hash,
+                         'status': 'clean' if result == upstream else 'local-only'}
+                if 'authored_sha256' in proposed:
+                    entry['authored_sha256'] = proposed['authored_sha256']
+                new_entries.append(entry)
             if result != local:
                 action = 'create' if local is None else 'remove' if result is None else 'update'
                 actions.append({'destination': relative, 'component_id': (proposed or prior)['component_id'], 'action': action})
@@ -830,13 +839,32 @@ OVERRIDE_FIELDS = ('Override', 'Reason', 'Source', 'Owner decision')
 NOT_REGULAR = 'not a regular file; symlinks and directories are not overlays'
 
 
+ITEM_FIELDS = ('file', 'skill', 'status', 'reason', 'fix', 'written_against', 'current', 'header_line', 'overrides')
+NO_HASH = 'staleness is not checked until the next update records authored hashes'
+
+
 def overlay_header(skill, written_against):
     return '<!-- rpi-overlay: skill=' + skill + '; written-against=' + written_against + ' -->'
 
 
+def overlay_record(file, **fields):
+    """A project_overlays item; every item carries the same fields."""
+    return {**dict.fromkeys(ITEM_FIELDS), 'status': 'present', 'file': file, **fields}
+
+
+def installation_record(status, reason=None, fix=None):
+    return {'status': status, 'manifest': STATE + '/manifest.json', 'profile': None, 'source_version': None,
+            'drift': [], 'reason': reason, 'fix': fix}
+
+
+def check_fix(target):
+    """The check command; the manifest does not record the package path, so the documented variables stand in."""
+    return engine_command('check', '--target', target) + ' --package "$package_dir" --profile "$selected_profile"'
+
+
 def skill_copy(skill, profile):
     """The installed file that a profile loads for a workflow skill."""
-    return '.github/prompts/' + skill + '.prompt.md' if profile == 'vscode-local' else '.github/skills/' + skill + '/SKILL.md'
+    return entrypoint_path('prompt' if profile == 'vscode-local' else 'skill', skill)
 
 
 def declared_overrides(text):
@@ -864,19 +892,14 @@ def declared_overrides(text):
 
 def installation_report(target, state):
     """Summarize the ownership manifest and drift from recorded baselines without writing anything."""
-    report = {'status': 'missing', 'manifest': STATE + '/manifest.json', 'profile': None, 'source_version': None,
-              'drift': [], 'reason': None, 'fix': None}
-    check_command = engine_command('check', '--target', target) + ' --package "$package_dir" --profile "$selected_profile"'
     try:
         manifest = load_state(state)
     except (OSError, ValueError, KeyError, TypeError, RecursionError) as exc:
-        report.update(status='unreadable', reason=str(exc),
-                      fix='repair or restore ' + report['manifest'] + ', then run ' + check_command)
-        return report, None
+        return installation_record('unreadable', str(exc), 'repair or restore ' + STATE + '/manifest.json, then run ' +
+                                   check_fix(target)), None
     if manifest is None:
-        report.update(reason='no Copilot RPI ownership manifest',
-                      fix='install Copilot RPI with rpi-adopt or rpi-bootstrap, then run ' + check_command)
-        return report, None
+        return installation_record('missing', 'no Copilot RPI ownership manifest',
+                                   'install Copilot RPI with rpi-adopt or rpi-bootstrap, then run ' + check_fix(target)), None
     drift = []
     for entry in manifest['entries']:
         try:
@@ -887,9 +910,9 @@ def installation_report(target, state):
             drift.append({'destination': entry['destination'], 'state': 'missing'})
         elif node['kind'] != 'file' or node['sha256'] != entry['base_hash']:
             drift.append({'destination': entry['destination'], 'state': 'modified'})
+    report = installation_record('present')
     text = lambda value: value if isinstance(value, str) else None
-    report.update(status='present', profile=text(manifest.get('profile')),
-                  source_version=text(manifest.get('source_version')),
+    report.update(profile=text(manifest.get('profile')), source_version=text(manifest.get('source_version')),
                   drift=sorted(drift, key=lambda item: item['destination']))
     return report, manifest
 
@@ -912,16 +935,24 @@ def read_overlay(path):
         os.close(descriptor)
 
 
-def overlay_item(target, entry, manifest):
-    item = {'file': PROJECT + '/' + entry.name, 'skill': None, 'status': 'present', 'reason': None, 'fix': None,
-            'written_against': None, 'current': None, 'header_line': None, 'overrides': None}
+def installed_bytes(target, relative):
+    """Bytes of an installed regular file, or None when it is missing, a symlink or unreachable."""
+    try:
+        path = bound_path(target, relative)
+        return path.read_bytes() if not path.is_symlink() and path.is_file() else None
+    except (Conflict, OSError):
+        return None
+
+
+def overlay_item(target, entry, profile, recorded):
+    item = overlay_record(PROJECT + '/' + entry.name)
 
     def invalid(reason, fix):
         item.update(status='invalid', reason=reason, fix=fix)
         return item
 
     regular_fix = 'replace ' + item['file'] + ' with a regular file, or remove it'
-    if entry.is_symlink() or not entry.is_file(follow_symlinks=False):
+    if not entry.is_file(follow_symlinks=False):
         return invalid(NOT_REGULAR, regular_fix)
     if entry.name != entry.name.lower():
         return invalid('overlay file names are lowercase', 'rename ' + item['file'] + ' to ' + PROJECT + '/' + entry.name.lower())
@@ -933,11 +964,9 @@ def overlay_item(target, entry, manifest):
         return invalid('not a workflow skill that reads a project overlay',
                        'rename or remove ' + item['file'] + '; docs/project-overlay.md lists the workflow skills')
     item['skill'] = skill
-    profile = (manifest or {}).get('profile')
     # Without a readable profile, inspect both copies: cli and agent-host share the skill path.
-    copies = sorted({skill_copy(skill, profile)} if profile in ('cli', 'agent-host', 'vscode-local') else
-                    {skill_copy(skill, 'cli'), skill_copy(skill, 'vscode-local')})
-    recorded = {record['destination']: record.get('authored_sha256') for record in (manifest or {}).get('entries', [])}
+    copies = ([skill_copy(skill, profile)] if profile in ('cli', 'agent-host', 'vscode-local') else
+              [skill_copy(skill, 'cli'), skill_copy(skill, 'vscode-local')])
     hashes = {recorded.get(copy) for copy in copies} - {None}
     if len(hashes) == 1:
         item['current'] = hashes.pop()[:12]
@@ -957,25 +986,21 @@ def overlay_item(target, entry, manifest):
         return invalid('not UTF-8 text', 'save ' + item['file'] + ' as UTF-8')
     header = OVERLAY_HEADER.fullmatch(text.partition('\n')[0].strip())
     if not header or header[1] != skill:
-        return invalid('the first line is not the rpi-overlay header for ' + skill,
-                       'make the first line ' + item['header_line'] if item['header_line'] else
-                       'update the installation so it records authored hashes, then make the first line '
-                       'the header_line that diagnose prints')
+        header_fix = ('make the first line ' + item['header_line'] if item['header_line'] else
+                      'make the first line ' + overlay_header(skill, '<12 hex characters>') +
+                      '; no authored hash is recorded yet, so any 12 hex characters are accepted')
+        return invalid('the first line is not the rpi-overlay header for ' + skill, header_fix)
     item['written_against'] = header[2]
     item['overrides'], override_problem = declared_overrides(text)
-    installed = []
-    for copy in copies:
-        try:
-            node = snapshot(bound_path(target, copy))
-        except (Conflict, OSError):
-            continue
-        if node['kind'] == 'file':
-            installed.append(node_bytes(node))
+    installed = [installed_bytes(target, copy) for copy in copies]
+    installed = [copy_bytes for copy_bytes in installed if copy_bytes is not None]
     if not installed or any(not OVERLAY_SECTION.search(copy_bytes) for copy_bytes in installed):
         item.update(status='inert',
                     reason='the installed ' + ' or '.join(copies) + ' is missing or has no ## Project overlay section',
                     fix='update the Copilot RPI installation with rpi-update, then rerun diagnose')
-    elif item['current'] and item['current'] != item['written_against']:
+    elif not item['current']:
+        item['reason'] = NO_HASH
+    elif item['current'] != item['written_against']:
         item.update(status='stale', reason='the stock skill changed since the overlay was reviewed',
                     fix='review the overlay against the installed skill, then replace its first line with header_line')
     if override_problem:
@@ -988,9 +1013,8 @@ def overlay_item(target, entry, manifest):
 def project_overlays(target, manifest):
     """One item per .rpi/project/*.md with a fixed field set; dotfiles and other names are skipped."""
     def directory_problem(reason, path=PROJECT):
-        return [{'file': PROJECT, 'skill': None, 'status': 'invalid', 'reason': reason,
-                 'fix': 'make ' + str(path) + ' a regular directory inside the project, not a symlink',
-                 'written_against': None, 'current': None, 'header_line': None, 'overrides': None}]
+        return [overlay_record(PROJECT, status='invalid', reason=reason,
+                               fix='make ' + str(path) + ' a regular directory inside the project, not a symlink')]
     try:
         directory = bound_path(target, PROJECT)
         if not stat.S_ISDIR(os.lstat(directory).st_mode):
@@ -1006,14 +1030,16 @@ def project_overlays(target, manifest):
         return directory_problem(str(exc), str(exc).partition(': ')[2] or PROJECT)
     except OSError as exc:
         return directory_problem('unreadable: ' + type(exc).__name__)
+    profile = (manifest or {}).get('profile')
+    recorded = {record['destination']: record.get('authored_sha256') for record in (manifest or {}).get('entries', [])}
     items = []
     for entry in selected:
         try:
-            items.append(overlay_item(target, entry, manifest))
+            items.append(overlay_item(target, entry, profile, recorded))
         except (Conflict, OSError) as exc:
-            items.append({'file': PROJECT + '/' + entry.name, 'skill': None, 'status': 'invalid',
-                          'reason': 'unreadable: ' + type(exc).__name__, 'fix': 'make the file a readable regular file',
-                          'written_against': None, 'current': None, 'header_line': None, 'overrides': None})
+            items.append(overlay_record(PROJECT + '/' + entry.name, status='invalid',
+                                        reason='unreadable: ' + type(exc).__name__,
+                                        fix='make the file a readable regular file'))
     return items
 
 
@@ -1023,9 +1049,8 @@ def diagnose(target):
     try:
         target, state, _ = state_paths(target)
     except (OSError, ValueError) as exc:
-        report['installation'] = {'status': 'unreadable', 'manifest': STATE + '/manifest.json', 'profile': None,
-                                  'source_version': None, 'drift': [], 'reason': str(exc),
-                                  'fix': 'pass an existing project directory that is not a symlink to diagnose --target'}
+        report['installation'] = installation_record(
+            'unreadable', str(exc), 'pass an existing project directory that is not a symlink to diagnose --target')
         return report
     report['target'] = str(target)
     report['installation'], manifest = installation_report(target, state)
@@ -1065,11 +1090,8 @@ def command(argv=None):
             report = diagnose(args.target)
         except Exception as exc:  # The contract is exit 0 with a report; never echo exception text here.
             report = {'schema_version': 1, 'target': str(args.target.absolute()), 'project_overlays': [],
-                      'installation': {'status': 'unreadable', 'manifest': STATE + '/manifest.json', 'profile': None,
-                                       'source_version': None, 'drift': [],
-                                       'reason': 'diagnose stopped on ' + type(exc).__name__,
-                                       'fix': 'run ' + engine_command('check', '--target', args.target.absolute()) +
-                                              ' --package "$package_dir" --profile "$selected_profile"'}}
+                      'installation': installation_record('unreadable', 'diagnose stopped on ' + type(exc).__name__,
+                                                          'run ' + check_fix(args.target.absolute()))}
         print(json.dumps(report, sort_keys=True))
         return 0
     try:

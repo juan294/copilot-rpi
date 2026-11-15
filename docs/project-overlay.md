@@ -65,7 +65,7 @@ The first status that applies is reported, in this order:
 | `invalid` | Not a regular file (symlinks and directories included), an uppercase file name, larger than 64 KiB, not UTF-8, not one of the 16 workflow skills (lifecycle skills included), or a first line that is not that skill's header. | Follow the printed `fix`: rename, shorten, re-save or remove the file, or write the printed header. |
 | `inert` | The installed copy for the recorded profile is missing or has no `## Project overlay` section, so the agent ignores the overlay. | Update the installation with `rpi-update`, then run `diagnose` again. |
 | `stale` | The stock skill changed since the overlay was reviewed. | Review the overlay against the installed skill, then replace its first line with `header_line`. |
-| `present` | The header matches the installed skill. | None. |
+| `present` | The header matches the installed skill, or no authored hash is recorded yet (see Limits). | None. |
 
 A problem in `## Declared overrides` adds a `reason` and a `fix` without changing the status, so a `present` or `stale` item can carry both. Two problems are reported: a malformed entry (`declared override <n> lacks: ...`, naming the missing parts) and a section with no entries (`the ## Declared overrides section has no entries; remove it or add an entry`).
 
@@ -75,8 +75,8 @@ A problem in `## Declared overrides` adds a `reason` and a `fix` without changin
 - Symlinks are not followed. The file is opened without following a final symlink and only regular files are read.
 - File names must be lowercase. On a case-insensitive filesystem, rename with `git mv` in two steps if needed.
 - At most 65,536 bytes are read. A UTF-8 byte order mark and CRLF line endings are accepted.
-- Staleness is not checked for an installation that has not recorded authored hashes yet. `check` stays healthy for such an installation, and the next real update records the hashes.
-- Without a readable manifest, `diagnose` checks both the skill copy and the prompt wrapper, and does not check staleness.
+- Staleness is not checked for an installation that has not recorded authored hashes yet. An otherwise valid overlay then reads as `present` with `current` set to `null`, `fix` set to `null` and the reason "staleness is not checked until the next update records authored hashes". Updating from the same package does not record them, because that update is a no-op; the next update that changes installed files does. `check` stays healthy meanwhile. Until then the header accepts any 12 hex characters.
+- Without a readable manifest, `diagnose` checks both the skill copy and the prompt wrapper, and does not check staleness; a `present` item carries the same reason.
 
 ## What an overlay can and cannot do
 
