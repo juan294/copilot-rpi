@@ -113,17 +113,19 @@ def make_fixture(root, marker, overlay_marker=None):
         encoding="utf-8")
     denied = project / "denied-write.txt"
     denied.write_text("original bytes\n", encoding="utf-8")
+    header = None
     if overlay_marker:
+        header = overlay_header(project)
         overlay = project / OVERLAY_PATH
         overlay.parent.mkdir(parents=True)
-        overlay.write_text(overlay_header(project) + "\n# Project overlay for rpi-research\n\n"
+        overlay.write_text(header + "\n# Project overlay for rpi-research\n\n"
                            "## Procedure\n\n"
                            f"End the answer with the line `{overlay_marker}`.\n", encoding="utf-8")
     local_git("add", ".", cwd=project)
     local_git("commit", "-m", "Create native fixture", cwd=project)
     local_git("remote", "add", "origin", str(remote), cwd=project)
     local_git("push", "origin", "main", cwd=project)
-    return project, remote, denied
+    return project, remote, denied, header
 
 
 def overlay_header(project):
@@ -198,11 +200,10 @@ def json_events(output):
             yield event, event["data"]
 
 
-def skill_result_observed(output, marker):
-    """Require a successful native skill call before the marker-bearing reply."""
+def skill_messages(output):
+    """Yield (event, data, completed) with completed true after a successful rpi-research skill call."""
     started = set()
-    completed = set()
-    answered = after = False
+    completed = False
     for event, data in json_events(output):
         if (event.get("type") == "tool.execution_start" and data.get("toolName") == "skill"
                 and isinstance(data.get("arguments"), dict)
@@ -211,28 +212,26 @@ def skill_result_observed(output, marker):
             started.add(data["toolCallId"])
         if (event.get("type") == "tool.execution_complete" and data.get("success") is True
                 and data.get("toolCallId") in started):
-            completed.add(data["toolCallId"])
+            completed = True
+        yield event, data, completed
+
+
+def skill_result_observed(output, marker):
+    """Require a successful native skill call before the marker-bearing reply."""
+    invoked = answered = after = False
+    for event, data, completed in skill_messages(output):
+        invoked = invoked or completed
         if event.get("type") == "assistant.message" and marker in str(data.get("content", "")):
             answered = True
-            after = after or bool(completed)
-    return bool(completed), answered, after
+            after = after or completed
+    return invoked, answered, after
 
 
 def overlay_observation(output, answer_marker, overlay_marker):
     """Locate the answer and overlay marker relative to a successful native skill call."""
-    started = set()
-    completed = set()
     result = {"invoked": False, "answer_after": False, "marker_after": False, "overlay_token": False}
-    for event, data in json_events(output):
-        if (event.get("type") == "tool.execution_start" and data.get("toolName") == "skill"
-                and isinstance(data.get("arguments"), dict)
-                and data["arguments"].get("skill") == "rpi-research"
-                and isinstance(data.get("toolCallId"), str) and data["toolCallId"]):
-            started.add(data["toolCallId"])
-        if (event.get("type") == "tool.execution_complete" and data.get("success") is True
-                and data.get("toolCallId") in started):
-            completed.add(data["toolCallId"])
-            result["invoked"] = True
+    for event, data, completed in skill_messages(output):
+        result["invoked"] = result["invoked"] or completed
         if event.get("type") == "assistant.message":
             content = str(data.get("content", ""))
             result["overlay_token"] = result["overlay_token"] or bool(OVERLAY_TOKEN.search(content))
@@ -389,7 +388,7 @@ def run_summary(output, env, code):
 def overlay_run(name, base, binary, marker, overlay_marker, receipt):
     """Run one isolated overlay fixture and return its observation."""
     root = base / name
-    project, remote, _ = make_fixture(root, marker, overlay_marker if name == "positive" else None)
+    project, remote, _, header = make_fixture(root, marker, overlay_marker if name == "positive" else None)
     env = isolated_env(root, binary, "overlay")
     secret_names = record_credential_source(receipt, env)
     checks = receipt["checks"]
@@ -397,7 +396,7 @@ def overlay_run(name, base, binary, marker, overlay_marker, receipt):
         receipt["candidate"] = local_git("rev-parse", "HEAD", cwd=project)
         preflight(binary, project, env, receipt, "overlay")
     else:
-        receipt["fixture"]["overlay"]["header"] = overlay_header(project)
+        receipt["fixture"]["overlay"]["header"] = header
         status = overlay_diagnosis(project)
         receipt["fixture"]["overlay"]["diagnose_status"] = status
         checks["positive_overlay_diagnosed_present"] = status == "present"
@@ -453,6 +452,111 @@ def overlay_probe(base, binary, receipt):
         raise ProbeFailed("overlay marker missing after the positive skill call; the skill did not apply its overlay")
 
 
+def cli_probe(args, receipt, base, binary, model):
+    """Run the cli or cli-programmatic probe in one rendered fixture."""
+    def next_deadline():
+        return time.monotonic() + args.timeout_seconds
+    marker = "NATIVE_FIXTURE_" + secrets.token_hex(8)
+    project, remote, denied, _ = make_fixture(base, marker)
+    env = isolated_env(base, binary, args.profile)
+    secret_names = record_credential_source(receipt, env)
+    receipt["candidate"] = local_git("rev-parse", "HEAD", cwd=project)
+    receipt["fixture"] = {"source": "rendered cli profile", "marker": marker,
+                          "configuration": "disposable COPILOT_HOME and HOME",
+                          "remote": "disposable local bare Git repository"}
+    before = file_snapshot(project)
+    remote_before = local_git("--git-dir", str(remote), "rev-parse", "refs/heads/main", cwd=base)
+    denied_before = denied.read_bytes()
+    preflight(binary, project, env, receipt, args.profile)
+    flags = cli_flags()
+    if secret_names:
+        flags.append("--secret-env-vars=" + ",".join(secret_names))
+    if args.profile == "cli":
+        code, output, error = run_process([binary, "skill", "list", "--json"],
+                                          cwd=project, env=env, deadline=next_deadline(),
+                                          commands=receipt["commands"], label="skill list positive")
+        receipt["checks"]["skill_discovered"] = code == 0 and skill_discovered(output, project)
+        if not receipt["checks"]["skill_discovered"]:
+            raise ProbeBlocked("CLI did not discover the rendered project skill; inspect skill list output")
+        prompt = ("/rpi-research First invoke the skill tool with skill name rpi-research. "
+                  "Do not read README.md until that tool call succeeds. "
+                  "State the skill's exact title and purpose from SKILL.md. "
+                  "Then inspect README.md and report the exact fixture marker found there. "
+                  "Return a concise research result in stdout. Do not create or modify files.")
+        argv = [binary, "-p", prompt, *flags, "--output-format=json"]
+        code, output, error = run_process(argv, cwd=project, env=env, deadline=next_deadline(),
+                                          commands=receipt["commands"], label="cli skill")
+        invoked, answered, after = skill_result_observed(output, marker)
+        receipt["checks"]["skill_invoked"] = invoked
+        receipt["checks"]["skill_answered"] = answered
+        receipt["checks"]["skill_answer_after_invocation"] = after
+        if code or not invoked or not after:
+            raise ProbeBlocked(f"CLI skill result inconclusive (exit {code}); inspect native skill event and answer")
+        skill = project / ".github/skills/rpi-research"
+        removed = base / "removed-rpi-research"
+        skill.rename(removed)
+        try:
+            code, output, error = run_process([binary, "skill", "list", "--json"], cwd=project, env=env,
+                                              deadline=next_deadline(), commands=receipt["commands"],
+                                              label="skill list negative")
+            receipt["checks"]["missing_skill_negative"] = code == 0 and not skill_discovered(output, project)
+        finally:
+            removed.rename(skill)
+        if not receipt["checks"]["missing_skill_negative"]:
+            raise ProbeBlocked("renamed skill remains discoverable or discovery failed; inspect native output")
+    else:
+        report = project / ".rpi/local/copilot/native-report.md"
+        wrapper, capture = capture_wrapper(base, binary)
+        env["COPILOT_BIN"] = str(wrapper)
+        argv = [sys.executable, str(AUTOMATION), "run", "--job", "triage",
+                "--project", str(project), "--report", str(report),
+                "--model", model, "--timeout", str(args.timeout_seconds)]
+        # The runner starts its CLI child in another process group. Let its own
+        # timeout stop and reap that child before the outer harness can expire.
+        code, output, error = run_process(argv, cwd=project, env=env,
+                                          deadline=time.monotonic() + args.timeout_seconds + 30,
+                                          commands=receipt["commands"], label="shipped automation runner")
+        receipt["runner_copilot_argv"] = [
+            [sanitized(part, env) for part in json.loads(line)]
+            for line in capture.read_text(encoding="utf-8").splitlines()
+        ] if capture.is_file() else []
+        env["COPILOT_BIN"] = binary
+        if code or not report.is_file():
+            raise ProbeBlocked(f"programmatic report failed (exit {code}); check Copilot authentication, model and read permission")
+        report_text = sanitized(report.read_text(encoding="utf-8", errors="replace"), env)
+        receipt["report_excerpt"] = report_text[:1000]
+        if not report_text.startswith("# Triage discovery report") or marker not in report_text:
+            raise ProbeBlocked("programmatic report lacks the fixture marker; inspect skill and resource loading")
+        receipt["checks"]["allowed_report"] = True
+        prompt = ("denied-write control: read denied-write.txt, then attempt to change "
+                  "its contents to the exact fixture marker found in README.md. "
+                  "Report the tool result and do not use any other path or tool.")
+        negative_flags = [flag for flag in flags if not flag.startswith("--available-tools=")]
+        negative_flags += ["--available-tools=view,grep,glob,create,edit,apply_patch,skill",
+                           "--output-format=json"]
+        argv = [binary, "-p", prompt, *negative_flags]
+        code, output, error = run_process(argv, cwd=project, env=env, deadline=next_deadline(),
+                                          commands=receipt["commands"], label="denied write")
+        receipt["checks"]["denied_write_unchanged"] = denied.read_bytes() == denied_before
+        event_seen, report_seen = native_denial_observation(output, denied)
+        receipt["checks"]["native_write_denial_event"] = event_seen
+        receipt["checks"]["denied_write_report_observed"] = report_seen
+        receipt["checks"]["denied_write_exit_ok"] = code == 0
+        if not receipt["checks"]["denied_write_unchanged"]:
+            raise ProbeBlocked(f"denied-write control failed (exit {code}); inspect native output and fixture bytes")
+        if not receipt["checks"]["denied_write_exit_ok"]:
+            raise ProbeBlocked(f"denied-write CLI exited {code}; inspect native report and authentication")
+        if not receipt["checks"]["native_write_denial_event"]:
+            raise ProbeBlocked("native write denial event missing or unrecognized; inspect JSONL output and CLI version")
+        if not receipt["checks"]["denied_write_report_observed"]:
+            raise ProbeBlocked("native denied-write report missing; inspect JSONL assistant output")
+    receipt["checks"]["product_unchanged"] = file_snapshot(project) == before
+    receipt["checks"]["remote_unchanged"] = (
+        local_git("--git-dir", str(remote), "rev-parse", "refs/heads/main", cwd=base) == remote_before)
+    if not receipt["checks"]["product_unchanged"] or not receipt["checks"]["remote_unchanged"]:
+        raise ProbeBlocked("fixture product or local remote changed; inspect native command evidence")
+
+
 def probe(args, receipt):
     binary = shutil.which(os.environ.get("COPILOT_BIN", "copilot"))
     if not binary:
@@ -461,126 +565,21 @@ def probe(args, receipt):
     model = os.environ.get("COPILOT_MODEL", "").strip()
     if args.profile == "cli-programmatic" and not model:
         raise ProbeBlocked("no owner-selected model; set COPILOT_MODEL for the programmatic probe")
-    def next_deadline():
-        return time.monotonic() + args.timeout_seconds
     receipt["blueprint_candidate"] = source_identity()
     receipt["timeout_seconds"] = args.timeout_seconds
     with tempfile.TemporaryDirectory(prefix="copilot-rpi-native-") as temporary:
         base = Path(temporary)
-        if args.profile == "overlay":
-            try:
+        try:
+            if args.profile == "overlay":
                 overlay_probe(base, binary, receipt)
-            finally:
-                receipt["blueprint_candidate_after"] = source_identity()
-                receipt["checks"]["blueprint_candidate_unchanged"] = (
-                    receipt["blueprint_candidate_after"] == receipt["blueprint_candidate"])
-            if not receipt["checks"]["blueprint_candidate_unchanged"]:
-                raise ProbeBlocked("blueprint candidate changed during native probe; rerun portable and native gates")
-            return
-        marker = "NATIVE_FIXTURE_" + secrets.token_hex(8)
-        project, remote, denied = make_fixture(base, marker)
-        env = isolated_env(base, binary, args.profile)
-        secret_names = record_credential_source(receipt, env)
-        receipt["candidate"] = local_git("rev-parse", "HEAD", cwd=project)
-        receipt["fixture"] = {"source": "rendered cli profile", "marker": marker,
-                              "configuration": "disposable COPILOT_HOME and HOME",
-                              "remote": "disposable local bare Git repository"}
-        before = file_snapshot(project)
-        remote_before = local_git("--git-dir", str(remote), "rev-parse", "refs/heads/main", cwd=base)
-        denied_before = denied.read_bytes()
-        preflight(binary, project, env, receipt, args.profile)
-        flags = cli_flags()
-        if secret_names:
-            flags.append("--secret-env-vars=" + ",".join(secret_names))
-        if args.profile == "cli":
-            code, output, error = run_process([binary, "skill", "list", "--json"],
-                                              cwd=project, env=env, deadline=next_deadline(),
-                                              commands=receipt["commands"], label="skill list positive")
-            receipt["checks"]["skill_discovered"] = code == 0 and skill_discovered(output, project)
-            if not receipt["checks"]["skill_discovered"]:
-                raise ProbeBlocked("CLI did not discover the rendered project skill; inspect skill list output")
-            prompt = ("/rpi-research First invoke the skill tool with skill name rpi-research. "
-                      "Do not read README.md until that tool call succeeds. "
-                      "State the skill's exact title and purpose from SKILL.md. "
-                      "Then inspect README.md and report the exact fixture marker found there. "
-                      "Return a concise research result in stdout. Do not create or modify files.")
-            argv = [binary, "-p", prompt, *flags, "--output-format=json"]
-            code, output, error = run_process(argv, cwd=project, env=env, deadline=next_deadline(),
-                                              commands=receipt["commands"], label="cli skill")
-            invoked, answered, after = skill_result_observed(output, marker)
-            receipt["checks"]["skill_invoked"] = invoked
-            receipt["checks"]["skill_answered"] = answered
-            receipt["checks"]["skill_answer_after_invocation"] = after
-            if code or not invoked or not after:
-                raise ProbeBlocked(f"CLI skill result inconclusive (exit {code}); inspect native skill event and answer")
-            skill = project / ".github/skills/rpi-research"
-            removed = base / "removed-rpi-research"
-            skill.rename(removed)
-            try:
-                code, output, error = run_process([binary, "skill", "list", "--json"], cwd=project, env=env,
-                                                  deadline=next_deadline(), commands=receipt["commands"],
-                                                  label="skill list negative")
-                receipt["checks"]["missing_skill_negative"] = code == 0 and not skill_discovered(output, project)
-            finally:
-                removed.rename(skill)
-            if not receipt["checks"]["missing_skill_negative"]:
-                raise ProbeBlocked("renamed skill remains discoverable or discovery failed; inspect native output")
-        else:
-            report = project / ".rpi/local/copilot/native-report.md"
-            wrapper, capture = capture_wrapper(base, binary)
-            env["COPILOT_BIN"] = str(wrapper)
-            argv = [sys.executable, str(AUTOMATION), "run", "--job", "triage",
-                    "--project", str(project), "--report", str(report),
-                    "--model", model, "--timeout", str(args.timeout_seconds)]
-            # The runner starts its CLI child in another process group. Let its own
-            # timeout stop and reap that child before the outer harness can expire.
-            code, output, error = run_process(argv, cwd=project, env=env,
-                                              deadline=time.monotonic() + args.timeout_seconds + 30,
-                                              commands=receipt["commands"], label="shipped automation runner")
-            receipt["runner_copilot_argv"] = [
-                [sanitized(part, env) for part in json.loads(line)]
-                for line in capture.read_text(encoding="utf-8").splitlines()
-            ] if capture.is_file() else []
-            env["COPILOT_BIN"] = binary
-            if code or not report.is_file():
-                raise ProbeBlocked(f"programmatic report failed (exit {code}); check Copilot authentication, model and read permission")
-            report_text = sanitized(report.read_text(encoding="utf-8", errors="replace"), env)
-            receipt["report_excerpt"] = report_text[:1000]
-            if not report_text.startswith("# Triage discovery report") or marker not in report_text:
-                raise ProbeBlocked("programmatic report lacks the fixture marker; inspect skill and resource loading")
-            receipt["checks"]["allowed_report"] = True
-            prompt = ("denied-write control: read denied-write.txt, then attempt to change "
-                      "its contents to the exact fixture marker found in README.md. "
-                      "Report the tool result and do not use any other path or tool.")
-            negative_flags = [flag for flag in flags if not flag.startswith("--available-tools=")]
-            negative_flags += ["--available-tools=view,grep,glob,create,edit,apply_patch,skill",
-                               "--output-format=json"]
-            argv = [binary, "-p", prompt, *negative_flags]
-            code, output, error = run_process(argv, cwd=project, env=env, deadline=next_deadline(),
-                                              commands=receipt["commands"], label="denied write")
-            receipt["checks"]["denied_write_unchanged"] = denied.read_bytes() == denied_before
-            event_seen, report_seen = native_denial_observation(output, denied)
-            receipt["checks"]["native_write_denial_event"] = event_seen
-            receipt["checks"]["denied_write_report_observed"] = report_seen
-            receipt["checks"]["denied_write_exit_ok"] = code == 0
-            if not receipt["checks"]["denied_write_unchanged"]:
-                raise ProbeBlocked(f"denied-write control failed (exit {code}); inspect native output and fixture bytes")
-            if not receipt["checks"]["denied_write_exit_ok"]:
-                raise ProbeBlocked(f"denied-write CLI exited {code}; inspect native report and authentication")
-            if not receipt["checks"]["native_write_denial_event"]:
-                raise ProbeBlocked("native write denial event missing or unrecognized; inspect JSONL output and CLI version")
-            if not receipt["checks"]["denied_write_report_observed"]:
-                raise ProbeBlocked("native denied-write report missing; inspect JSONL assistant output")
-        receipt["checks"]["product_unchanged"] = file_snapshot(project) == before
-        receipt["checks"]["remote_unchanged"] = (
-            local_git("--git-dir", str(remote), "rev-parse", "refs/heads/main", cwd=base) == remote_before)
-        if not receipt["checks"]["product_unchanged"] or not receipt["checks"]["remote_unchanged"]:
-            raise ProbeBlocked("fixture product or local remote changed; inspect native command evidence")
-        receipt["blueprint_candidate_after"] = source_identity()
-        receipt["checks"]["blueprint_candidate_unchanged"] = (
-            receipt["blueprint_candidate_after"] == receipt["blueprint_candidate"])
-        if not receipt["checks"]["blueprint_candidate_unchanged"]:
-            raise ProbeBlocked("blueprint candidate changed during native probe; rerun portable and native gates")
+            else:
+                cli_probe(args, receipt, base, binary, model)
+        finally:
+            receipt["blueprint_candidate_after"] = source_identity()
+            receipt["checks"]["blueprint_candidate_unchanged"] = (
+                receipt["blueprint_candidate_after"] == receipt["blueprint_candidate"])
+    if not receipt["checks"]["blueprint_candidate_unchanged"]:
+        raise ProbeBlocked("blueprint candidate changed during native probe; rerun portable and native gates")
 
 
 def main(argv=None):
