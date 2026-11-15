@@ -465,7 +465,7 @@
       "source": "templates/hooks/guard-bash.sh",
       "source_sha256": "baeb396ccfda294fff7f82db7234c90df36710d5e5f5ec482f88b31faec5dc0d",
       "disposition": "inapplicable",
-      "rationale": "Native adapter awaits the phase that qualifies and renders the Copilot surface. Intake 2026-11-15 (cc-rpi v2.2.0): Copilot hook and gate already have the cc-rpi 2.1 semantics; cc-rpi-specific parser deltas not ported.",
+      "rationale": "Copilot covers this hook with its own policy-engine and prepush-gate adapters. Intake 2026-11-15 (cc-rpi v2.2.0): Copilot hook and gate already have the cc-rpi 2.1 semantics; cc-rpi-specific parser deltas not ported.",
       "destination": null,
       "destination_sha256": null,
       "adaptation_note": null
