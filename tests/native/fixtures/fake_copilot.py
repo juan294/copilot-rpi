@@ -60,8 +60,20 @@ else:
             print("unknown skill: rpi-research", file=sys.stderr)
             sys.exit(2)
         suffix = ("; unrelated_present=" + str("UNRELATED_SECRET" in os.environ).lower()) if mode == "env-check" else ""
-        answer = json.dumps({"type": "assistant.message", "data": {
-            "content": "Research result: " + marker + "; no product files changed" + suffix}})
+        overlay = Path(".rpi/project/rpi-research.md")
+        if overlay.is_file() and mode != "ignore-overlay":
+            found = re.search(r"OVERLAY-[0-9a-f]{16}", overlay.read_text())
+            overlay_line = found.group() if found else ""
+        elif mode == "leak-overlay":
+            overlay_line = "OVERLAY-0123456789abcdef"
+        else:
+            overlay_line = ""
+        content = "Research result: " + marker + "; no product files changed" + suffix
+        if overlay_line and mode == "overlay-before-skill-complete":
+            print(json.dumps({"type": "assistant.message", "data": {"content": overlay_line}}))
+        elif overlay_line:
+            content += "\n" + overlay_line
+        answer = json.dumps({"type": "assistant.message", "data": {"content": content}})
         missing_explicit_call = (mode == "requires-tool-first"
                                  and "First invoke the skill tool" not in prompt)
         if mode != "no-skill-event" and not missing_explicit_call:

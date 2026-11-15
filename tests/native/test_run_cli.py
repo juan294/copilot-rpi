@@ -1,5 +1,6 @@
 """Native probe contract with a fake external Copilot executable."""
 
+import hashlib
 import json
 import importlib.util
 import os
@@ -289,6 +290,121 @@ class NativeRunnerTests(unittest.TestCase):
                              mode="echo-secret")
         self.assertNotIn("fixture-secret-value", result.stdout + result.stderr)
         self.assertNotIn("fixture-secret-value", (self.evidence / "cli-programmatic-receipt.json").read_text())
+
+    def overlay_command(self, receipt, label):
+        return next(command for command in receipt["commands"] if command["label"] == label)
+
+    def test_overlay_profile_passes_with_marker_only_in_positive_run(self):
+        result = self.invoke("overlay")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        receipt = self.receipt("overlay")
+        self.assertEqual(receipt["status"], "passed")
+        checks = receipt["checks"]
+        for name in ("negative_skill_discovered", "negative_skill_invoked",
+                     "negative_answer_after_invocation", "negative_overlay_marker_absent",
+                     "positive_skill_discovered", "positive_overlay_diagnosed_present",
+                     "positive_skill_invoked", "positive_answer_after_invocation",
+                     "positive_overlay_marker_after_invocation",
+                     "negative_product_unchanged", "negative_remote_unchanged",
+                     "positive_product_unchanged", "positive_remote_unchanged",
+                     "blueprint_candidate_unchanged"):
+            self.assertIs(checks[name], True, name)
+        authored = hashlib.sha256((ROOT / "templates/skills/rpi-research/SKILL.md").read_bytes()).hexdigest()
+        overlay = receipt["fixture"]["overlay"]
+        self.assertEqual(overlay["path"], ".rpi/project/rpi-research.md")
+        self.assertEqual(overlay["header"],
+                         f"<!-- rpi-overlay: skill=rpi-research; written-against={authored[:12]} -->")
+        self.assertRegex(overlay["marker"], r"^OVERLAY-[0-9a-f]{16}$")
+        self.assertEqual(overlay["diagnose_status"], "present")
+        labels = [command["label"] for command in receipt["commands"]]
+        self.assertLess(labels.index("negative skill"), labels.index("positive skill"))
+        negative = self.overlay_command(receipt, "negative skill")["argv"]
+        positive = self.overlay_command(receipt, "positive skill")["argv"]
+        self.assertEqual(negative, positive)
+        prompt = " ".join(positive)
+        self.assertIn("/rpi-research", prompt)
+        self.assertNotIn(overlay["marker"], prompt)
+        self.assertNotIn("overlay", prompt.lower())
+        self.assertNotIn(receipt["fixture"]["marker"], prompt)
+        self.assertIn("--available-tools=view,grep,glob,skill", positive)
+        self.assertIn("--deny-tool=write", positive)
+        self.assertNotIn(overlay["marker"], self.overlay_command(receipt, "negative skill")["stdout"])
+        self.assertIn(overlay["marker"], self.overlay_command(receipt, "positive skill")["stdout"])
+
+    def test_overlay_marker_missing_in_positive_run_fails(self):
+        result = self.invoke("overlay", mode="ignore-overlay")
+        self.assertEqual(result.returncode, 1, result.stderr)
+        receipt = self.receipt("overlay")
+        self.assertEqual(receipt["status"], "failed")
+        self.assertTrue(receipt["checks"]["positive_skill_invoked"])
+        self.assertFalse(receipt["checks"]["positive_overlay_marker_after_invocation"])
+        self.assertIn("overlay marker", receipt["recovery"])
+
+    def test_overlay_marker_in_negative_run_fails(self):
+        result = self.invoke("overlay", mode="leak-overlay")
+        self.assertEqual(result.returncode, 1, result.stderr)
+        receipt = self.receipt("overlay")
+        self.assertEqual(receipt["status"], "failed")
+        self.assertTrue(receipt["checks"]["negative_skill_invoked"])
+        self.assertFalse(receipt["checks"]["negative_overlay_marker_absent"])
+        self.assertIn("negative", receipt["recovery"])
+        self.assertNotIn("positive skill", [command["label"] for command in receipt["commands"]])
+
+    def test_overlay_marker_before_skill_completion_fails(self):
+        result = self.invoke("overlay", mode="overlay-before-skill-complete")
+        self.assertEqual(result.returncode, 1, result.stderr)
+        receipt = self.receipt("overlay")
+        self.assertEqual(receipt["status"], "failed")
+        self.assertFalse(receipt["checks"]["positive_overlay_marker_after_invocation"])
+
+    def test_overlay_without_native_skill_event_is_blocked(self):
+        result = self.invoke("overlay", mode="no-skill-event")
+        self.assertEqual(result.returncode, 2)
+        receipt = self.receipt("overlay")
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertFalse(receipt["checks"]["negative_skill_invoked"])
+        self.assertIn("skill event", receipt["recovery"])
+
+    def test_overlay_missing_cli_is_blocked(self):
+        result = self.invoke("overlay", extra_env={"COPILOT_BIN": str(self.directory / "absent-copilot")})
+        self.assertEqual(result.returncode, 2)
+        receipt = self.receipt("overlay")
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("Copilot CLI missing", receipt["recovery"])
+        self.assertEqual(receipt["commands"], [])
+
+    def test_overlay_missing_credential_is_blocked(self):
+        result = self.invoke("overlay", mode="missing-auth")
+        self.assertEqual(result.returncode, 2)
+        receipt = self.receipt("overlay")
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("authentication", receipt["recovery"])
+        self.assertIn("credential_source", receipt)
+        self.assertNotIn("positive skill", [command["label"] for command in receipt["commands"]])
+
+    def test_overlay_timeout_is_blocked(self):
+        result = self.invoke("overlay", mode="sleep", timeout=1)
+        self.assertEqual(result.returncode, 2)
+        receipt = self.receipt("overlay")
+        self.assertEqual(receipt["status"], "blocked")
+        self.assertIn("timeout", receipt["recovery"].lower())
+
+    def test_overlay_observation_requires_marker_after_successful_skill(self):
+        marker = "OVERLAY-0123456789abcdef"
+        start = json.dumps({"type": "tool.execution_start", "data": {
+            "toolCallId": "s1", "toolName": "skill", "arguments": {"skill": "rpi-research"}}})
+        done = json.dumps({"type": "tool.execution_complete", "data": {"toolCallId": "s1", "success": True}})
+        answer = json.dumps({"type": "assistant.message", "data": {"content": "Result README-1\n" + marker}})
+        self.assertEqual(native.overlay_observation("\n".join((start, done, answer)), "README-1", marker),
+                         {"invoked": True, "answer_after": True, "marker_after": True, "overlay_token": True})
+        self.assertEqual(native.overlay_observation("\n".join((start, answer, done)), "README-1", marker),
+                         {"invoked": True, "answer_after": False, "marker_after": False, "overlay_token": True})
+        other = answer.replace(marker, "OVERLAY-fedcba9876543210")
+        self.assertEqual(native.overlay_observation("\n".join((start, done, other)), "README-1", marker),
+                         {"invoked": True, "answer_after": True, "marker_after": False, "overlay_token": True})
+        plain = answer.replace(marker, "done")
+        self.assertEqual(native.overlay_observation("\n".join((start, done, plain)), "README-1", marker),
+                         {"invoked": True, "answer_after": True, "marker_after": False, "overlay_token": False})
 
     def test_unrelated_environment_is_not_given_to_copilot(self):
         result = self.invoke("cli", mode="env-check",

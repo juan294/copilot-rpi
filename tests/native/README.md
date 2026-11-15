@@ -20,11 +20,12 @@ From the blueprint root:
 ```sh
 uv run --locked python tests/native/run_cli.py --profile cli --timeout-seconds 120
 uv run --locked python tests/native/run_cli.py --profile cli-programmatic --timeout-seconds 120
+uv run --locked python tests/native/run_cli.py --profile overlay --timeout-seconds 120
 ```
 
 Set `COPILOT_BIN` to an approved local executable if `copilot` is not on `PATH`.
 Set `COPILOT_MODEL` to the owner-selected model for `cli-programmatic`; the CLI
-skill probe does not pass a model flag. Both profiles capture `copilot --version`
+skill and overlay probes do not pass a model flag. Both profiles capture `copilot --version`
 and `copilot --help` before inference. Missing flags, authentication, a model,
 and any timeout produce a blocked receipt with a recovery action. Each external
 process gets the selected wall-clock limit independently, and its process group
@@ -59,6 +60,26 @@ It requires CLI exit 0 and a denial report in an `assistant.message` event.
 If a client emits a different shape, the probe blocks and preserves output for
 inspection; prose refusal alone never passes. Review the event against the
 recorded client version before qualification.
+
+The `overlay` probe checks that an installed workflow skill reads its
+[project overlay](../../docs/project-overlay.md). It renders two separate `cli`
+fixtures, each with its own local bare remote, `COPILOT_HOME` and `HOME`, and
+sends both the same `/rpi-research` prompt. The prompt names neither the
+overlay nor its marker. The negative fixture runs first and has no
+`.rpi/project/`. The positive fixture adds `.rpi/project/rpi-research.md`. Its
+header uses the first 12 hex characters of the `authored_sha256` in the
+fixture's render receipt, and its Procedure tells the skill to end the answer
+with the line `OVERLAY-<random marker>`. The packaged `diagnose` must report
+that overlay as `present` before inference. Each run needs skill discovery, a
+native `skill` start and successful completion for `rpi-research`, and the
+README fixture marker in an `assistant.message` after that completion. The
+positive run passes only when the overlay marker is in an assistant message
+after the skill completion. The negative run fails if any `OVERLAY-` marker
+appears. A missing or early overlay marker in the positive run, or a marker in
+the negative run, gives status `failed` (exit 1). A missing client, a failed
+or unauthenticated run, a missing skill event or a timeout gives `blocked`
+(exit 2). Both fixtures must keep their product files and local remotes
+unchanged.
 
 Each run writes `.rpi/local/copilot/native/<profile>-receipt.json` by default,
 so the two required profile results survive sequential runs. Set
