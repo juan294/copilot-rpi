@@ -168,15 +168,17 @@ fi
 #                      two package-lock.json root fields to equal $VERSION
 #   upstream/       -- the pinned cc-rpi lock and inventory name upstream
 #                      releases, which can share a number with this project
-# A line that names "cc-rpi <version>" or "cc-rpi source <version>" is an
-# upstream provenance note for the same reason, so it is ignored too.
+# A "cc-rpi <version>" or "cc-rpi source <version>" mention is an upstream
+# provenance note for the same reason. Only those words are ignored; any other
+# mention of the previous version on the same line is still reported.
 if [[ -n "$PREV_VERSION" ]]; then
-  PREV_PATTERN="${PREV_VERSION//./\\.}"
+  PREV_PATTERN="${PREV_VERSION//./[.]}"
   STALE="$(git grep -n -F "$PREV_VERSION" -- \
              ':!CHANGELOG.md' ':!CONTRIBUTING.md' \
              ':!docs/' ':!*.lock' ':!package-lock.json' ':!upstream/' \
              ':!tests/test_legacy_migration.py' 2>/dev/null \
-           | grep -v -E "cc-rpi (source )?v?${PREV_PATTERN}([^0-9]|\$)" || true)"
+           | awk -v prev="$PREV_VERSION" -v upstream="cc-rpi (source )?v?${PREV_PATTERN}[^0-9A-Za-z.]" \
+               '{ line = $0 " "; gsub(upstream, "", line); if (index(line, prev)) print }' || true)"
   if [[ -n "$STALE" ]]; then
     emit_block "Previous version $PREV_VERSION still appears outside $CHANGELOG:
 $(printf '%s' "$STALE" | sed 's/^/  /')" \

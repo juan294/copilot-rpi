@@ -204,6 +204,58 @@ class LifecycleTest(unittest.TestCase):
         self.apply()
         self.assertEqual(edited, installed.read_bytes())
 
+    def test_retirement_fix_keeps_command_and_flags(self):
+        self.install_with_retired_skill()
+        blocked = self.plan(expected=2, component="skill:hello")
+        self.assertIn("plan --package", blocked.stderr)
+        self.assertIn("--component skill:hello", blocked.stderr)
+        self.assertIn("--retired-component skill:process-errors", blocked.stderr)
+        detach = self.run_cli("detach", "--package", self.package, "--target", self.target,
+                              "--profile", "cli", "--output", self.plan_path, expected=2)
+        fix = detach.stderr.partition("FIX:")[2]
+        self.assertIn("rpi-lifecycle.py detach --package", fix)
+        self.assertNotIn(" plan ", fix)
+        self.assertIn("--retired-component skill:process-errors", fix)
+
+    def test_invalid_retired_component_is_named_and_dropped_from_fix(self):
+        self.install_with_retired_skill()
+        for bogus, reason in (("skill:bogus", "names no recorded component: skill:bogus"),
+                              ("skill:hello", "names a component still in this package: skill:hello")):
+            with self.subTest(bogus=bogus):
+                result = self.run_cli("plan", "--package", self.package, "--target", self.target, "--profile", "cli",
+                                      "--output", self.plan_path, "--retired-component", bogus,
+                                      "--retired-component", "skill:process-errors", expected=2)
+                why, _, fix = result.stderr.partition("FIX:")
+                self.assertIn(reason, why)
+                self.assertNotIn(bogus, fix)
+                self.assertIn("--retired-component skill:process-errors", fix)
+
+    def test_deleted_retired_file_is_not_reported_as_retained(self):
+        installed, _ = self.install_with_retired_skill()
+        installed.unlink()
+        result = self.plan(retired_component="skill:process-errors")
+        self.assertEqual("ready", result["status"])
+        self.assertEqual([], [item for item in result["retained"] if "process-errors" in item["destination"]])
+        self.assertEqual([], [item for item in result["actions"] if "process-errors" in item["destination"]])
+
+    def test_detach_with_other_profile_package_names_the_profile(self):
+        self.plan()
+        self.apply()
+        receipt_path = self.package / ".rpi/copilot-render.json"
+        receipt = json.loads(receipt_path.read_text())
+        prompt = b"---\nname: hello\ndescription: Hello\n---\n\nprompt\n"
+        (self.package / ".github/prompts").mkdir(parents=True)
+        (self.package / ".github/prompts/hello.prompt.md").write_bytes(prompt)
+        receipt["profile"] = "vscode-local"
+        receipt["files"] = [{"path": ".github/prompts/hello.prompt.md", "component": "prompt:hello",
+                             "sha256": hashlib.sha256(prompt).hexdigest()}]
+        receipt_path.write_bytes(encoded_json(receipt))
+        self.plan_path.unlink()
+        result = self.run_cli("detach", "--package", self.package, "--target", self.target,
+                              "--profile", "vscode-local", "--output", self.plan_path, expected=2)
+        self.assertIn("recorded profile cli differs from package profile vscode-local", result.stderr)
+        self.assertNotIn("--retired-component", result.stderr)
+
     def test_interrupted_apply_requires_rollback_then_replan(self):
         self.plan()
         result = self.run_cli("apply", "--plan", self.plan_path, "--fail-after", "1", expected=2)

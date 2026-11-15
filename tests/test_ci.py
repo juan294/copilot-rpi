@@ -102,6 +102,12 @@ class CIContractTests(unittest.TestCase):
         self.assertNotEqual(0, result.returncode)
         self.assertIn("README.md", result.stdout)
         self.assertNotIn("tool.py", result.stdout)
+        for line in ("Copilot RPI 9.0.0 syncs with cc-rpi 9.0.0.", "see cc-rpi 9.0.0x and the 9.0.0 notes"):
+            with self.subTest(line=line):
+                mixed = dict(files, **{"notes.md": line + "\n"})
+                result = self.run_release_gate(mixed)
+                self.assertNotEqual(0, result.returncode, result.stdout)
+                self.assertIn("notes.md", result.stdout)
 
 
 if __name__ == "__main__":

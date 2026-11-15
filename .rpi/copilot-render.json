@@ -68,7 +68,7 @@
     {
       "path": ".github/skills/rpi-adopt/references/lifecycle-contract.md",
       "component": "skill:rpi-adopt",
-      "sha256": "49bb0b298c7ec44cdb524ed0e4e5687e24a71724ed923b1ff6676b182c50c588"
+      "sha256": "fa68be2c753e40fe8ca9e67001ebc4bc3ad185080cd61a43e66e9bd57ce24de7"
     },
     {
       "path": ".github/skills/rpi-assess/SKILL.md",
@@ -95,7 +95,7 @@
     {
       "path": ".github/skills/rpi-bootstrap/references/lifecycle-contract.md",
       "component": "skill:rpi-bootstrap",
-      "sha256": "49bb0b298c7ec44cdb524ed0e4e5687e24a71724ed923b1ff6676b182c50c588"
+      "sha256": "fa68be2c753e40fe8ca9e67001ebc4bc3ad185080cd61a43e66e9bd57ce24de7"
     },
     {
       "path": ".github/skills/rpi-brainstorm/SKILL.md",
@@ -129,7 +129,7 @@
     {
       "path": ".github/skills/rpi-detach/references/lifecycle-contract.md",
       "component": "skill:rpi-detach",
-      "sha256": "49bb0b298c7ec44cdb524ed0e4e5687e24a71724ed923b1ff6676b182c50c588"
+      "sha256": "fa68be2c753e40fe8ca9e67001ebc4bc3ad185080cd61a43e66e9bd57ce24de7"
     },
     {
       "path": ".github/skills/rpi-explore-release/SKILL.md",
@@ -348,7 +348,7 @@
     {
       "path": ".github/skills/rpi-update/references/lifecycle-contract.md",
       "component": "skill:rpi-update",
-      "sha256": "49bb0b298c7ec44cdb524ed0e4e5687e24a71724ed923b1ff6676b182c50c588"
+      "sha256": "fa68be2c753e40fe8ca9e67001ebc4bc3ad185080cd61a43e66e9bd57ce24de7"
     },
     {
       "path": ".github/skills/rpi-validate/SKILL.md",

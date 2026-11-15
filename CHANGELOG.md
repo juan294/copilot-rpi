@@ -14,11 +14,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Changed
 
-- When a package no longer contains a recorded component, `plan` still stops, and its FIX is now a runnable command with one `--retired-component <id>` per named component. The lifecycle contract and [the v2 guide](docs/migrations/v2.md) describe the review.
+- When a package no longer contains a recorded component, `plan`, `detach` and `check` still stop. The FIX is now a runnable `plan` command (`detach` after a detach) that keeps your flags and adds one `--retired-component <id>` per named component. The lifecycle contract and [the v2 guide](docs/migrations/v2.md) describe the review.
+- `--retired-component` now refuses, by name, a component that is not recorded or that the package still contains, and the FIX leaves that value out.
+- `detach` with a package rendered for another profile now reports the profile difference instead of asking you to retire every component.
+
+### Fixed
+
+- A removal plan no longer reports an owned file that the owner already deleted as "modified owned content retained on removal" (since 2.0.0).
 
 ### Migration
 
 - Updating from 2.0.0 or 2.1.0 stops once with `persisted ownership names components absent from this package: skill:process-errors` (`prompt:process-errors` for `vscode-local`). Replan with the printed command, which adds `--retired-component skill:process-errors` (or `prompt:process-errors`), then apply and run `check`. The plan removes the unchanged file and retains a copy you edited. An empty `.github/skills/process-errors/` directory can remain; Git does not track it, and you can delete it.
+
+### Known issues
+
+An independent review with exploratory runs of the 2.0.0 and 2.1.0 to 2.2.0 update, detach, check and rollback paths on synthetic targets found no S1 or S2 issue. Its findings in the new retirement messages are fixed above. These remain, accepted under the owner's rule that S3 and S4 findings do not block a release:
+
+- S4 (since 2.0.0): on `vscode-local`, a plan also lists owned prompt wrappers under `legacy` as `retained-unproven`, so the retired `process-errors.prompt.md` appears both as a `remove` action and as a retained legacy item. The `remove` action is the one applied.
+- The 2.1.0 known issues still apply.
 
 ## [2.1.0] - 2026-11-15
 

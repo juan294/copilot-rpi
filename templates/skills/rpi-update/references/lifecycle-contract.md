@@ -43,8 +43,9 @@ Review the generated plan before apply; an action name or skill invocation is
 not authority for a new external effect. Run `check` after apply. If the engine
 stops mid-transaction, use its exact journal path for rollback. Replan after
 any source or target input changes.
-If a newer package retires a recorded component, `plan` stops and names it.
-Confirm in the package changelog that it was retired, then replan with
+If a newer package retires a recorded component, `plan`, `detach` and `check`
+stop and name it. Confirm in the package changelog that it was retired, then
+run the printed command, which repeats your flags and adds
 `--retired-component <id>`. Unchanged files are removed; edited files are
 retained.
 

@@ -404,14 +404,24 @@ def make_plan(request):
     if reviewed_adoptions - selected:
         raise ValueError('--adopt-exact names an unselected component')
     old = {item['destination']: item for item in (previous or {}).get('entries', [])}
-    unknown_old = {item['component_id'] for item in old.values()} - available - retired_review
+    recorded = {item['component_id'] for item in old.values()}
+    valid_retired = sorted(retired_review & recorded - available)
+    for invalid, reason in ((retired_review - recorded, 'names no recorded component'),
+                            (retired_review & recorded & available, 'names a component still in this package')):
+        if invalid:
+            exc = ValueError('--retired-component ' + reason + ': ' + ', '.join(sorted(invalid)))
+            exc.retired = valid_retired
+            raise exc
+    unknown_old = recorded - available - retired_review
+    if unknown_old and previous.get('profile') != profile:
+        raise Conflict('recorded profile ' + str(previous.get('profile')) + ' differs from package profile ' + profile +
+                       '; use a package rendered for the recorded profile')
     if unknown_old:
         exc = Conflict('persisted ownership names components absent from this package: ' + ', '.join(sorted(unknown_old)) +
                        '; inspect the manifest, or explicitly review retirement with --retired-component')
         exc.retired = sorted(unknown_old | retired_review)
+        exc.retirement = True
         raise exc
-    if retired_review - {item['component_id'] for item in old.values()}:
-        raise ValueError('--retired-component names no recorded component')
     desired = {} if request['action'] == 'detach' else {path: item for path, item in package_contents.items() if item['component_id'] in selected}
     observations, operations, actions, conflicts, retained, baselines, new_entries = {}, [], [], [], [], {}, []
     configuration = configuration_engine()
@@ -457,7 +467,7 @@ def make_plan(request):
                 else:
                     result = upstream
             elif upstream is None:
-                if local == base:
+                if local is None or local == base:
                     result = None
                 else:
                     result = local
@@ -1061,6 +1071,22 @@ def diagnose(target):
     return report
 
 
+def rerun_command(args, output, retired):
+    """Rebuild the operator's plan, detach or check request with reviewed retirement flags."""
+    verb = 'detach' if args.command == 'detach' else 'plan'
+    parts = [verb, '--package', args.package, '--target', args.target, '--profile', args.profile]
+    for flag, values in (('--component', args.components), ('--adopt-exact', args.adopt_exact),
+                         ('--allow-capabilities', args.allow_capabilities), ('--capability', args.capabilities),
+                         ('--retired-component', retired)):
+        for value in values or []:
+            parts += [flag, value]
+    if args.legacy_source:
+        parts += ['--legacy-source', args.legacy_source, '--legacy-base', args.legacy_base]
+    if getattr(args, 'action', 'update') != 'update':
+        parts += ['--action', args.action]
+    return engine_command(*parts, '--output', output)
+
+
 def command(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest='command', required=True)
@@ -1133,10 +1159,9 @@ def command(argv=None):
             output = getattr(args, 'output', None) or Path(args.target) / LOCAL / 'plans/reconciled.json'
             if output.exists():
                 output = output.with_name(output.stem + '-retry.json')
-            retired = [part for cid in getattr(exc, 'retired', ()) for part in ('--retired-component', cid)]
-            fix = ('confirm the package retired each named component, then rerun ' if retired else
-                   'repair the named input, then rerun ') + engine_command(
-                'plan', '--package', args.package, '--target', args.target, '--profile', args.profile, '--output', output, *retired)
+            retired = getattr(exc, 'retired', args.retired_components)
+            fix = ('confirm the package retired each named component, then rerun ' if getattr(exc, 'retirement', False) else
+                   'repair the named input, then rerun ') + rerun_command(args, output, retired)
         fix = fix or 'inspect the named journal or plan and rerun with a fresh review artifact'
         print('BLOCKED / WHY: ' + str(exc) + ' / FIX: ' + fix, file=sys.stderr)
         return 2
