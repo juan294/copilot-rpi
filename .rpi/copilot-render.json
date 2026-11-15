@@ -123,8 +123,8 @@
     {
       "path": ".github/skills/rpi-detach/SKILL.md",
       "component": "skill:rpi-detach",
-      "sha256": "be5b025589ca330d5f788820f8c2734d3b5a752b32ede70f6ad6e564cb5f5aa9",
-      "authored_sha256": "be5b025589ca330d5f788820f8c2734d3b5a752b32ede70f6ad6e564cb5f5aa9"
+      "sha256": "ffd3b03dc61c79746187022521c7a22515be3a1175562a939ad86f545a3e0561",
+      "authored_sha256": "ffd3b03dc61c79746187022521c7a22515be3a1175562a939ad86f545a3e0561"
     },
     {
       "path": ".github/skills/rpi-detach/references/lifecycle-contract.md",

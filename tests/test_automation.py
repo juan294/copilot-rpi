@@ -45,7 +45,7 @@ mode_file = Path(os.environ['COPILOT_HOME'], 'mode')
 mode = mode_file.read_text() if mode_file.exists() else 'ok'
 if '--help' in sys.argv:
  base = '-p --prompt -s --silent --no-ask-user --available-tools --allow-tool --model --no-auto-update --secret-env-vars'
- remote = {'old-cli': None, 'cli-1.0.112': ' --sync-session[=<on|off>]', 'no-remote-controls': ''}.get(mode, ' --no-remote --no-remote-export')
+ remote = {'old-cli': None, 'cli-1.0.112': ' --sync-session[=<on|off>]', 'no-remote-controls': '', 'export-only': ' --no-remote-export', 'export-and-sync': ' --no-remote-export --sync-session[=<on|off>]'}.get(mode, ' --no-remote --no-remote-export')
  print('-p' if remote is None else base + remote); sys.exit(0)
 if mode == 'timeout': print('partial', flush=True); time.sleep(30)
 if mode == 'deny': print('tool permission denied', file=sys.stderr); sys.exit(2)
@@ -115,6 +115,16 @@ print('Ready plan: inspect reports. No changes made.')
         self.assertFalse(self.report.exists())
         argv = json.loads(self.capture.read_text())["argv"]
         self.assertEqual(argv, ["--help"])
+
+    def test_remote_flags_match_whole_flags_not_substrings(self):
+        stderr = io.StringIO()
+        with contextlib.redirect_stderr(stderr):
+            self.assertEqual(self.run_job(mode="export-only"), 2)
+        self.assertIn("advertises neither", stderr.getvalue())
+        self.assertEqual(self.run_job(mode="export-and-sync"), 0)
+        argv = json.loads(self.capture.read_text())["argv"]
+        self.assertIn("--sync-session=off", argv)
+        self.assertNotIn("--no-remote", argv)
 
     def test_failure_and_partial_output_preserve_last_good(self):
         self.assertEqual(self.run_job(), 0)
@@ -278,7 +288,8 @@ print('Ready plan: inspect reports. No changes made.')
         lib = ROOT / "templates/scripts/agents/lib/agent-utils.sh"
         script_dir = self.project / "scripts/agents"
         script_dir.mkdir(parents=True)
-        for mode, expected in (("ok", 0), ("cli-1.0.112", 0), ("no-remote-controls", 1)):
+        for mode, expected in (("ok", 0), ("cli-1.0.112", 0), ("export-and-sync", 0),
+                               ("no-remote-controls", 1), ("export-only", 1)):
             with self.subTest(mode=mode):
                 (self.root / "mode").write_text(mode)
                 env = dict(os.environ, COPILOT_BIN=str(self.bin), COPILOT_HOME=str(self.root),

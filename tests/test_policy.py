@@ -213,7 +213,7 @@ class HookActivationAfterInstallTests(unittest.TestCase):
         installed.write_bytes(installed.read_bytes() + b"# earlier package copy\n")
         record_path = self.target / ".rpi/copilot/runtime/rpi-hook.install.json"
         record = json.loads(record_path.read_text())
-        record["runtime_sha256"] = hashlib.sha256(installed.read_bytes()).hexdigest()
+        record["files"]["rpi-hook.py"] = hashlib.sha256(installed.read_bytes()).hexdigest()
         record_path.write_text(json.dumps(record))
         self.hook("--activate")
         self.assertEqual(installed.read_bytes(), (self.runtime / "rpi-hook.py").read_bytes())
@@ -242,6 +242,73 @@ class HookActivationAfterInstallTests(unittest.TestCase):
         (self.target / ".rpi/copilot/runtime").symlink_to(outside, target_is_directory=True)
         self.hook("--activate", expected=2)
         self.assertEqual([], list(outside.iterdir()))
+
+    def test_hook_and_prepush_share_one_runtime_installation_block(self):
+        def block(path):
+            text = path.read_text()
+            return text[text.index("# --- Recorded runtime installation."):
+                        text.index("# --- End of recorded runtime installation. ---")]
+        self.assertEqual(block(ROOT / "templates/scripts/rpi-hook.py"),
+                         block(ROOT / "templates/scripts/rpi-prepush.py"))
+
+    def test_planted_temporary_file_symlinks_are_not_followed(self):
+        runtime_dir = self.target / ".rpi/copilot/runtime"
+        runtime_dir.mkdir(parents=True)
+        outside = {name: self.base / ("outside-" + name) for name in ("runtime", "record")}
+        for name, path in outside.items():
+            path.write_text("outside " + name + "\n")
+        (runtime_dir / ".rpi-hook.py.tmp").symlink_to(outside["runtime"])
+        (runtime_dir / ".rpi-hook.install.json.tmp").symlink_to(outside["record"])
+        self.hook("--activate")
+        for name, path in outside.items():
+            self.assertEqual(path.read_text(), "outside " + name + "\n")
+        self.assertFalse((runtime_dir / "rpi-hook.py").is_symlink())
+
+    def test_symlinked_runtime_file_and_record_are_refused(self):
+        runtime_dir = self.target / ".rpi/copilot/runtime"
+        runtime_dir.mkdir(parents=True)
+        copy = self.base / "outside-runtime.py"
+        copy.write_bytes((self.runtime / "rpi-hook.py").read_bytes())
+        (runtime_dir / "rpi-hook.py").symlink_to(copy)
+        self.hook("--activate", expected=2)
+        self.assertFalse((self.target / ".github/hooks/rpi-policy.json").exists())
+        (runtime_dir / "rpi-hook.py").unlink()
+        record = self.base / "outside-record.json"
+        record.write_text(json.dumps({"schema_version": 1, "profile": "cli", "files": {}}))
+        (runtime_dir / "rpi-hook.install.json").symlink_to(record)
+        self.hook("--activate", expected=2)
+        self.assertFalse((runtime_dir / "rpi-hook.py").exists())
+
+    def test_deactivation_refuses_an_edited_or_symlinked_configuration(self):
+        self.hook("--activate")
+        config = self.target / ".github/hooks/rpi-policy.json"
+        original = config.read_bytes()
+        config.write_bytes(original + b"\n")
+        self.hook("--deactivate", expected=2)
+        self.assertEqual(config.read_bytes(), original + b"\n")
+        self.assertTrue((self.target / ".rpi/copilot/runtime/rpi-hook.py").exists())
+        outside = self.base / "outside-config.json"
+        outside.write_bytes(original)
+        config.unlink()
+        config.symlink_to(outside)
+        self.hook("--deactivate", expected=2)
+        self.assertTrue(config.is_symlink())
+        self.assertEqual(outside.read_bytes(), original)
+
+    def test_deactivation_keeps_an_owner_config_that_activation_did_not_write(self):
+        config = self.target / ".github/hooks/rpi-policy.json"
+        config.parent.mkdir(parents=True)
+        spec = importlib.util.spec_from_file_location("hook_config_source", self.runtime / "rpi-hook.py")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        config.write_text(json.dumps(module.hook_config("cli"), indent=2) + "\n")
+        owner_bytes = config.read_bytes()
+        self.hook("--activate")
+        record = json.loads((self.target / ".rpi/copilot/runtime/rpi-hook.install.json").read_text())
+        self.assertIs(record["config_written"], False)
+        self.hook("--deactivate")
+        self.assertEqual(config.read_bytes(), owner_bytes)
+        self.assertFalse((self.target / ".rpi/copilot/runtime").exists())
 
     def test_detach_preserves_active_hook_until_deactivation(self):
         self.hook("--activate")

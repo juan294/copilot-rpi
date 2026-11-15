@@ -403,7 +403,115 @@ def wrapper(runtime, prior=None):
             + gate + ' < "$rpi_refs"\n')
 
 
-def install(root, activate, checks_path=None):
+# --- Recorded runtime installation. Keep this block byte-identical in rpi-hook.py and rpi-prepush.py. ---
+RUNTIME_DIR = '.rpi/copilot/runtime'
+
+
+def runtime_sha256(data):
+    import hashlib
+    return hashlib.sha256(data).hexdigest()
+
+
+def safe_write(path, data, mode=0o644):
+    """Write through a new exclusive temporary file in the same directory, then replace."""
+    import os
+    import tempfile
+    descriptor, temporary = tempfile.mkstemp(prefix='.' + path.name + '.', dir=path.parent)
+    try:
+        with os.fdopen(descriptor, 'wb') as stream:
+            stream.write(data)
+            os.fchmod(stream.fileno(), mode)
+        os.replace(temporary, path)
+    finally:
+        if os.path.lexists(temporary):
+            os.unlink(temporary)
+
+
+def runtime_paths(target, names, record_name):
+    """Every path activation writes below the target, for the symlink guard."""
+    runtime = target / RUNTIME_DIR
+    return [target / '.rpi', target / '.rpi/copilot', runtime, runtime / record_name,
+            *(runtime / name for name in names)]
+
+
+def read_runtime_record(target, record_name, refuse):
+    path = target / RUNTIME_DIR / record_name
+    if not path.is_file():
+        return None
+    try:
+        record = json.loads(path.read_text(encoding='utf-8'))
+    except (OSError, UnicodeError, ValueError):
+        refuse('The activation record ' + RUNTIME_DIR + '/' + record_name + ' is unreadable.',
+               'Review that file and restore or remove it.')
+    files = record.get('files') if isinstance(record, dict) else None
+    if not isinstance(files, dict) or not all(isinstance(value, str) for value in files.values()):
+        refuse('The activation record ' + RUNTIME_DIR + '/' + record_name + ' is malformed.',
+               'Review that file and restore or remove it.')
+    return record
+
+
+def check_runtime_copies(target, sources, record, refuse):
+    """Refuse an unrecorded or edited runtime file before anything is written."""
+    for name, data in sources.items():
+        path = target / RUNTIME_DIR / name
+        if path.exists() and path.read_bytes() != data:
+            recorded = (record or {}).get('files', {}).get(name)
+            if recorded != runtime_sha256(path.read_bytes()):
+                refuse('An unrecorded or edited runtime file occupies ' + RUNTIME_DIR + '/' + name + '.',
+                       'Review that file; its bytes are preserved.')
+
+
+def install_runtime_copies(target, sources):
+    runtime = target / RUNTIME_DIR
+    runtime.mkdir(parents=True, exist_ok=True)
+    for name, data in sources.items():
+        path = runtime / name
+        if not path.exists() or path.read_bytes() != data:
+            safe_write(path, data)
+    return {name: runtime_sha256(data) for name, data in sources.items()}
+
+
+def check_runtime_removal(target, record, refuse):
+    for name, digest in record['files'].items():
+        path = target / RUNTIME_DIR / name
+        if path.exists() and runtime_sha256(path.read_bytes()) != digest:
+            refuse('The runtime file ' + RUNTIME_DIR + '/' + name + ' was edited after activation.',
+                   'Review that file; its bytes are preserved and nothing was removed.')
+
+
+def remove_runtime_copies(target, record, record_name):
+    runtime = target / RUNTIME_DIR
+    for name in [*record['files'], record_name]:
+        if (runtime / name).exists():
+            (runtime / name).unlink()
+    if runtime.is_dir() and not any(runtime.iterdir()):
+        runtime.rmdir()
+# --- End of recorded runtime installation. ---
+
+
+RECORD_NAME = 'rpi-prepush.install.json'
+RUNTIME_NAMES = ('rpi-prepush.py', 'rpi-candidate.py', 'rpi-verify.py')
+
+
+def deactivate(root, destination, prior, record):
+    """Remove only the wrapper and runtime copies activation recorded, when their bytes are unchanged."""
+    if record is None:
+        fail('No recorded pre-push activation in this target.',
+             'Review the Git pre-push hook and ' + RUNTIME_DIR + ' by hand; nothing was removed.')
+    if destination.exists() and runtime_sha256(destination.read_bytes()) != record.get('hook_sha256'):
+        fail('The pre-push wrapper was edited after activation.', 'Review ' + str(destination) + '; its bytes are preserved.')
+    check_runtime_removal(root, record, fail)
+    if record.get('prior_saved') is True and prior.is_file():
+        os.replace(prior, destination)
+    elif destination.exists():
+        destination.unlink()
+    remove_runtime_copies(root, record, RECORD_NAME)
+    print(json.dumps({'status': 'inactive', 'hook': str(destination),
+                      'prior_restored': record.get('prior_saved') is True}, sort_keys=True))
+    return 0
+
+
+def install(root, activate, checks_path=None, deactivating=False):
     root = Path(root).resolve()
     if not root.is_dir() or git(root, 'rev-parse', '--show-toplevel') != str(root):
         fail('Installer target must be a Git checkout root.', 'Pass --target with a local checkout root.')
@@ -411,9 +519,13 @@ def install(root, activate, checks_path=None):
     destination, prior = directory / 'pre-push', directory / 'pre-push.rpi-prior'
     runtime = root / '.rpi/copilot/runtime/rpi-prepush.py'
     policy_path = root / '.rpi/policy.json'
-    if any(path.is_symlink() for path in (root / '.rpi', root / '.rpi/copilot',
-                                          root / '.rpi/copilot/runtime')):
+    if any(path.is_symlink() for path in runtime_paths(root, RUNTIME_NAMES, RECORD_NAME)):
         fail('Project policy or runtime path contains a symlink.', 'Review the project .rpi directory.')
+    if directory.is_symlink() or destination.is_symlink() or prior.is_symlink():
+        fail('Git hook path contains an unreviewed symlink.', 'Review the existing hook path before activation.')
+    record = read_runtime_record(root, RECORD_NAME, fail)
+    if deactivating:
+        return deactivate(root, destination, prior, record)
     if policy_path.is_symlink() or policy_path.exists() and not policy_path.is_file():
         fail('Project policy is not a regular file.', 'Review .rpi/policy.json before activation.')
     current = git(root, 'symbolic-ref', '--quiet', '--short', 'HEAD')
@@ -451,8 +563,6 @@ def install(root, activate, checks_path=None):
         policy = {'schema_version': 1, 'integration_branch': current,
                   'require_verification_receipt': True, 'verification_checks': checks}
         policy_content = (json.dumps(policy, indent=2) + '\n').encode()
-    if directory.is_symlink() or destination.is_symlink() or prior.is_symlink():
-        fail('Git hook path contains an unreviewed symlink.', 'Review the existing hook path before activation.')
     installed = destination.is_file() and b'# copilot-rpi pre-push v1' in destination.read_bytes()
     if prior.exists() and not installed:
         fail('A prior-hook backup already exists.', 'Review pre-push.rpi-prior and the active hook before activation.')
@@ -461,16 +571,25 @@ def install(root, activate, checks_path=None):
     if installed and destination.read_bytes() != content:
         fail('Installed pre-push wrapper was edited.', 'Review the edited hook and restore it before activation.')
     if activate:
-        if not runtime.is_file() or runtime.is_symlink():
-            fail('The packaged pre-push runtime is missing.', 'Apply the reviewed Copilot package before activation.')
-        if not Path(__file__).resolve().with_name('rpi-verify.py').is_file():
-            fail('The packaged verifier is missing.', 'Apply the reviewed Copilot verifier before activation.')
+        # The wrapper runs the gate from the target, and lifecycle apply never installs
+        # runtime files, so activation installs recorded copies of the gate and its helpers.
+        packaged = Path(__file__).resolve().parent
+        if not all((packaged / name).is_file() for name in RUNTIME_NAMES):
+            fail('The packaged verifier is missing.', 'Activate from a rendered package runtime that has ' +
+                 ', '.join(RUNTIME_NAMES) + '.')
+        sources = {name: (packaged / name).read_bytes() for name in RUNTIME_NAMES}
+        check_runtime_copies(root, sources, record, fail)
         temporary = destination.with_name('pre-push.rpi-new')
         if not installed and (temporary.exists() or temporary.is_symlink()):
             fail('An installation staging hook already exists.', 'Review pre-push.rpi-new before activation.')
         if not policy_path.exists() or policy_path.read_bytes() != policy_content:
             policy_path.parent.mkdir(parents=True, exist_ok=True)
             policy_path.write_bytes(policy_content)
+        files = install_runtime_copies(root, sources)
+        prior_saved = (record or {}).get('prior_saved') is True if installed else had_prior
+        safe_write(root / RUNTIME_DIR / RECORD_NAME, (json.dumps(
+            {'schema_version': 2, 'hook': str(destination), 'hook_sha256': runtime_sha256(content),
+             'prior_saved': prior_saved, 'files': files}, indent=2, sort_keys=True) + '\n').encode())
         directory.mkdir(parents=True, exist_ok=True)
         if not installed:
             if had_prior:
@@ -491,9 +610,11 @@ def main(argv):
             parser.add_argument('install')
             parser.add_argument('--target', required=True)
             parser.add_argument('--checks')
-            parser.add_argument('--activate', action='store_true')
+            mode = parser.add_mutually_exclusive_group()
+            mode.add_argument('--activate', action='store_true')
+            mode.add_argument('--deactivate', action='store_true')
             args = parser.parse_args(argv)
-            return install(args.target, args.activate, args.checks)
+            return install(args.target, args.activate, args.checks, args.deactivate)
         lines = [] if sys.stdin is None else sys.stdin.read().splitlines()
         evaluate(argv, lines, Path.cwd())
         return 0

@@ -30,19 +30,26 @@ paths. Skill invocation or tool visibility does not grant extra authority.
 
 ## Apply and preserve
 
-1. Run `apply --plan` for the unchanged reviewed removal plan after
+1. Before `apply`, deactivate the optional pre-tool hook and pre-push gate when
+   `.rpi/copilot/runtime/rpi-hook.install.json` or `rpi-prepush.install.json`
+   records an activation; lifecycle detach does not own their configuration,
+   wrapper or runtime copies. From the package runtime, run
+   `rpi-hook.py install --target "$project_dir" --profile <recorded profile> --deactivate`
+   and `rpi-prepush.py install --target "$project_dir" --deactivate`. Each
+   removes only unchanged recorded files; report any file it preserves.
+2. Run `apply --plan` for the unchanged reviewed removal plan after
    baseline/precondition verification. Retain edited or unknown files and
    explain the disposition.
-2. Preserve AGENTS.md and scoped Copilot instruction files; remove only their
+3. Preserve AGENTS.md and scoped Copilot instruction files; remove only their
    proven-owned unchanged blocks while keeping user additions.
-3. Remove only individually owned unchanged settings/hook registrations. Keep
+4. Remove only individually owned unchanged settings/hook registrations. Keep
    remaining JSON keys, permissions, environment and the user's settings files.
-4. Preserve native plugin cache ownership and any independent user-scope
+5. Preserve native plugin cache ownership and any independent user-scope
    installation. Do not bulk-delete `.github`, `.agents`, prompt or skill trees.
-5. Keep curated docs and operational reports/logs. Remove only empty owned
+6. Keep curated docs and operational reports/logs. Remove only empty owned
    directories when safe. Existing launchd/cron schedules require their own
    explicit scope and concrete reviewed change; do not unload them implicitly.
-6. Preserve recovery receipts and required baseline bytes outside the removed
+7. Preserve recovery receipts and required baseline bytes outside the removed
    tree until verification and any recovery obligation finish.
 
 ## Completion

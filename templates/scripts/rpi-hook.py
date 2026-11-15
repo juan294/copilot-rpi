@@ -598,34 +598,98 @@ def hook_config(profile):
          'cwd': '.', 'timeout': 3}]}}
 
 
-RUNTIME = '.rpi/copilot/runtime/rpi-hook.py'
-RECORD = '.rpi/copilot/runtime/rpi-hook.install.json'
+# --- Recorded runtime installation. Keep this block byte-identical in rpi-hook.py and rpi-prepush.py. ---
+RUNTIME_DIR = '.rpi/copilot/runtime'
 
 
-def sha256(data):
+def runtime_sha256(data):
     import hashlib
     return hashlib.sha256(data).hexdigest()
 
 
-def read_record(target):
-    path = target / RECORD
-    if path.is_symlink() or not path.is_file():
+def safe_write(path, data, mode=0o644):
+    """Write through a new exclusive temporary file in the same directory, then replace."""
+    import os
+    import tempfile
+    descriptor, temporary = tempfile.mkstemp(prefix='.' + path.name + '.', dir=path.parent)
+    try:
+        with os.fdopen(descriptor, 'wb') as stream:
+            stream.write(data)
+            os.fchmod(stream.fileno(), mode)
+        os.replace(temporary, path)
+    finally:
+        if os.path.lexists(temporary):
+            os.unlink(temporary)
+
+
+def runtime_paths(target, names, record_name):
+    """Every path activation writes below the target, for the symlink guard."""
+    runtime = target / RUNTIME_DIR
+    return [target / '.rpi', target / '.rpi/copilot', runtime, runtime / record_name,
+            *(runtime / name for name in names)]
+
+
+def read_runtime_record(target, record_name, refuse):
+    path = target / RUNTIME_DIR / record_name
+    if not path.is_file():
         return None
     try:
-        record = read_json(path.read_text(encoding='utf-8'))
+        record = json.loads(path.read_text(encoding='utf-8'))
     except (OSError, UnicodeError, ValueError):
-        fail('The hook activation record is unreadable.', 'Review ' + RECORD + ' and restore or remove it.', 'installation')
-    if not isinstance(record, dict) or not isinstance(record.get('runtime_sha256'), str):
-        fail('The hook activation record is malformed.', 'Review ' + RECORD + ' and restore or remove it.', 'installation')
+        refuse('The activation record ' + RUNTIME_DIR + '/' + record_name + ' is unreadable.',
+               'Review that file and restore or remove it.')
+    files = record.get('files') if isinstance(record, dict) else None
+    if not isinstance(files, dict) or not all(isinstance(value, str) for value in files.values()):
+        refuse('The activation record ' + RUNTIME_DIR + '/' + record_name + ' is malformed.',
+               'Review that file and restore or remove it.')
     return record
 
 
-def write_new(path, data):
-    """Replace a file through a sibling temporary file in the same directory."""
-    import os
-    temporary = path.with_name('.' + path.name + '.tmp')
-    temporary.write_bytes(data)
-    os.replace(temporary, path)
+def check_runtime_copies(target, sources, record, refuse):
+    """Refuse an unrecorded or edited runtime file before anything is written."""
+    for name, data in sources.items():
+        path = target / RUNTIME_DIR / name
+        if path.exists() and path.read_bytes() != data:
+            recorded = (record or {}).get('files', {}).get(name)
+            if recorded != runtime_sha256(path.read_bytes()):
+                refuse('An unrecorded or edited runtime file occupies ' + RUNTIME_DIR + '/' + name + '.',
+                       'Review that file; its bytes are preserved.')
+
+
+def install_runtime_copies(target, sources):
+    runtime = target / RUNTIME_DIR
+    runtime.mkdir(parents=True, exist_ok=True)
+    for name, data in sources.items():
+        path = runtime / name
+        if not path.exists() or path.read_bytes() != data:
+            safe_write(path, data)
+    return {name: runtime_sha256(data) for name, data in sources.items()}
+
+
+def check_runtime_removal(target, record, refuse):
+    for name, digest in record['files'].items():
+        path = target / RUNTIME_DIR / name
+        if path.exists() and runtime_sha256(path.read_bytes()) != digest:
+            refuse('The runtime file ' + RUNTIME_DIR + '/' + name + ' was edited after activation.',
+                   'Review that file; its bytes are preserved and nothing was removed.')
+
+
+def remove_runtime_copies(target, record, record_name):
+    runtime = target / RUNTIME_DIR
+    for name in [*record['files'], record_name]:
+        if (runtime / name).exists():
+            (runtime / name).unlink()
+    if runtime.is_dir() and not any(runtime.iterdir()):
+        runtime.rmdir()
+# --- End of recorded runtime installation. ---
+
+
+RECORD_NAME = 'rpi-hook.install.json'
+RUNTIME = RUNTIME_DIR + '/rpi-hook.py'
+
+
+def refuse(reason, fix):
+    fail(reason, fix, 'installation')
 
 
 def install(target, profile, activate, deactivate=False):
@@ -635,53 +699,47 @@ def install(target, profile, activate, deactivate=False):
     name = 'rpi-policy.json' if profile == 'cli' else 'rpi-policy-local.json'
     destination = target / '.github/hooks' / name
     other = target / '.github/hooks' / ('rpi-policy-local.json' if profile == 'cli' else 'rpi-policy.json')
-    if any(path.is_symlink() for path in (target / '.github', target / '.github/hooks',
-                                          target / '.rpi', target / '.rpi/copilot',
-                                          target / '.rpi/copilot/runtime',
-                                          target / RUNTIME, target / RECORD)):
+    if any(path.is_symlink() for path in (target / '.github', target / '.github/hooks', destination,
+                                          *runtime_paths(target, ['rpi-hook.py'], RECORD_NAME))):
         fail('Hook installation path contains a symlink.', 'Review the project hook and runtime paths.', 'installation')
     config = hook_config(profile)
     content = (json.dumps(config, indent=2) + '\n').encode()
-    runtime = target / RUNTIME
+    record = read_runtime_record(target, RECORD_NAME, refuse)
     if deactivate:
-        record = read_record(target)
         if record is None or record.get('profile') != profile:
             fail('No recorded ' + profile + ' hook activation in this target.',
                  'Review .github/hooks and ' + RUNTIME + ' by hand; nothing was removed.', 'installation')
-        if destination.exists() and destination.read_bytes() != content:
+        written = record.get('config_written') is True
+        if written and destination.exists() and destination.read_bytes() != content:
             fail('The hook configuration was edited after activation.', 'Review ' + str(destination) + '; its bytes are preserved.', 'installation')
-        if runtime.exists() and sha256(runtime.read_bytes()) != record['runtime_sha256']:
-            fail('The hook runtime was edited after activation.', 'Review ' + RUNTIME + '; its bytes are preserved.', 'installation')
-        for path in (destination, runtime, target / RECORD):
-            if path.exists():
-                path.unlink()
-        for directory in (runtime.parent, destination.parent):
-            if directory.is_dir() and not any(directory.iterdir()):
-                directory.rmdir()
-        print(json.dumps({'status': 'inactive', 'destination': str(destination)}, sort_keys=True))
+        check_runtime_removal(target, record, refuse)
+        if written and destination.exists():
+            destination.unlink()
+            if not any(destination.parent.iterdir()):
+                destination.parent.rmdir()
+        remove_runtime_copies(target, record, RECORD_NAME)
+        print(json.dumps({'status': 'inactive', 'destination': str(destination),
+                          'configuration_removed': written}, sort_keys=True))
         return 0
     if activate:
         # The configuration runs the runtime from the target, and lifecycle apply never
         # installs runtime files, so activation installs a recorded copy of itself.
-        source = Path(__file__).resolve().read_bytes()
-        if runtime.exists() and runtime.read_bytes() != source:
-            record = read_record(target)
-            if record is None or sha256(runtime.read_bytes()) != record['runtime_sha256']:
-                fail('An unrecorded or edited hook runtime occupies ' + RUNTIME + '.',
-                     'Review that file; its bytes are preserved.', 'installation')
-        if other.exists() or other.is_symlink():
+        sources = {'rpi-hook.py': Path(__file__).resolve().read_bytes()}
+        check_runtime_copies(target, sources, record, refuse)
+        if other.exists():
             fail('The other hook profile is active.', 'Review and retire the other profile before activation.', 'installation')
-        if destination.is_symlink() or destination.exists() and destination.read_bytes() != content:
+        if destination.exists() and destination.read_bytes() != content:
             fail('An owner hook already occupies the destination.', 'Review the existing hook; preserve its bytes.', 'installation')
-        runtime.parent.mkdir(parents=True, exist_ok=True)
-        if not runtime.exists() or runtime.read_bytes() != source:
-            write_new(runtime, source)
-        record = {'schema_version': 1, 'profile': profile, 'config': destination.relative_to(target).as_posix(),
-                  'runtime': RUNTIME, 'runtime_sha256': sha256(source)}
-        write_new(target / RECORD, (json.dumps(record, indent=2, sort_keys=True) + '\n').encode())
-        destination.parent.mkdir(parents=True, exist_ok=True)
+        # A configuration this tool did not write stays the owner's, even when its bytes match.
+        written = not destination.exists() or bool(record and record.get('profile') == profile
+                                                    and record.get('config_written') is True)
+        files = install_runtime_copies(target, sources)
+        safe_write(target / RUNTIME_DIR / RECORD_NAME, (json.dumps(
+            {'schema_version': 2, 'profile': profile, 'config': destination.relative_to(target).as_posix(),
+             'config_written': written, 'files': files}, indent=2, sort_keys=True) + '\n').encode())
         if not destination.exists():
-            destination.write_bytes(content)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            safe_write(destination, content)
     print(json.dumps({'status': 'active' if activate else 'preview', 'destination': str(destination),
                       'timeout_seconds': 3, 'config': config}, sort_keys=True))
     return 0

@@ -25,7 +25,7 @@ python3 "$package_dir/.rpi/copilot/runtime/rpi-hook.py" install \
   --target "$project_dir" --profile cli --activate
 ```
 
-The hook configuration runs `.rpi/copilot/runtime/rpi-hook.py` from the target, and lifecycle apply does not install runtime files. Activation therefore copies the running `rpi-hook.py` to that path and writes `.rpi/copilot/runtime/rpi-hook.install.json` with the profile, the configuration path and the runtime hash. Running activation again from a newer package refreshes a runtime whose bytes still match the record. Activation refuses a symlinked path, an unrecorded or edited runtime, the other active profile and an owner hook at the destination, and preserves their bytes.
+The hook configuration runs `.rpi/copilot/runtime/rpi-hook.py` from the target, and lifecycle apply does not install runtime files. Activation therefore copies the running `rpi-hook.py` to that path and writes `.rpi/copilot/runtime/rpi-hook.install.json` with the profile, the configuration path, whether activation wrote the configuration, and the runtime hash. Every write goes through a new exclusive temporary file in the same directory. Running activation again from a newer package refreshes a runtime whose bytes still match the record. Activation refuses a symlinked path, an unrecorded or edited runtime, the other active profile and an owner hook at the destination, and preserves their bytes.
 
 Deactivate before you detach. Lifecycle detach does not own these files and leaves them in place:
 
@@ -34,7 +34,7 @@ python3 "$package_dir/.rpi/copilot/runtime/rpi-hook.py" install \
   --target "$project_dir" --profile cli --deactivate
 ```
 
-Deactivation removes the configuration, the runtime copy and the record only when the record exists and their bytes are unchanged; otherwise it removes nothing and names the file to review. The installer preserves an existing owner hook instead of replacing it. A
+Deactivation removes the runtime copy and the record, and the configuration only when activation wrote it, when the record exists and their bytes are unchanged; it refuses a symlinked configuration, and otherwise removes nothing and names the file to review. The installer preserves an existing owner hook instead of replacing it. A
 native probe must show a safe command succeeding and a disposable destructive
 fixture denied before any side effect before advertising this profile.
 
@@ -58,7 +58,14 @@ python3 "$package_dir/.rpi/copilot/runtime/rpi-prepush.py" install \
   --target "$project_dir" --checks "$checks_file" --activate
 ```
 
-The adapter chains a prior pre-push hook through a preserved backup when it
+The wrapper runs `.rpi/copilot/runtime/rpi-prepush.py` from the target, so activation also copies `rpi-prepush.py`, `rpi-candidate.py` and `rpi-verify.py` from the running package runtime there and writes `.rpi/copilot/runtime/rpi-prepush.install.json` with their hashes, the wrapper hash and whether it saved a prior hook. The gate requires a clean candidate, so commit or ignore `.rpi/copilot/` (this repository ignores it). Deactivate before detach:
+
+```bash
+python3 "$package_dir/.rpi/copilot/runtime/rpi-prepush.py" install \
+  --target "$project_dir" --deactivate
+```
+
+Deactivation restores the saved prior hook or removes the wrapper, then removes the runtime copies and the record, only when their bytes are unchanged. It keeps `.rpi/policy.json`. The adapter chains a prior pre-push hook through a preserved backup when it
 can do so safely. Diagnose missing, edited or inactive hooks separately from a
 valid receipt. A hook block must report `BLOCKED / WHY / FIX` and an actionable
 local command. CI and exact-commit remote checks remain separate gates after

@@ -2,7 +2,6 @@
 
 import importlib.util
 import json
-import shutil
 import stat
 import subprocess
 import sys
@@ -41,12 +40,10 @@ class PrepushTests(unittest.TestCase):
         git(self.root, "config", "user.name", "Fixture")
         git(self.root, "config", "user.email", "fixture@example.invalid")
         git(self.root, "remote", "add", "origin", str(self.remote))
-        (self.root / ".rpi/copilot/runtime").mkdir(parents=True)
-        shutil.copy2(PREPUSH, self.root / ".rpi/copilot/runtime/rpi-prepush.py")
-        shutil.copy2(CANDIDATE, self.root / ".rpi/copilot/runtime/rpi-candidate.py")
-        shutil.copy2(VERIFY, self.root / ".rpi/copilot/runtime/rpi-verify.py")
         (self.root / ".rpi/local").mkdir(parents=True)
         (self.root / ".rpi/local/.gitignore").write_text("*\n")
+        # Activation installs the gate runtime here; like this repository, the fixture ignores it.
+        (self.root / ".gitignore").write_text(".rpi/copilot/\n")
         shell = self.root / "templates/scripts/demo.sh"
         shell.parent.mkdir(parents=True)
         shell.write_text("#!/bin/sh\nexit 0\n")
@@ -180,6 +177,118 @@ class PrepushTests(unittest.TestCase):
         self.assertEqual(marker.read_bytes(), b"OWNER CONTENT")
         self.assertFalse((outside / "subdir/pre-push").exists())
 
+
+    def runtime_names(self):
+        return sorted(path.name for path in (self.root / ".rpi/copilot/runtime").iterdir())
+
+    def test_activation_installs_recorded_runtime_and_deactivation_restores_prior_hook(self):
+        hook = self.root / ".git/hooks/pre-push"
+        prior = b"#!/bin/sh\nexit 0\n"
+        hook.write_bytes(prior)
+        hook.chmod(0o755)
+        self.assertFalse((self.root / ".rpi/copilot/runtime").exists())
+        self.assertEqual(self.invoke("install", "--target", self.root, "--activate").returncode, 0)
+        self.assertEqual(self.runtime_names(), ["rpi-candidate.py", "rpi-prepush.install.json",
+                                                "rpi-prepush.py", "rpi-verify.py"])
+        record = json.loads((self.root / ".rpi/copilot/runtime/rpi-prepush.install.json").read_text())
+        self.assertEqual(sorted(record["files"]), ["rpi-candidate.py", "rpi-prepush.py", "rpi-verify.py"])
+        result = self.invoke("install", "--target", self.root, "--deactivate")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout)["status"], "inactive")
+        self.assertEqual(hook.read_bytes(), prior)
+        self.assertFalse((self.root / ".git/hooks/pre-push.rpi-prior").exists())
+        self.assertFalse((self.root / ".rpi/copilot/runtime").exists())
+        self.assertTrue((self.root / ".rpi/policy.json").exists())
+
+    def test_deactivation_preserves_edited_wrapper_or_runtime(self):
+        self.assertEqual(self.invoke("install", "--target", self.root, "--activate").returncode, 0)
+        hook = self.root / ".git/hooks/pre-push"
+        wrapper = hook.read_bytes()
+        hook.write_bytes(wrapper + b"# owner edit\n")
+        refused = self.invoke("install", "--target", self.root, "--deactivate")
+        self.assertEqual(refused.returncode, 1)
+        self.assertIn("edited", refused.stderr)
+        self.assertEqual(hook.read_bytes(), wrapper + b"# owner edit\n")
+        hook.write_bytes(wrapper)
+        runtime = self.root / ".rpi/copilot/runtime/rpi-verify.py"
+        runtime.write_bytes(b"# owner edit\n")
+        refused = self.invoke("install", "--target", self.root, "--deactivate")
+        self.assertEqual(refused.returncode, 1)
+        self.assertEqual(runtime.read_bytes(), b"# owner edit\n")
+        self.assertEqual(hook.read_bytes(), wrapper)
+        missing = self.invoke("install", "--target", self.base / "absent", "--deactivate")
+        self.assertEqual(missing.returncode, 1)
+
+    def test_activation_refuses_unrecorded_runtime_and_ignores_planted_temporary_symlinks(self):
+        runtime_dir = self.root / ".rpi/copilot/runtime"
+        runtime_dir.mkdir(parents=True)
+        outside = self.base / "outside.txt"
+        outside.write_text("outside\n")
+        for name in ("rpi-prepush.py", "rpi-candidate.py", "rpi-verify.py", "rpi-prepush.install.json"):
+            (runtime_dir / (".{}.tmp".format(name))).symlink_to(outside)
+        self.assertEqual(self.invoke("install", "--target", self.root, "--activate").returncode, 0)
+        self.assertEqual(outside.read_text(), "outside\n")
+        self.assertFalse((runtime_dir / "rpi-prepush.py").is_symlink())
+        self.assertEqual(self.invoke("install", "--target", self.root, "--deactivate").returncode, 0)
+        for path in list(runtime_dir.iterdir()):
+            path.unlink()
+        (runtime_dir / "rpi-verify.py").write_bytes(b"# owner verifier\n")
+        refused = self.invoke("install", "--target", self.root, "--activate")
+        self.assertEqual(refused.returncode, 1)
+        self.assertEqual((runtime_dir / "rpi-verify.py").read_bytes(), b"# owner verifier\n")
+        self.assertFalse((self.root / ".git/hooks/pre-push").exists())
+        (runtime_dir / "rpi-verify.py").unlink()
+        (runtime_dir / "rpi-prepush.py").symlink_to(PREPUSH)
+        refused = self.invoke("install", "--target", self.root, "--activate")
+        self.assertEqual(refused.returncode, 1)
+        self.assertIn("symlink", refused.stderr)
+
+
+class PrepushAfterInstallTests(unittest.TestCase):
+    """The documented flow from a real rendered and applied package, without copying the runtime."""
+
+    def test_render_apply_activate_gates_push_and_deactivates(self):
+        with tempfile.TemporaryDirectory(prefix="copilot prepush install ") as directory:
+            base = Path(directory)
+            package, target, remote = base / "package", base / "target", base / "remote.git"
+            rendered = subprocess.run([sys.executable, str(ROOT / "templates/scripts/rpi-distribution.py"), "render",
+                                       "--source", str(ROOT), "--profile", "cli", "--target", str(package)],
+                                      capture_output=True, text=True)
+            self.assertEqual(0, rendered.returncode, rendered.stderr)
+            runtime = package / ".rpi/copilot/runtime"
+            git(base, "init", "-q", "--bare", str(remote))
+            git(base, "init", "-q", "-b", "main", str(target))
+            git(target, "config", "user.name", "Fixture")
+            git(target, "config", "user.email", "fixture@example.invalid")
+            git(target, "remote", "add", "origin", str(remote))
+            plan = base / "plan.json"
+            for argv in (["plan", "--package", str(package), "--target", str(target), "--profile", "cli",
+                          "--action", "update", "--output", str(plan)], ["apply", "--plan", str(plan)]):
+                result = subprocess.run([sys.executable, str(runtime / "rpi-lifecycle.py"), *argv],
+                                        capture_output=True, text=True)
+                self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+            (target / "README.md").write_text("candidate\n")
+            (target / ".gitignore").write_text(".rpi/copilot/\n.rpi/local/\n")
+            (target / "scripts").mkdir()
+            (target / "scripts/demo.sh").write_text("#!/bin/sh\nexit 0\n")
+            git(target, "add", ".")
+            git(target, "commit", "-qm", "Installed candidate")
+            inventory = base / "checks.json"
+            inventory.write_text(json.dumps(module("installed_verify", runtime / "rpi-verify.py").required_checks(target)))
+            prepush = [sys.executable, str(runtime / "rpi-prepush.py"), "install", "--target", str(target)]
+            active = subprocess.run([*prepush, "--checks", str(inventory), "--activate"], capture_output=True, text=True)
+            self.assertEqual(0, active.returncode, active.stdout + active.stderr)
+            self.assertEqual((target / ".rpi/copilot/runtime/rpi-prepush.py").read_bytes(),
+                             (runtime / "rpi-prepush.py").read_bytes())
+            blocked = git(target, "push", "origin", "main", check=False)
+            self.assertNotEqual(0, blocked.returncode)
+            self.assertIn("BLOCKED / WHY", blocked.stderr)
+            inactive = subprocess.run([*prepush, "--deactivate"], capture_output=True, text=True)
+            self.assertEqual(0, inactive.returncode, inactive.stdout + inactive.stderr)
+            self.assertFalse((target / ".git/hooks/pre-push").exists())
+            self.assertFalse((target / ".rpi/copilot/runtime").exists())
+            pushed = git(target, "push", "origin", "main", check=False)
+            self.assertEqual(0, pushed.returncode, pushed.stderr)
 
 if __name__ == "__main__":
     unittest.main()

@@ -71,8 +71,8 @@
       "disposition": "adapted",
       "rationale": "Pinned portable workflow contract is authored as a canonical Copilot skill in Phase 1.",
       "destination": "templates/skills/rpi-detach",
-      "destination_sha256": "fbc9ca59629971f9f090bbe5b0709628d0a340f42b7a8f895c7f76dc6d0c8b79",
-      "adaptation_note": "Copilot project skill location and owner-preserving detach contract."
+      "destination_sha256": "a3b6568c9e3bc1a233f834e46a44b23af92989cfafa8314d47f1243e158b3be7",
+      "adaptation_note": "Copilot project skill location and owner-preserving detach contract. Post-plan fix (owner-approved 2026-11-15): deactivate the recorded hook and pre-push gate before apply; Copilot-specific."
     },
     {
       "id": "skill:rpi-explore-release",
@@ -522,8 +522,8 @@
       "disposition": "adapted",
       "rationale": "Pinned portable control is adapted for the Copilot Phase 4 runtime. Intake 2026-11-15 (cc-rpi v2.2.0): Copilot hook and gate already have the cc-rpi 2.1 semantics; cc-rpi-specific parser deltas not ported. The lock keeps this component adapted with its existing Copilot destination and hash; this disposition applies to the incoming cc-rpi delta.",
       "destination": "templates/scripts/rpi-hook.py",
-      "destination_sha256": "ebd8d538a5d652982f0dcee1065a74aa530934785bff4b2dfc0b3dd85eae95de",
-      "adaptation_note": "Copilot native hook policy uses preview-only activation and fail-closed local checks. Incoming cc-rpi changes through cec458a9769049c6dd08777768ef718ac7571a30 are inapplicable (2026-11-15 intake); the existing native destination is unchanged. Post-plan fix (owner-approved 2026-11-15): activation installs and records a copy of the running hook runtime in the target, and --deactivate removes it; Copilot-specific, not from cc-rpi."
+      "destination_sha256": "584593867b86916f4cfbb6b8ec11d53f95adc642510ff847e185e5180c191664",
+      "adaptation_note": "Copilot native hook policy uses preview-only activation and fail-closed local checks. Incoming cc-rpi changes through cec458a9769049c6dd08777768ef718ac7571a30 are inapplicable (2026-11-15 intake); the existing native destination is unchanged. Post-plan fix (owner-approved 2026-11-15): activation installs and records a copy of the running hook runtime in the target, and --deactivate removes it; Copilot-specific, not from cc-rpi. Review repair: exclusive temporary files, symlink guard on every written path, and deactivation that removes only a configuration activation wrote."
     },
     {
       "id": "resource:prepush-gate",
@@ -533,8 +533,8 @@
       "disposition": "adapted",
       "rationale": "Pinned portable control is adapted for the Copilot Phase 4 runtime. Intake 2026-11-15 (cc-rpi v2.2.0): Copilot hook and gate already have the cc-rpi 2.1 semantics; cc-rpi-specific parser deltas not ported. The lock keeps this component adapted with its existing Copilot destination and hash; this disposition applies to the incoming cc-rpi delta.",
       "destination": "templates/scripts/rpi-prepush.py",
-      "destination_sha256": "0a6df1ad9396b8983fe310702d72fcfc975fcec7bfc233088aa8ba1cda543907",
-      "adaptation_note": "Copilot opt-in pre-push receipt gate validates the tested candidate. Incoming cc-rpi changes through cec458a9769049c6dd08777768ef718ac7571a30 are inapplicable (2026-11-15 intake); the existing native destination is unchanged."
+      "destination_sha256": "388469efb3fcd670de269932d97b859beac1166b877aaf8e65aa1f185a390c80",
+      "adaptation_note": "Copilot opt-in pre-push receipt gate validates the tested candidate. Incoming cc-rpi changes through cec458a9769049c6dd08777768ef718ac7571a30 are inapplicable (2026-11-15 intake); the existing native destination is unchanged. Post-plan fix (owner-approved 2026-11-15): activation installs and records the gate runtime copies in the target, and --deactivate restores the prior hook and removes them; Copilot-specific, not from cc-rpi."
     },
     {
       "id": "resource:diagnostics",
